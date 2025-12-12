@@ -1,0 +1,15 @@
+django>=5.0
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+psycopg2-binary
+celery
+redis
+django-storages
+boto3
+pillow
+pytesseract
+openai
+python-dotenv
+drf-spectacular
+gunicorn
