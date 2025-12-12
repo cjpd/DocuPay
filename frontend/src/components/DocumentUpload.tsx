@@ -36,12 +36,16 @@ export default function DocumentUpload() {
       <button
         type="submit"
         className="rounded-md bg-gray-900 text-white px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-60"
-        disabled={!file || upload.isLoading}
+        disabled={!file || upload.isPending}
       >
-        {upload.isLoading ? "Uploading..." : "Upload"}
+        {upload.isPending ? "Uploading..." : "Upload"}
       </button>
       {upload.isSuccess && <p className="text-sm text-emerald-600">Uploaded and queued for processing.</p>}
-      {upload.isError && <p className="text-sm text-red-600">Upload failed.</p>}
+      {upload.isError && (
+        <p className="text-sm text-red-600">
+          Upload failed: {(upload.error as any)?.message || "Please try again"}
+        </p>
+      )}
     </form>
   );
 }

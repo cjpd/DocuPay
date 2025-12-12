@@ -19,8 +19,10 @@ export function useReviewTask(id: string | number) {
 export function useReviewActions(id: string | number) {
   const queryClient = useQueryClient();
   const approve = useMutation({
-    mutationFn: async () => {
-      const { data } = await apiClient.post(`/api/documents/reviews/${id}/approve/`, {});
+    mutationFn: async (corrections?: Record<string, any>) => {
+      const { data } = await apiClient.post(`/api/documents/reviews/${id}/approve/`, {
+        corrections: corrections || {},
+      });
       return data;
     },
     onSuccess: () => {

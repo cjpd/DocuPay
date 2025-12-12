@@ -106,7 +106,14 @@ AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
 
-if AWS_STORAGE_BUCKET_NAME:
+use_s3 = bool(
+    AWS_STORAGE_BUCKET_NAME
+    and AWS_STORAGE_BUCKET_NAME.lower() != "changeme"
+    and AWS_S3_ENDPOINT_URL
+    and AWS_S3_ENDPOINT_URL.lower() != "changeme"
+)
+
+if use_s3:
     STORAGES = {
         "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},

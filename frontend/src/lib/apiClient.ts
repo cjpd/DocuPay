@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosHeaders } from "axios";
 import { getAccessToken, clearTokens } from "./auth";
 
 export const apiClient = axios.create({
@@ -9,7 +9,10 @@ apiClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = getAccessToken();
     if (token) {
-      config.headers = { ...config.headers, Authorization: `Bearer ${token}` };
+      if (!config.headers) {
+        config.headers = new AxiosHeaders();
+      }
+      (config.headers as AxiosHeaders).set("Authorization", `Bearer ${token}`);
     }
   }
   return config;

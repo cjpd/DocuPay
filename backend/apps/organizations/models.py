@@ -6,6 +6,10 @@ from apps.common.models import TimeStampedModel
 class Organization(TimeStampedModel):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
+    auto_approve_threshold = models.FloatField(
+        default=0.92,
+        help_text="Overall confidence threshold to auto-approve without human review",
+    )
 
     def __str__(self) -> str:
         return self.name

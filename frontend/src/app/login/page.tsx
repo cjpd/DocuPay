@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { clearTokens, login, storeTokens } from "@/lib/auth";
 
-export default function LoginPage() {
+export const dynamic = "force-dynamic";
+
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams?.get("next") || "/";
@@ -52,13 +54,11 @@ export default function LoginPage() {
         <button
           type="submit"
           className="w-full rounded-md bg-gray-900 text-white px-4 py-2 font-medium hover:bg-gray-800 disabled:opacity-60"
-          disabled={mutation.isLoading}
+          disabled={mutation.isPending}
         >
-          {mutation.isLoading ? "Signing in..." : "Sign in"}
+          {mutation.isPending ? "Signing in..." : "Sign in"}
         </button>
-        {mutation.isError && (
-          <p className="text-sm text-red-600">Invalid credentials or server unavailable.</p>
-        )}
+        {mutation.isError && <p className="text-sm text-red-600">Invalid credentials or server unavailable.</p>}
         <button
           type="button"
           className="text-sm text-gray-600 underline"
@@ -72,5 +72,13 @@ export default function LoginPage() {
         </button>
       </form>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

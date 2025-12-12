@@ -3,10 +3,11 @@
 import DocumentTable from "@/components/DocumentTable";
 import DocumentUpload from "@/components/DocumentUpload";
 import AuthGate from "@/components/AuthGate";
-import { useDocuments } from "@/lib/useDocuments";
+import { useDeleteDocument, useDocuments } from "@/lib/useDocuments";
 
 export default function DocumentsPage() {
   const { data: documents = [], isLoading } = useDocuments();
+  const deleteDoc = useDeleteDocument();
 
   return (
     <AuthGate>
@@ -25,7 +26,12 @@ export default function DocumentsPage() {
                 Loading documents...
               </div>
             ) : (
-              <DocumentTable documents={documents} />
+              <DocumentTable
+                documents={documents}
+                onDelete={(id) => {
+                  deleteDoc.mutate(id);
+                }}
+              />
             )}
           </div>
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-4">

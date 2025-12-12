@@ -36,10 +36,10 @@ export default function ReviewQueuePage() {
               {queue.map((item) => (
                 <li key={item.id} className="px-4 py-3 flex items-center justify-between hover:bg-gray-50">
                   <div>
-                    <p className="font-medium text-gray-900">#{item.id}</p>
-                    <p className="text-sm text-gray-500">
-                      Status: {item.status} • Document: {item.document}
-                    </p>
+                  <p className="font-medium text-gray-900">#{item.id}</p>
+                  <p className="text-sm text-gray-500">
+                    Status: {item.status} • Document: {typeof item.document === "object" ? item.document.id : item.document}
+                  </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <a
