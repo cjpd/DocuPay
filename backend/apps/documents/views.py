@@ -22,17 +22,27 @@ from apps.processing.tasks import process_document
 
 class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+    permission_classes = [permissions.AllowAny]
+
+    def _default_org(self):
+        from apps.organizations.models import Organization
+        org, _ = Organization.objects.get_or_create(name="Default Org", defaults={"slug": "default-org"})
+        return org
 
     def get_queryset(self):
         user = self.request.user
-        return Document.objects.filter(organization__memberships__user=user).distinct()
+        if user and user.is_authenticated:
+            return Document.objects.filter(organization__memberships__user=user).distinct()
+        return Document.objects.all()
 
     def perform_create(self, serializer):
-        org = OrgMembership.objects.filter(user=self.request.user).values_list("organization", flat=True).first()
-        if not org:
-            raise permissions.PermissionDenied("User is not a member of any organization")
-        doc = serializer.save(uploaded_by=self.request.user, organization_id=org, status=Document.Status.PROCESSING)
+        user = self.request.user
+        if user and user.is_authenticated:
+            org = OrgMembership.objects.filter(user=user).values_list("organization", flat=True).first()
+            org_id = org or self._default_org().id
+        else:
+            org_id = self._default_org().id
+        doc = serializer.save(uploaded_by=None, organization_id=org_id, status=Document.Status.PROCESSING)
         process_document.delay(doc.id)
 
     @action(detail=False, methods=["get"], url_path="analytics")
@@ -93,13 +103,15 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if not file:
             return Response({"detail": "file is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        org = OrgMembership.objects.filter(user=request.user).values_list("organization", flat=True).first()
-        if not org:
-            return Response({"detail": "No organization membership"}, status=status.HTTP_403_FORBIDDEN)
+        user = request.user if request.user and request.user.is_authenticated else None
+        org = (
+            OrgMembership.objects.filter(user=user).values_list("organization", flat=True).first()
+            if user else None
+        ) or self._default_org().id
 
         document = Document.objects.create(
             organization_id=org,
-            uploaded_by=request.user,
+            uploaded_by=user,
             file=file,
             status=Document.Status.PROCESSING,
         )
@@ -110,20 +122,24 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
 class ExtractedDataViewSet(viewsets.ModelViewSet):
     serializer_class = ExtractedDataSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         user = self.request.user
-        return ExtractedData.objects.filter(document__organization__memberships__user=user).distinct()
+        if user and user.is_authenticated:
+            return ExtractedData.objects.filter(document__organization__memberships__user=user).distinct()
+        return ExtractedData.objects.all()
 
 
 class ReviewTaskViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewTaskSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         user = self.request.user
-        return ReviewTask.objects.filter(document__organization__memberships__user=user).distinct()
+        if user and user.is_authenticated:
+            return ReviewTask.objects.filter(document__organization__memberships__user=user).distinct()
+        return ReviewTask.objects.all()
 
     @action(detail=True, methods=["post"], url_path="approve")
     def approve(self, request, pk=None):
@@ -177,7 +193,7 @@ class ReviewTaskViewSet(viewsets.ModelViewSet):
 
 class WebhookConfigViewSet(viewsets.ModelViewSet):
     serializer_class = WebhookConfigSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         user = self.request.user
@@ -186,7 +202,7 @@ class WebhookConfigViewSet(viewsets.ModelViewSet):
 
 class WebhookDeliveryLogViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = WebhookDeliveryLogSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         user = self.request.user

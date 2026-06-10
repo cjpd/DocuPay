@@ -3,7 +3,7 @@ import { getAccessToken, clearTokens } from "./auth";
 
 const baseURL =
   process.env.NEXT_PUBLIC_API_BASE ||
-  (typeof window === "undefined" ? "http://backend:8000" : "http://localhost:8000");
+  (typeof window === "undefined" ? "http://backend:8000" : "http://127.0.0.1:8000");
 
 export const apiClient = axios.create({
   baseURL,

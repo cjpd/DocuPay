@@ -7,16 +7,14 @@ import { getAccessToken } from "@/lib/auth";
 export default function AuthGate({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const hasToken = typeof window !== "undefined" ? !!getAccessToken() : true; // assume true during SSR to avoid hydration mismatch
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const token = getAccessToken();
-    if (!token) {
-      const next = encodeURIComponent(pathname || "/");
-      router.replace(`/login?next=${next}`);
+    if (!getAccessToken()) {
+      router.replace(`/login?next=${encodeURIComponent(pathname || "/")}`);
     }
   }, [pathname, router]);
 
+  if (typeof window !== "undefined" && !getAccessToken()) return null;
   return <>{children}</>;
 }
