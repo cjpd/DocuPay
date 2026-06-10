@@ -14,5 +14,9 @@ class IsOrgMember(permissions.BasePermission):
             return False
         org = getattr(obj, "organization", None)
         if org is None:
+            # Try traversing a parent document (e.g. ReviewTask → document → organization)
+            doc = getattr(obj, "document", None)
+            org = getattr(doc, "organization", None)
+        if org is None:
             return False
         return OrgMembership.objects.filter(user=request.user, organization=org).exists()

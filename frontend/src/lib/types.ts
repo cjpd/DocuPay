@@ -21,6 +21,14 @@ export type ReviewTask = {
   priority?: string;
 };
 
+export type Analytics = {
+  docs_processed_24h: number;
+  docs_processed_24h_delta: number;
+  pending_review: number;
+  avg_confidence: number;
+  webhook_success_rate: number | null;
+};
+
 export type ExtractedData = {
   id: number;
   raw_extraction?: any;

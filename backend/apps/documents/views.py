@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from django.db.models import Avg, Count, Q
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -31,6 +34,55 @@ class DocumentViewSet(viewsets.ModelViewSet):
             raise permissions.PermissionDenied("User is not a member of any organization")
         doc = serializer.save(uploaded_by=self.request.user, organization_id=org, status=Document.Status.PROCESSING)
         process_document.delay(doc.id)
+
+    @action(detail=False, methods=["get"], url_path="analytics")
+    def analytics(self, request):
+        now = timezone.now()
+        window = now - timedelta(hours=24)
+        prev_window = now - timedelta(hours=48)
+
+        org_docs = self.get_queryset()
+        processed_statuses = [Document.Status.APPROVED, Document.Status.PROCESSED]
+
+        processed_24h = org_docs.filter(status__in=processed_statuses, updated_at__gte=window).count()
+        processed_prev = org_docs.filter(
+            status__in=processed_statuses, updated_at__gte=prev_window, updated_at__lt=window
+        ).count()
+
+        if processed_prev:
+            delta = round((processed_24h - processed_prev) / processed_prev * 100, 1)
+        elif processed_24h:
+            delta = 100.0
+        else:
+            delta = 0.0
+
+        pending_review = ReviewTask.objects.filter(
+            document__in=org_docs, status=ReviewTask.STATUS_PENDING
+        ).count()
+
+        avg_conf_raw = (
+            ExtractedData.objects.filter(document__in=org_docs)
+            .aggregate(avg=Avg("overall_confidence"))["avg"]
+            or 0.0
+        )
+
+        webhook_stats = WebhookDeliveryLog.objects.filter(document__in=org_docs).aggregate(
+            total=Count("id"), successful=Count("id", filter=Q(success=True))
+        )
+        if webhook_stats["total"]:
+            webhook_success = round(webhook_stats["successful"] / webhook_stats["total"] * 100, 1)
+        else:
+            webhook_success = None
+
+        return Response(
+            {
+                "docs_processed_24h": processed_24h,
+                "docs_processed_24h_delta": delta,
+                "pending_review": pending_review,
+                "avg_confidence": round(avg_conf_raw * 100, 1),
+                "webhook_success_rate": webhook_success,
+            }
+        )
 
     @action(detail=False, methods=["post"], url_path="upload")
     def upload(self, request, *args, **kwargs):

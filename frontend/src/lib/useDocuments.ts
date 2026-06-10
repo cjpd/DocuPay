@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "./apiClient";
-import { Document } from "./types";
+import { Analytics, Document } from "./types";
 
 export function useDocuments() {
   return useQuery({
@@ -12,6 +12,17 @@ export function useDocuments() {
       return Array.isArray(data) ? (data as Document[]) : ((data?.results || []) as Document[]);
     },
     staleTime: 30_000,
+  });
+}
+
+export function useAnalytics() {
+  return useQuery({
+    queryKey: ["analytics"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Analytics>("/api/documents/analytics/");
+      return data;
+    },
+    staleTime: 60_000,
   });
 }
 

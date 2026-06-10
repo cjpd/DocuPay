@@ -2,20 +2,38 @@
 
 import AuthGate from "@/components/AuthGate";
 import DocumentUpload from "@/components/DocumentUpload";
-import { useDocuments } from "@/lib/useDocuments";
+import { useDocuments, useAnalytics } from "@/lib/useDocuments";
 import { useReviewQueue } from "@/lib/useReviewQueue";
 import { Document } from "@/lib/types";
-
-const summaryCards = [
-  { title: "Docs processed (24h)", value: "128", trend: "+12% vs yesterday" },
-  { title: "Pending review", value: "9", trend: "3 high-priority" },
-  { title: "Avg confidence", value: "91%", trend: "Goal: 95%" },
-  { title: "Webhook success", value: "97%", trend: "Last hour" },
-];
 
 export default function HomePage() {
   const { data: documents } = useDocuments();
   const { data: reviewQueue } = useReviewQueue();
+  const { data: analytics } = useAnalytics();
+
+  const deltaSign = analytics && analytics.docs_processed_24h_delta >= 0 ? "+" : "";
+  const summaryCards = [
+    {
+      title: "Docs processed (24h)",
+      value: analytics ? String(analytics.docs_processed_24h) : "—",
+      trend: analytics ? `${deltaSign}${analytics.docs_processed_24h_delta}% vs yesterday` : "Loading…",
+    },
+    {
+      title: "Pending review",
+      value: analytics ? String(analytics.pending_review) : "—",
+      trend: analytics ? `${analytics.pending_review} item${analytics.pending_review !== 1 ? "s" : ""} awaiting review` : "Loading…",
+    },
+    {
+      title: "Avg confidence",
+      value: analytics ? `${analytics.avg_confidence}%` : "—",
+      trend: "Goal: 95%",
+    },
+    {
+      title: "Webhook success",
+      value: analytics?.webhook_success_rate != null ? `${analytics.webhook_success_rate}%` : "—",
+      trend: analytics?.webhook_success_rate != null ? "Last 24h" : "No deliveries yet",
+    },
+  ];
 
   const docsArray: Document[] = Array.isArray(documents) ? documents : [];
   const queueArray = Array.isArray(reviewQueue) ? reviewQueue : [];
