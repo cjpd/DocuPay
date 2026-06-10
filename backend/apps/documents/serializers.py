@@ -72,6 +72,8 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class ReviewTaskSerializer(serializers.ModelSerializer):
+    document = DocumentSerializer(read_only=True)
+
     class Meta:
         model = ReviewTask
         fields = [

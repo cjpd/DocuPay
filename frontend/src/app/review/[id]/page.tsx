@@ -7,6 +7,11 @@ import { useParams } from "next/navigation";
 import { useReviewActions, useReviewTask } from "@/lib/useReviewTask";
 import { useState } from "react";
 
+const API_BASE =
+  typeof window !== "undefined"
+    ? "http://127.0.0.1:8000"
+    : "http://backend:8000";
+
 export default function ReviewDetailPage() {
   const params = useParams();
   const id = params?.id as string;
@@ -15,7 +20,10 @@ export default function ReviewDetailPage() {
   const [corrections, setCorrections] = useState<Record<string, string>>({});
 
   const taskData = task;
-  const extracted = (taskData as any)?.document?.extracted_data;
+  const doc = typeof taskData?.document === "object" ? (taskData.document as any) : null;
+  const extracted = doc?.extracted_data;
+  const rawFile: string = doc?.file || "";
+  const fileUrl = rawFile.startsWith("http") ? rawFile : `${API_BASE}${rawFile}`;
   const fields = [
     { key: "invoice_number", label: "Invoice Number" },
     { key: "vendor_name", label: "Vendor" },
@@ -45,9 +53,9 @@ export default function ReviewDetailPage() {
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-4 text-gray-600">
             Loading review task...
           </div>
-        ) : taskData && typeof taskData.document === "object" ? (
+        ) : doc ? (
           <div className="grid gap-4 lg:grid-cols-2">
-            <PdfPreview />
+            <PdfPreview src={fileUrl} fileName={rawFile.split("/").pop()} />
             <div className="space-y-3">
               <ReviewForm
                 fields={fields.map((f) => ({
