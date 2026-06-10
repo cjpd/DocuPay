@@ -9,6 +9,7 @@ django-storages
 boto3
 pillow
 pytesseract
+pdf2image
 openai
 python-dotenv
 drf-spectacular

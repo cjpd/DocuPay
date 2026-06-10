@@ -9,7 +9,6 @@ export function useDocuments() {
     queryKey: ["documents"],
     queryFn: async () => {
       const { data } = await apiClient.get("/api/documents/");
-      // DRF pagination returns {results: [...]}; fallback to data if already an array
       return Array.isArray(data) ? (data as Document[]) : ((data?.results || []) as Document[]);
     },
     staleTime: 30_000,

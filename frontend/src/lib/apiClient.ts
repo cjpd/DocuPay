@@ -1,8 +1,12 @@
 import axios, { AxiosHeaders } from "axios";
 import { getAccessToken, clearTokens } from "./auth";
 
+const baseURL =
+  process.env.NEXT_PUBLIC_API_BASE ||
+  (typeof window === "undefined" ? "http://backend:8000" : "http://localhost:8000");
+
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000",
+  baseURL,
 });
 
 apiClient.interceptors.request.use((config) => {

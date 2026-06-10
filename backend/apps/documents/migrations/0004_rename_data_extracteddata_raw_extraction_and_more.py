@@ -13,10 +13,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
+        migrations.AddField(
             model_name='extracteddata',
-            old_name='data',
-            new_name='raw_extraction',
+            name='raw_extraction',
+            field=models.JSONField(default=dict),
         ),
         migrations.RenameField(
             model_name='reviewtask',
@@ -30,6 +30,10 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='extracteddata',
             name='raw_model_response',
+        ),
+        migrations.RunSQL(
+            sql="ALTER TABLE documents_extracteddata DROP COLUMN IF EXISTS data;",
+            reverse_sql="ALTER TABLE documents_extracteddata ADD COLUMN data jsonb DEFAULT '{}'::jsonb;",
         ),
         migrations.AddField(
             model_name='document',

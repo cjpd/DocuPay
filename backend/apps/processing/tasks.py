@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from apps.documents.models import Document, ExtractedData, ReviewTask
 from apps.processing.ocr import run_ocr
+from apps.processing.classification import classify_document
 from apps.processing.extraction import extract_fields
 
 
@@ -24,8 +25,8 @@ def process_document(document_id: int):
             file_path = ""
         doc.ocr_text = run_ocr(file_path)
 
+    doc.doc_type = classify_document(doc.ocr_text or "")
     extraction = extract_fields(doc.doc_type, doc.ocr_text or "")
-    doc.doc_type = doc.doc_type or "invoice"
     doc.save(update_fields=["ocr_text", "doc_type"])
 
     extracted, _ = ExtractedData.objects.update_or_create(

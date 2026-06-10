@@ -14,6 +14,8 @@ export type ReviewTask = {
   document: Document | number;
   assigned_to: number | null;
   status: string;
+  reviewed_by?: number | null;
+  reviewed_at?: string | null;
   created_at?: string;
   completed_at?: string | null;
   priority?: string;

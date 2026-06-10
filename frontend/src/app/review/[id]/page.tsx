@@ -14,7 +14,8 @@ export default function ReviewDetailPage() {
   const { approve, reject } = useReviewActions(id);
   const [corrections, setCorrections] = useState<Record<string, string>>({});
 
-  const extracted = (task as any)?.document?.extracted_data;
+  const taskData = task;
+  const extracted = (taskData as any)?.document?.extracted_data;
   const fields = [
     { key: "invoice_number", label: "Invoice Number" },
     { key: "vendor_name", label: "Vendor" },
@@ -40,11 +41,11 @@ export default function ReviewDetailPage() {
           </a>
         </header>
 
-        {isLoading ? (
+        {isLoading || !taskData ? (
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-4 text-gray-600">
             Loading review task...
           </div>
-        ) : (
+        ) : taskData && typeof taskData.document === "object" ? (
           <div className="grid gap-4 lg:grid-cols-2">
             <PdfPreview />
             <div className="space-y-3">
@@ -65,7 +66,7 @@ export default function ReviewDetailPage() {
               <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-4 space-y-2">
                 <h3 className="text-sm font-semibold text-gray-900">OCR Text</h3>
                 <p className="text-xs text-gray-600 whitespace-pre-wrap">
-                  {task.document?.ocr_text || "No OCR text available."}
+                  {taskData.document.ocr_text || "No OCR text available."}
                 </p>
               </div>
 
@@ -76,6 +77,10 @@ export default function ReviewDetailPage() {
                 </pre>
               </div>
             </div>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-4 text-gray-600">
+            Cannot load review task.
           </div>
         )}
       </main>

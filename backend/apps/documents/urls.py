@@ -9,10 +9,10 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r"", DocumentViewSet, basename="document")
-router.register(r"extracted", ExtractedDataViewSet, basename="extracted-data")
 router.register(r"reviews", ReviewTaskViewSet, basename="review-task")
+router.register(r"extracted", ExtractedDataViewSet, basename="extracted-data")
 router.register(r"webhooks", WebhookConfigViewSet, basename="webhook-config")
 router.register(r"webhook-deliveries", WebhookDeliveryLogViewSet, basename="webhook-delivery-log")
+router.register(r"", DocumentViewSet, basename="document")
 
 urlpatterns = router.urls
