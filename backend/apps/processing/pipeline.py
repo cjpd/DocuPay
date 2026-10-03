@@ -11,7 +11,7 @@ from typing import Callable, List, Optional
 
 from django.conf import settings
 
-from .errors import ProcessingError
+from .errors import ModelOutputError, ProcessingError
 from .ingest import DocumentInput
 from .providers import FAST, STRONG, ExtractionProvider, ProviderResult
 from .schema import InvoiceExtraction
@@ -68,20 +68,31 @@ def run_pipeline(
     threshold: float,
     is_duplicate: Optional[Callable[[InvoiceExtraction], bool]] = None,
     escalate: Optional[bool] = None,
+    max_amount: Optional[Decimal] = None,
 ) -> PipelineResult:
     if escalate is None:
         escalate = getattr(settings, "EXTRACTION_ESCALATE", True)
+    can_escalate = escalate and provider.supports_escalation
+
+    def check(result: ProviderResult) -> Attempt:
+        return Attempt(result, validate(result.extraction, is_duplicate=is_duplicate, max_amount=max_amount))
 
     attempts = []
     escalation_error = None
-    result = provider.extract(doc, FAST)
-    attempts.append(Attempt(result, validate(result.extraction, is_duplicate=is_duplicate)))
+    try:
+        attempts.append(check(provider.extract(doc, FAST)))
+    except ModelOutputError as exc:
+        # The fast model's answer was unusable (refusal, invalid JSON, cut off). The strong model may still succeed.
+        if not can_escalate:
+            raise
+        escalation_error = f"fast model: {exc}"
 
-    if escalate and provider.supports_escalation and not attempts[0].report.can_auto_approve(threshold):
+    if not attempts:
+        attempts.append(check(provider.extract(doc, STRONG)))
+    elif can_escalate and not attempts[0].report.can_auto_approve(threshold) and attempts[0].report.worth_escalating:
         # A failed escalation must not throw away a usable fast result: keep it and send it to review.
         try:
-            strong = provider.extract(doc, STRONG)
-            attempts.append(Attempt(strong, validate(strong.extraction, is_duplicate=is_duplicate)))
+            attempts.append(check(provider.extract(doc, STRONG)))
         except ProcessingError as exc:
             escalation_error = str(exc)
 

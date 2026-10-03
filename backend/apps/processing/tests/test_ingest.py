@@ -40,7 +40,7 @@ def test_scanned_pdf_becomes_images(org):
     result = load_document(doc.file)
     assert result.source == "pdf_scan"
     assert len(result.images) == 1
-    assert result.images[0].media_type == "image/png"
+    assert result.images[0].media_type == "image/jpeg"
 
 
 def test_image_is_resized(org):
@@ -78,4 +78,28 @@ def test_bad_files(org, content):
 def test_damaged_pdf(org):
     doc = make_document(org, b"%PDF-1.4 broken", "bad.pdf")
     with pytest.raises(PermanentProcessingError, match="damaged"):
+        load_document(doc.file)
+
+
+def test_huge_pdf_page_is_rendered_at_target_size(org):
+    """A 200 x 200 inch page must not be rasterized at full resolution (memory DoS)."""
+    from io import BytesIO
+
+    from PIL import Image
+    from reportlab.pdfgen import canvas
+
+    buf = BytesIO()
+    c = canvas.Canvas(buf, pagesize=(14400, 14400))
+    c.rect(10, 10, 100, 100, fill=1)
+    c.showPage()
+    c.save()
+    doc = make_document(org, buf.getvalue(), "huge.pdf")
+    result = load_document(doc.file)
+    assert result.source == "pdf_scan"
+    assert max(Image.open(BytesIO(result.images[0].data)).size) <= MAX_IMAGE_EDGE
+
+
+def test_image_with_too_many_pixels_is_refused(org):
+    doc = make_document(org, image_bytes("PNG", size=(8000, 6000)), "big.png")
+    with pytest.raises(PermanentProcessingError, match="too large"):
         load_document(doc.file)

@@ -72,32 +72,41 @@ INVOICE_JSON_SCHEMA = {
 }
 
 
-def parse_money(value: Any) -> Optional[Decimal]:
-    """Parse 1234.5, "1,234.50", "$1 234,50" or "(12.00)" into a 2-place Decimal."""
+def _parse_decimal(value: Any) -> Optional[Decimal]:
+    """Parse 1234.5, "1,234.56", "1.234,56", "1.234" (thousands), "$ -5" or "(12.00)"."""
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, (int, float, Decimal)):
         try:
-            return Decimal(str(value)).quantize(Decimal("0.01"))
+            number = Decimal(str(value))
         except InvalidOperation:
             return None
+        return number if number.is_finite() else None
     text = str(value).strip()
     if not text:
         return None
-    negative = text.startswith("(") and text.endswith(")") or text.startswith("-")
+    # A minus sign or parentheses anywhere before the first digit mean a negative amount.
+    prefix = re.match(r"^[^\d]*", text).group(0)
+    negative = "-" in prefix or (text.startswith("(") and text.endswith(")"))
     text = re.sub(r"[^\d.,]", "", text)
     if not text:
         return None
-    # A trailing ",dd" with no later "." means a decimal comma (1.234,56).
-    if re.search(r",\d{2}$", text) and ("." not in text or text.rfind(".") < text.rfind(",")):
-        text = text.replace(".", "").replace(",", ".")
+    if re.fullmatch(r"\d{1,3}(\.\d{3})+", text) or re.fullmatch(r"\d{1,3}(,\d{3})+", text):
+        text = text.replace(".", "").replace(",", "")  # 1.234 or 1,234: thousands separators only
+    elif "," in text and ("." not in text or text.rfind(",") > text.rfind(".")):
+        text = text.replace(".", "").replace(",", ".")  # decimal comma: 1.234,56 or 12,5
     else:
         text = text.replace(",", "")
     try:
-        amount = Decimal(text).quantize(Decimal("0.01"))
+        number = Decimal(text)
     except InvalidOperation:
         return None
-    return -amount if negative else amount
+    return -number if negative else number
+
+
+def parse_money(value: Any) -> Optional[Decimal]:
+    number = _parse_decimal(value)
+    return number.quantize(Decimal("0.01")) if number is not None else None
 
 
 def parse_date(value: Any) -> Optional[date]:
@@ -125,12 +134,7 @@ class LineItem(BaseModel):
     @field_validator("quantity", mode="before")
     @classmethod
     def _qty(cls, v):
-        if v is None or isinstance(v, bool):
-            return None
-        try:
-            return Decimal(str(v).replace(",", "").strip())
-        except InvalidOperation:
-            return None
+        return _parse_decimal(v)
 
     @field_validator("unit_price", "amount", mode="before")
     @classmethod

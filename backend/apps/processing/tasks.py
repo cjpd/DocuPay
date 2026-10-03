@@ -1,39 +1,57 @@
 import logging
+import re
+from datetime import timedelta
 
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.documents.models import Document, ExtractedData, ReviewTask
+from apps.organizations.models import Organization
 
 from .errors import PermanentProcessingError, TransientProcessingError
 from .ingest import load_document
-from .pipeline import AUTO_APPROVE, run_pipeline
+from .pipeline import AUTO_APPROVE, REVIEW, run_pipeline
 from .providers import get_provider
-from .validation import ValidationReport
+from .validation import MAX_STORABLE_AMOUNT, validate
 
 logger = logging.getLogger(__name__)
 
-# A document in one of these states is (re)processed. Others are skipped unless force=True.
-CLAIMABLE = (Document.Status.PENDING, Document.Status.PROCESSING, Document.Status.FAILED)
 MAX_RETRIES = 5
+# A run that has not finished after this long is treated as dead (worker killed by the
+# hard time limit, out of memory, or lost) and marked FAILED by fail_stale_documents.
+STALE_AFTER = timedelta(minutes=15)
+GENERIC_ERROR = "Processing failed because of an internal error. Use Reprocess to try again."
 
 
-def _mark_failed(document_id: int, message: str) -> None:
-    Document.objects.filter(id=document_id).update(
+def dedupe_key(organization_id: int, vendor_name, invoice_number) -> str:
+    """Normalized key, so "ACME Inc." / "acme inc" and "INV-001" / "inv 001" match."""
+    if not (vendor_name and invoice_number):
+        return ""
+    norm = lambda text: re.sub(r"[^0-9a-z]", "", text.lower())  # noqa: E731
+    return f"{organization_id}:{norm(vendor_name)}:{norm(invoice_number)}"[:400]
+
+
+def _storable(amount):
+    """Amounts the column cannot hold are saved as null (the raw value stays in raw_extraction;
+    the amount_limit check has already sent the document to review)."""
+    return amount if amount is None or abs(amount) <= MAX_STORABLE_AMOUNT else None
+
+
+def _mark_failed(document_id: int, task_id: str, message: str) -> None:
+    Document.objects.filter(id=document_id, processing_task_id=task_id).update(
         status=Document.Status.FAILED, error_message=message[:2000], updated_at=timezone.now()
     )
 
 
 def _duplicate_checker(doc: Document):
     def is_duplicate(ex) -> bool:
+        key = dedupe_key(doc.organization_id, ex.vendor_name, ex.invoice_number)
         return (
-            ExtractedData.objects.filter(
-                document__organization_id=doc.organization_id,
-                vendor_name__iexact=ex.vendor_name,
-                invoice_number__iexact=ex.invoice_number,
-            )
+            bool(key)
+            and ExtractedData.objects.filter(dedupe_key=key)
             .exclude(document_id=doc.id)
             .exclude(document__status=Document.Status.FAILED)
             .exists()
@@ -42,18 +60,39 @@ def _duplicate_checker(doc: Document):
     return is_duplicate
 
 
-@shared_task(bind=True, max_retries=MAX_RETRIES, acks_late=True, soft_time_limit=240, time_limit=300)
+def _claim(document_id: int, task_id: str, force: bool) -> bool:
+    """
+    Take exclusive ownership of the document for this task.
+
+    A new run may start from PENDING or FAILED. A run already in PROCESSING can only be
+    continued by the same task id (a Celery retry or a redelivery keeps its id), so a
+    second task never processes the same document at the same time.
+    """
+    allowed = Q(status__in=[Document.Status.PENDING, Document.Status.FAILED]) | Q(
+        status=Document.Status.PROCESSING, processing_task_id=task_id
+    )
+    if force:
+        allowed |= Q(status__in=[Document.Status.REQUIRES_REVIEW, Document.Status.PROCESSED])
+    return bool(
+        Document.objects.filter(allowed, id=document_id).update(
+            status=Document.Status.PROCESSING,
+            processing_task_id=task_id,
+            processing_started_at=timezone.now(),
+            error_message="",
+        )
+    )
+
+
+@shared_task(bind=True, max_retries=MAX_RETRIES, acks_late=True, soft_time_limit=300, time_limit=360)
 def process_document(self, document_id: int, force: bool = False):
     """
-    Extract, validate and route one document. Safe to run more than once:
-    results are written with update_or_create and a finished document is skipped.
+    Extract, validate and route one document. Safe to run more than once: only the
+    task that claimed the document writes results, and they are written in place.
+    Approved documents are never reprocessed, so human corrections are never lost.
     """
-    statuses = None if force else CLAIMABLE
-    claimed = Document.objects.filter(id=document_id)
-    if statuses:
-        claimed = claimed.filter(status__in=statuses)
-    if not claimed.update(status=Document.Status.PROCESSING, error_message=""):
-        return f"document {document_id} skipped (missing or already processed)"
+    task_id = self.request.id or f"direct-{document_id}"
+    if not _claim(document_id, task_id, force):
+        return f"document {document_id} skipped (missing, approved, or owned by another run)"
     doc = Document.objects.select_related("organization").get(id=document_id)
 
     try:
@@ -63,26 +102,46 @@ def process_document(self, document_id: int, force: bool = False):
             provider=get_provider(),
             threshold=doc.organization.auto_approve_threshold,
             is_duplicate=_duplicate_checker(doc),
+            max_amount=doc.organization.auto_approve_max_amount,
         )
+        saved = _save_result(doc, task_id, doc_input, result)
     except PermanentProcessingError as exc:
         logger.warning("document %s failed: %s", document_id, exc)
-        _mark_failed(document_id, str(exc))
+        _mark_failed(document_id, task_id, str(exc))
         return f"document {document_id} failed"
     except (TransientProcessingError, SoftTimeLimitExceeded) as exc:
         if self.request.retries >= self.max_retries:
-            _mark_failed(document_id, f"Gave up after {self.max_retries} retries: {exc}")
+            _mark_failed(document_id, task_id, f"Gave up after {self.max_retries} retries: {exc}")
             return f"document {document_id} failed"
         raise self.retry(exc=exc, countdown=min(300, 15 * 2 ** self.request.retries))
+    except Exception:
+        # Never leave a document stuck in PROCESSING. Details go to the log, not to the user.
+        logger.exception("document %s failed with an unexpected error", document_id)
+        _mark_failed(document_id, task_id, GENERIC_ERROR)
+        return f"document {document_id} failed"
 
-    _save_result(doc, doc_input, result)
+    if not saved:
+        return f"document {document_id} result discarded (another run took over)"
     return f"document {document_id} {result.decision}"
 
 
-def _save_result(doc: Document, doc_input, result) -> None:
+def _save_result(doc: Document, task_id: str, doc_input, result) -> bool:
     ex = result.extraction
-    report: ValidationReport = result.report
     now = timezone.now()
+    org = doc.organization
     with transaction.atomic():
+        # One writer per organization at a time: two copies of the same invoice that are
+        # processed together cannot both pass the duplicate check and both auto-approve.
+        Organization.objects.select_for_update().filter(id=org.id).first()
+        locked = Document.objects.select_for_update().filter(id=doc.id, processing_task_id=task_id).first()
+        if locked is None or locked.status != Document.Status.PROCESSING:
+            return False
+
+        # Validate again under the lock: the duplicate check must see rows saved since the pipeline ran.
+        report = validate(ex, is_duplicate=_duplicate_checker(doc), max_amount=org.auto_approve_max_amount)
+        decision = AUTO_APPROVE if (result.decision == AUTO_APPROVE and report.can_auto_approve(
+            org.auto_approve_threshold)) else REVIEW
+
         ExtractedData.objects.update_or_create(
             document=doc,
             defaults={
@@ -93,33 +152,47 @@ def _save_result(doc: Document, doc_input, result) -> None:
                 "vendor_name": ex.vendor_name or "",
                 "customer_name": ex.customer_name or "",
                 "purchase_order": ex.purchase_order or "",
-                "subtotal": ex.subtotal,
-                "tax_amount": ex.tax_amount,
-                "total_amount": ex.total_amount,
+                "subtotal": _storable(ex.subtotal),
+                "tax_amount": _storable(ex.tax_amount),
+                "total_amount": _storable(ex.total_amount),
                 "currency": ex.currency or "",
                 "line_items": [li.model_dump(mode="json") for li in ex.line_items],
                 "overall_confidence": report.score,
                 "field_confidences": report.field_confidences(ex),
                 "validation": report.to_json(),
+                "dedupe_key": dedupe_key(doc.organization_id, ex.vendor_name, ex.invoice_number),
             },
         )
-        doc.doc_type = "invoice" if ex.is_invoice else "other"
-        doc.ocr_text = doc_input.text or ""
-        doc.page_count = doc_input.page_count
-        doc.processing_meta = result.meta(doc_input)
-        doc.error_message = ""
-        if result.decision == AUTO_APPROVE:
-            doc.status = Document.Status.APPROVED
-            doc.approved_at = now
+        locked.doc_type = "invoice" if ex.is_invoice else "other"
+        locked.ocr_text = doc_input.text or ""
+        locked.page_count = doc_input.page_count
+        locked.processing_meta = result.meta(doc_input) | {"decision": decision}
+        locked.error_message = ""
+        if decision == AUTO_APPROVE:
+            locked.status = Document.Status.APPROVED
+            locked.approved_at = now
             ReviewTask.objects.filter(document=doc, status=ReviewTask.STATUS_PENDING).update(
                 status=ReviewTask.STATUS_APPROVED, reviewed_at=now
             )
         else:
-            doc.status = Document.Status.REQUIRES_REVIEW
-            doc.approved_at = None
+            locked.status = Document.Status.REQUIRES_REVIEW
+            locked.approved_at = None
             if not ReviewTask.objects.filter(document=doc, status=ReviewTask.STATUS_PENDING).exists():
                 ReviewTask.objects.create(document=doc)
-        doc.save()
+        locked.save()
+    return True
+
+
+@shared_task
+def fail_stale_documents():
+    """Mark runs that died without a result as FAILED. Schedule with Celery beat (every 5 minutes)."""
+    cutoff = timezone.now() - STALE_AFTER
+    count = Document.objects.filter(status=Document.Status.PROCESSING, processing_started_at__lt=cutoff).update(
+        status=Document.Status.FAILED,
+        error_message="Processing did not finish in time. Use Reprocess to try again.",
+        updated_at=timezone.now(),
+    )
+    return f"{count} stale documents marked failed"
 
 
 @shared_task

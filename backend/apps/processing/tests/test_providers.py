@@ -8,7 +8,7 @@ import openai
 import pytest
 from django.test import override_settings
 
-from apps.processing.errors import PermanentProcessingError, TransientProcessingError
+from apps.processing.errors import ModelOutputError, PermanentProcessingError, TransientProcessingError
 from apps.processing.ingest import DocumentInput, ImagePart
 from apps.processing.providers import get_provider
 from apps.processing.providers.anthropic_provider import FALLBACK_BETA, AnthropicProvider
@@ -93,20 +93,27 @@ def test_anthropic_fallbacks_can_be_disabled():
     (_http_error(anthropic.AuthenticationError, 401), PermanentProcessingError),
 ])
 def test_anthropic_error_mapping(error, expected):
-    with pytest.raises(expected):
+    with pytest.raises(expected) as info:
         AnthropicProvider(FakeAnthropic(error=error)).extract(TEXT_DOC)
+    assert not isinstance(info.value, ModelOutputError)  # request errors are not escalated
+    assert "error" not in str(info.value).lower() or "HTTP" in str(info.value)  # no raw provider text
 
 
 @pytest.mark.parametrize("stop_reason", ["refusal", "max_tokens"])
 def test_anthropic_bad_stop_reasons(stop_reason):
-    with pytest.raises(PermanentProcessingError):
+    with pytest.raises(ModelOutputError):
         AnthropicProvider(FakeAnthropic(claude_response(stop_reason=stop_reason))).extract(TEXT_DOC)
+
+
+def test_dated_model_id_is_priced():
+    client = FakeAnthropic(claude_response(model="claude-haiku-4-5-20251001"))
+    assert AnthropicProvider(client).extract(TEXT_DOC).cost_usd == Decimal("0.004000")
 
 
 def test_anthropic_invalid_json():
     resp = claude_response()
     resp.content[0].text = "{not json"
-    with pytest.raises(PermanentProcessingError, match="invalid"):
+    with pytest.raises(ModelOutputError, match="invalid"):
         AnthropicProvider(FakeAnthropic(resp)).extract(TEXT_DOC)
 
 

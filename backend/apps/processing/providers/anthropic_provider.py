@@ -7,21 +7,29 @@ server-side refusal fallbacks.
 """
 import base64
 import json
+import logging
 
 from django.conf import settings
 from pydantic import ValidationError
 
-from ..errors import PermanentProcessingError, TransientProcessingError
+from ..errors import ModelOutputError, PermanentProcessingError, TransientProcessingError
 from ..ingest import DocumentInput
 from ..schema import INVOICE_JSON_SCHEMA, InvoiceExtraction
 from .base import FAST, STRONG, SYSTEM_PROMPT, USER_INSTRUCTION, ExtractionProvider, ProviderResult, estimate_cost
 
 # $ per million tokens (input, output). Override with ANTHROPIC_PRICING in settings.
+# Includes the models that server-side refusal fallbacks may route to.
 DEFAULT_PRICING = {
     "claude-haiku-4-5": (1.00, 5.00),
+    "claude-sonnet-4-6": (3.00, 15.00),
+    "claude-sonnet-5": (2.00, 10.00),
     "claude-sonnet-5-5": (2.00, 10.00),
+    "claude-opus-4-8": (5.00, 25.00),
+    "claude-opus-5": (5.00, 25.00),
     "claude-opus-5-5": (4.00, 20.00),
+    "claude-fable-5-1": (10.00, 50.00),
 }
+logger = logging.getLogger(__name__)
 
 # Models that accept output_config.effort and the server-side fallback beta.
 _EFFORT_MODELS = ("claude-opus-5", "claude-sonnet-5", "claude-fable-5")
@@ -39,7 +47,7 @@ class AnthropicProvider(ExtractionProvider):
         if self._client is None:
             import anthropic
 
-            self._client = anthropic.Anthropic(max_retries=2, timeout=120.0)
+            self._client = anthropic.Anthropic(max_retries=1, timeout=float(getattr(settings, "EXTRACTION_REQUEST_TIMEOUT", 60)))
         return self._client
 
     def model_for(self, tier: str) -> str:
@@ -88,23 +96,29 @@ class AnthropicProvider(ExtractionProvider):
             else:
                 response = self.client.messages.create(**params)
         except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.APIConnectionError) as exc:
-            raise TransientProcessingError(f"Claude API unavailable: {exc}") from exc
+            logger.warning("Claude API unavailable: %s", exc)
+            raise TransientProcessingError("The extraction service is busy or unreachable") from exc
         except anthropic.APIStatusError as exc:
+            logger.error("Claude API error %s: %s", exc.status_code, exc.message)
             if exc.status_code >= 500 or exc.status_code in (408, 409, 429):
-                raise TransientProcessingError(f"Claude API error {exc.status_code}") from exc
-            raise PermanentProcessingError(f"Claude API rejected the request ({exc.status_code}): {exc.message}") from exc
+                raise TransientProcessingError("The extraction service is busy or unreachable") from exc
+            raise PermanentProcessingError(f"The extraction service rejected the document (HTTP {exc.status_code})") from exc
+        except anthropic.APIResponseValidationError as exc:
+            logger.error("Claude API returned an unexpected response: %s", exc)
+            raise ModelOutputError("The extraction service returned an unexpected response") from exc
 
         if response.stop_reason == "refusal":
-            raise PermanentProcessingError("Claude declined to process this document")
+            raise ModelOutputError("The model declined to process this document")
         if response.stop_reason == "max_tokens":
-            raise PermanentProcessingError("Extraction output was cut off (max_tokens)")
+            raise ModelOutputError("The extraction was cut off before it finished")
         text = next((b.text for b in response.content if b.type == "text"), None)
         if not text:
-            raise PermanentProcessingError("Claude returned no extraction")
+            raise ModelOutputError("The model returned no extraction")
         try:
             extraction = InvoiceExtraction.model_validate(json.loads(text))
         except (json.JSONDecodeError, ValidationError) as exc:
-            raise PermanentProcessingError(f"Claude returned invalid extraction JSON: {exc}") from exc
+            logger.warning("Claude returned invalid extraction JSON: %s", exc)
+            raise ModelOutputError("The model returned an invalid extraction") from exc
 
         pricing = {**DEFAULT_PRICING, **getattr(settings, "ANTHROPIC_PRICING", {})}
         usage = response.usage

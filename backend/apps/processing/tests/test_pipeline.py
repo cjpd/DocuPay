@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from apps.processing.errors import PermanentProcessingError
+from apps.processing.errors import ModelOutputError, PermanentProcessingError
 from apps.processing.ingest import DocumentInput
 from apps.processing.pipeline import AUTO_APPROVE, REVIEW, run_pipeline
 from apps.processing.providers.fake import FakeProvider
@@ -74,3 +74,38 @@ def test_heuristic_provider_offline():
     assert len(ex.line_items) == 2
     assert result.total_cost == Decimal("0")
     assert len(result.attempts) == 1  # no escalation offline
+
+
+def test_no_escalation_for_failures_a_model_cannot_fix():
+    for kwargs in ({"is_duplicate": lambda ex: True}, {"max_amount": Decimal("10")}):
+        provider = FakeProvider(fast=CLEAN_INVOICE, strong=CLEAN_INVOICE)
+        result = run_pipeline(DOC, provider, threshold=0.92, **kwargs)
+        assert result.decision == REVIEW
+        assert provider.calls == ["fast"]
+    provider = FakeProvider(fast={**CLEAN_INVOICE, "is_invoice": False}, strong=CLEAN_INVOICE)
+    run_pipeline(DOC, provider, threshold=0.92)
+    assert provider.calls == ["fast"]
+
+
+def test_unusable_fast_answer_escalates():
+    provider = FakeProvider(fast=ModelOutputError("invalid JSON"), strong=CLEAN_INVOICE)
+    result = run_pipeline(DOC, provider, threshold=0.92)
+    assert provider.calls == ["fast", "strong"]
+    assert result.decision == AUTO_APPROVE
+    assert "fast model" in result.escalation_error
+
+
+def test_unusable_fast_answer_without_escalation_fails():
+    import pytest
+
+    with pytest.raises(ModelOutputError):
+        run_pipeline(DOC, FakeProvider(fast=ModelOutputError("x")), threshold=0.92, escalate=False)
+
+
+def test_request_errors_on_fast_tier_are_not_escalated():
+    import pytest
+
+    provider = FakeProvider(fast=PermanentProcessingError("HTTP 401"), strong=CLEAN_INVOICE)
+    with pytest.raises(PermanentProcessingError):
+        run_pipeline(DOC, provider, threshold=0.92)
+    assert provider.calls == ["fast"]

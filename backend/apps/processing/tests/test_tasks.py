@@ -88,13 +88,108 @@ def test_transient_error_then_success(org):
     assert doc.status == Document.Status.APPROVED
 
 
-def test_finished_document_is_skipped(org):
+def test_approved_document_is_never_reprocessed(org):
+    """Reprocessing must not overwrite a reviewer's corrections, even with force=True."""
     doc = make_document(org, INVOICE_TEXT.encode(), status=Document.Status.APPROVED)
+    provider = FakeProvider(fast=CLEAN_INVOICE)
+    _run(doc, provider)
+    _run(doc, provider, force=True)
+    assert provider.calls == []
+
+
+def test_force_reprocesses_document_in_review(org):
+    doc = make_document(org, INVOICE_TEXT.encode(), status=Document.Status.REQUIRES_REVIEW)
     provider = FakeProvider(fast=CLEAN_INVOICE)
     _run(doc, provider)
     assert provider.calls == []
     _run(doc, provider, force=True)
     assert provider.calls == ["fast"]
+
+
+def test_document_owned_by_another_run_is_skipped(org):
+    doc = make_document(org, INVOICE_TEXT.encode(), status=Document.Status.PROCESSING)
+    Document.objects.filter(id=doc.id).update(processing_task_id="other-task")
+    provider = FakeProvider(fast=CLEAN_INVOICE)
+    doc = _run(doc, provider)
+    assert provider.calls == []
+    assert doc.status == Document.Status.PROCESSING
+
+
+def test_result_is_discarded_if_another_run_took_over(org):
+    doc = make_document(org, INVOICE_TEXT.encode())
+
+    class TakeOver(FakeProvider):
+        def extract(self, doc_input, tier="fast"):
+            Document.objects.filter(id=doc.id).update(processing_task_id="newer-run")
+            return super().extract(doc_input, tier)
+
+    doc = _run(doc, TakeOver(fast=CLEAN_INVOICE))
+    assert doc.status == Document.Status.PROCESSING
+    assert not ExtractedData.objects.filter(document=doc).exists()
+
+
+def test_unexpected_error_marks_failed_without_details(org):
+    doc = make_document(org, INVOICE_TEXT.encode())
+    with mock.patch.object(tasks, "run_pipeline", side_effect=ValueError("secret internals")):
+        doc = _run(doc, FakeProvider())
+    assert doc.status == Document.Status.FAILED
+    assert doc.error_message == tasks.GENERIC_ERROR
+
+
+def test_amount_above_org_limit_goes_to_review(org):
+    org.auto_approve_max_amount = 100
+    org.save()
+    doc = _run(make_document(org, INVOICE_TEXT.encode()), FakeProvider(fast=CLEAN_INVOICE))
+    assert doc.status == Document.Status.REQUIRES_REVIEW
+    assert doc.processing_meta["escalated"] is False  # a limit is not an extraction error
+
+
+def test_duplicate_does_not_pay_for_escalation(org):
+    _run(make_document(org, INVOICE_TEXT.encode(), "a.txt"), FakeProvider(fast=CLEAN_INVOICE))
+    variant = {**CLEAN_INVOICE, "vendor_name": "ACME Supplies, LLC", "invoice_number": "inv 1001"}
+    provider = FakeProvider(fast=variant, strong=variant)
+    second = _run(make_document(org, INVOICE_TEXT.encode(), "b.txt"), provider)
+    assert second.status == Document.Status.REQUIRES_REVIEW
+    assert provider.calls == ["fast"]
+
+
+def test_duplicate_recheck_under_lock(org):
+    """Two copies processed at the same time: when the second one ran its pipeline the
+    first was not saved yet, so only the re-check under the lock can catch it."""
+    from apps.processing.ingest import DocumentInput
+    from apps.processing.pipeline import run_pipeline
+
+    first = _run(make_document(org, INVOICE_TEXT.encode(), "a.txt"), FakeProvider(fast=CLEAN_INVOICE))
+    assert first.status == Document.Status.APPROVED
+    stale_result = run_pipeline(DocumentInput(source="text", page_count=1, text="x"),
+                                FakeProvider(fast=CLEAN_INVOICE), threshold=0.92, is_duplicate=lambda ex: False)
+    assert stale_result.decision == "auto_approve"
+    with mock.patch.object(tasks, "run_pipeline", return_value=stale_result):
+        second = _run(make_document(org, INVOICE_TEXT.encode(), "b.txt"), FakeProvider())
+    assert second.status == Document.Status.REQUIRES_REVIEW
+    assert second.processing_meta["decision"] == "review"
+
+
+def test_stale_runs_are_marked_failed(org):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    doc = make_document(org, INVOICE_TEXT.encode(), status=Document.Status.PROCESSING)
+    Document.objects.filter(id=doc.id).update(processing_started_at=timezone.now() - timedelta(hours=1))
+    fresh = make_document(org, INVOICE_TEXT.encode(), status=Document.Status.PROCESSING)
+    Document.objects.filter(id=fresh.id).update(processing_started_at=timezone.now())
+    tasks.fail_stale_documents()
+    doc.refresh_from_db()
+    fresh.refresh_from_db()
+    assert doc.status == Document.Status.FAILED
+    assert fresh.status == Document.Status.PROCESSING
+
+
+def test_dedupe_key_normalization():
+    assert tasks.dedupe_key(1, "ACME Inc.", "INV-001") == tasks.dedupe_key(1, "acme inc", "inv 001")
+    assert tasks.dedupe_key(1, "Acme", "1") != tasks.dedupe_key(2, "Acme", "1")
+    assert tasks.dedupe_key(1, None, "1") == ""
 
 
 def test_rerun_updates_in_place(org):
@@ -108,3 +203,13 @@ def test_rerun_updates_in_place(org):
 
 def test_missing_document():
     assert "skipped" in tasks.process_document.apply(args=[999999]).get()
+
+
+
+def test_out_of_range_amount_is_saved_for_review(org):
+    """On Postgres a 1e15 total would overflow numeric(14,2) and crash the save."""
+    huge = {**CLEAN_INVOICE, "subtotal": 1e15, "total_amount": 1e15 + 24, "line_items": []}
+    doc = _run(make_document(org, INVOICE_TEXT.encode()), FakeProvider(fast=huge))
+    assert doc.status == Document.Status.REQUIRES_REVIEW
+    assert doc.extracted_data.total_amount is None
+    assert doc.extracted_data.raw_extraction["total_amount"].startswith("1000000000000024")

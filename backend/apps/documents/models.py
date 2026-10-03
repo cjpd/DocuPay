@@ -25,6 +25,9 @@ class Document(TimeStampedModel):
     error_message = models.TextField(blank=True, default="")
     # Models used, tokens, estimated cost and escalation path for each processing run.
     processing_meta = models.JSONField(default=dict, blank=True)
+    # The Celery task that owns the current run. Only that task may write results.
+    processing_task_id = models.CharField(max_length=64, blank=True, default="")
+    processing_started_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [models.Index(fields=["organization", "status", "created_at"])]
@@ -51,15 +54,14 @@ class ExtractedData(TimeStampedModel):
     field_confidences = models.JSONField(default=dict, blank=True)
     # Result of each validation check (see apps.processing.validation).
     validation = models.JSONField(default=list, blank=True)
+    # "<org id>:<normalized vendor>:<normalized invoice number>" for duplicate detection.
+    dedupe_key = models.CharField(max_length=400, blank=True, default="", db_index=True)
 
     # Fields a reviewer may correct. Anything else in a correction is rejected.
     EDITABLE_FIELDS = (
         "invoice_number", "invoice_date", "due_date", "vendor_name", "customer_name", "purchase_order",
         "subtotal", "tax_amount", "total_amount", "currency", "line_items",
     )
-
-    class Meta:
-        indexes = [models.Index(fields=["vendor_name", "invoice_number"])]
 
 
 class ReviewTask(TimeStampedModel):

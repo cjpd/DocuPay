@@ -106,12 +106,18 @@ CELERY_TASK_IGNORE_RESULT = True
 # blocks other work; run a worker with: celery -A config worker -Q extraction,celery
 CELERY_TASK_ROUTES = {"apps.processing.tasks.process_document": {"queue": "extraction"}}
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+# Run with: celery -A config beat
+CELERY_BEAT_SCHEDULE = {
+    "fail-stale-documents": {"task": "apps.processing.tasks.fail_stale_documents", "schedule": 300.0},
+}
 
 # Extraction pipeline
 EXTRACTION_PROVIDER = os.getenv("EXTRACTION_PROVIDER", "heuristic")  # anthropic | openai | heuristic
 EXTRACTION_ESCALATE = os.getenv("EXTRACTION_ESCALATE", "1") == "1"
 PROCESSING_MAX_PAGES = int(os.getenv("PROCESSING_MAX_PAGES", "20"))
 PROCESSING_MAX_FILE_BYTES = int(os.getenv("PROCESSING_MAX_FILE_BYTES", str(20 * 1024 * 1024)))
+# Seconds per LLM request; with 1 SDK retry, fast + strong attempts fit inside the task's 300 s soft limit.
+EXTRACTION_REQUEST_TIMEOUT = int(os.getenv("EXTRACTION_REQUEST_TIMEOUT", "60"))
 ANTHROPIC_FAST_MODEL = os.getenv("ANTHROPIC_FAST_MODEL", "claude-haiku-4-5")
 ANTHROPIC_STRONG_MODEL = os.getenv("ANTHROPIC_STRONG_MODEL", "claude-opus-5-5")
 ANTHROPIC_STRONG_EFFORT = os.getenv("ANTHROPIC_STRONG_EFFORT", "medium")

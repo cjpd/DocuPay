@@ -47,8 +47,12 @@ class ExtractionProvider:
 
 
 def estimate_cost(pricing: dict, model: str, input_tokens: int, output_tokens: int) -> Optional[Decimal]:
-    """pricing maps model id -> (input $/MTok, output $/MTok)."""
+    """pricing maps model id -> (input $/MTok, output $/MTok). The API may report a
+    dated id (claude-haiku-4-5-20251001), so the longest matching prefix wins."""
     rates = pricing.get(model)
+    if rates is None:
+        prefixes = [key for key in pricing if model.startswith(key)]
+        rates = pricing[max(prefixes, key=len)] if prefixes else None
     if not rates:
         return None
     in_rate, out_rate = (Decimal(str(r)) for r in rates)

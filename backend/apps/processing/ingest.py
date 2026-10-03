@@ -23,6 +23,11 @@ from .errors import PermanentProcessingError
 MAX_IMAGE_EDGE = 1568
 # Average text characters per page below which a PDF is treated as scanned.
 MIN_TEXT_CHARS_PER_PAGE = 40
+# Refuse images larger than this before decoding them (memory safety).
+MAX_SOURCE_PIXELS = 40_000_000
+# Highest render scale for PDF pages (2 = 144 dpi).
+MAX_RENDER_SCALE = 2.0
+JPEG_QUALITY = 85
 
 
 @dataclass
@@ -120,7 +125,11 @@ def _from_pdf(data: bytes) -> DocumentInput:
             return DocumentInput(source="pdf_text", page_count=count, text=text)
         images = []
         for i in range(count):
-            bitmap = pdf[i].render(scale=2)
+            page = pdf[i]
+            # Render at the target size directly: a huge page (PDF allows 200 x 200 inches)
+            # must never be rasterized at full resolution.
+            scale = min(MAX_RENDER_SCALE, MAX_IMAGE_EDGE / max(page.get_size()))
+            bitmap = page.render(scale=scale)
             images.append(_image_part(bitmap.to_pil()))
         return DocumentInput(source="pdf_scan", page_count=count, images=images)
     finally:
@@ -130,13 +139,23 @@ def _from_pdf(data: bytes) -> DocumentInput:
 def _open_image(data: bytes) -> Image.Image:
     try:
         img = Image.open(io.BytesIO(data))
+    except Exception as exc:  # Pillow raises many types for bad input
+        raise PermanentProcessingError("The image file cannot be read") from exc
+    # Image.open reads only the header, so the size is known before decoding.
+    if img.width * img.height > MAX_SOURCE_PIXELS:
+        raise PermanentProcessingError("The image is too large. Upload a smaller scan.")
+    try:
+        if getattr(img, "draft", None) and img.format == "JPEG":
+            img.draft("RGB", (MAX_IMAGE_EDGE, MAX_IMAGE_EDGE))  # decode JPEGs at reduced size
         img.load()
         return img
-    except Exception as exc:  # Pillow raises many types for bad input
+    except Exception as exc:
         raise PermanentProcessingError("The image file cannot be read") from exc
 
 
 def _image_part(img: Image.Image) -> ImagePart:
+    """Resize to MAX_IMAGE_EDGE and encode as JPEG: scans and photos are several times
+    smaller as JPEG than PNG, which keeps multi-page requests under the size limit."""
     if img.mode not in ("RGB", "L"):
         img = img.convert("RGB")
     longest = max(img.size)
@@ -144,5 +163,5 @@ def _image_part(img: Image.Image) -> ImagePart:
         ratio = MAX_IMAGE_EDGE / longest
         img = img.resize((max(1, int(img.width * ratio)), max(1, int(img.height * ratio))), Image.LANCZOS)
     buf = io.BytesIO()
-    img.save(buf, format="PNG", optimize=True)
-    return ImagePart(media_type="image/png", data=buf.getvalue())
+    img.save(buf, format="JPEG", quality=JPEG_QUALITY)
+    return ImagePart(media_type="image/jpeg", data=buf.getvalue())

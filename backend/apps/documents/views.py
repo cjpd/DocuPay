@@ -21,6 +21,8 @@ from apps.processing.tasks import process_document
 class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+    # No PUT/PATCH: a document's file and organization never change after upload.
+    http_method_names = ["get", "post", "delete", "head", "options"]
 
     def get_queryset(self):
         user = self.request.user
@@ -58,10 +60,18 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="reprocess")
     def reprocess(self, request, *args, **kwargs):
-        """Run the pipeline again, for example after a FAILED status or a provider change."""
+        """Run the pipeline again, for example after a FAILED status or a provider change.
+        Approved documents cannot be reprocessed: that would overwrite a reviewer's corrections."""
         document = self.get_object()
-        Document.objects.filter(id=document.id).update(status=Document.Status.PENDING, error_message="")
-        _queue(document.id, force=True)
+        reprocessable = [Document.Status.FAILED, Document.Status.REQUIRES_REVIEW, Document.Status.PENDING]
+        if not Document.objects.filter(id=document.id, status__in=reprocessable).update(
+            status=Document.Status.PENDING, error_message=""
+        ):
+            return Response(
+                {"detail": f"A document with status '{document.status}' cannot be reprocessed."},
+                status=status.HTTP_409_CONFLICT,
+            )
+        _queue(document.id)
         document.refresh_from_db()
         return Response(self.get_serializer(document).data, status=status.HTTP_202_ACCEPTED)
 
@@ -71,7 +81,9 @@ def _queue(document_id: int, force: bool = False) -> None:
     transaction.on_commit(lambda: process_document.delay(document_id, force=force))
 
 
-class ExtractedDataViewSet(viewsets.ModelViewSet):
+class ExtractedDataViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read only. Corrections go through reviews/<id>/approve/, which records them."""
+
     serializer_class = ExtractedDataSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
 

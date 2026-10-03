@@ -10,6 +10,10 @@ class Organization(TimeStampedModel):
         default=0.92,
         help_text="Overall confidence threshold to auto-approve without human review",
     )
+    auto_approve_max_amount = models.DecimalField(
+        max_digits=14, decimal_places=2, null=True, blank=True,
+        help_text="Invoices with a total above this amount always go to human review. Empty = no limit.",
+    )
 
     def __str__(self) -> str:
         return self.name

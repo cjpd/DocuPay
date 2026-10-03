@@ -19,6 +19,15 @@ CRITICAL, MAJOR, MINOR = "critical", "major", "minor"
 WEIGHTS = {CRITICAL: 3.0, MAJOR: 2.0, MINOR: 1.0}
 
 REQUIRED_FIELDS = ("vendor_name", "invoice_number", "invoice_date", "total_amount")
+# Largest amount the database can store (DecimalField max_digits=14, decimal_places=2).
+MAX_STORABLE_AMOUNT = Decimal("999999999999.99")
+AMOUNT_FIELDS = ("subtotal", "discount_amount", "tax_amount", "shipping_amount", "total_amount")
+# Failures that a stronger model can fix by reading the document better. Others
+# (duplicate, not an invoice, amount limit) are facts about the document, so a
+# second model call would only cost money.
+EXTRACTION_QUALITY_CHECKS = frozenset({
+    "required_fields", "totals_math", "line_items_sum", "line_item_math", "date_order", "currency", "model_uncertain",
+})
 # Checks that prove the amounts. At least one must pass to auto-approve.
 AMOUNT_PROOFS = ("line_items_sum", "totals_math")
 
@@ -48,6 +57,10 @@ class ValidationReport:
 
     def can_auto_approve(self, threshold: float) -> bool:
         return not self.critical_failures and self.amounts_proved and self.score >= threshold
+
+    @property
+    def worth_escalating(self) -> bool:
+        return any(c.name in EXTRACTION_QUALITY_CHECKS for c in self.failures)
 
     def field_confidences(self, extraction: InvoiceExtraction) -> dict:
         """1.0 = proved by a passed check, 0.6 = present but not proved, 0.0 = missing or in a failed check."""
@@ -117,7 +130,9 @@ def check_line_item_math(ex: InvoiceExtraction) -> Check:
     rows = [li for li in ex.line_items if None not in (li.quantity, li.unit_price, li.amount)]
     if not rows:
         return Check("line_item_math", SKIP, MINOR, "No line has quantity, unit price and amount")
-    bad = [i for i, li in enumerate(rows, 1) if not _close((li.quantity * li.unit_price).quantize(Decimal("0.01")), li.amount)]
+    bad = [i for i, li in enumerate(rows, 1)
+           if abs(li.quantity) > MAX_STORABLE_AMOUNT
+           or not _close((li.quantity * li.unit_price).quantize(Decimal("0.01")), li.amount)]
     if bad:
         return Check("line_item_math", FAIL, MINOR,
                      "Quantity x unit price does not equal the amount on line(s) " + ", ".join(map(str, bad)),
@@ -163,6 +178,18 @@ def check_uncertain(ex: InvoiceExtraction) -> Check:
     return Check("model_uncertain", PASS, MAJOR)
 
 
+def check_amount_limits(ex: InvoiceExtraction, max_amount: Optional[Decimal]) -> Check:
+    too_big = [f for f in AMOUNT_FIELDS if getattr(ex, f) is not None and abs(getattr(ex, f)) > MAX_STORABLE_AMOUNT]
+    too_big += [f"line_items[{i}]" for i, li in enumerate(ex.line_items, 1)
+                if any(v is not None and abs(v) > MAX_STORABLE_AMOUNT for v in (li.unit_price, li.amount))]
+    if too_big:
+        return Check("amount_limit", FAIL, CRITICAL, "Amount out of range: " + ", ".join(too_big), tuple(too_big))
+    if max_amount is not None and ex.total_amount is not None and abs(ex.total_amount) > max_amount:
+        return Check("amount_limit", FAIL, CRITICAL,
+                     f"The total {ex.total_amount} is above the auto-approve limit of {max_amount}", ("total_amount",))
+    return Check("amount_limit", PASS, CRITICAL)
+
+
 def check_duplicate(ex: InvoiceExtraction, is_duplicate: Optional[Callable[[InvoiceExtraction], bool]]) -> Check:
     if is_duplicate is None or not (ex.vendor_name and ex.invoice_number):
         return Check("duplicate", SKIP, CRITICAL, "Not enough data to look for duplicates")
@@ -174,7 +201,8 @@ def check_duplicate(ex: InvoiceExtraction, is_duplicate: Optional[Callable[[Invo
 
 
 def validate(ex: InvoiceExtraction, today: Optional[date] = None,
-             is_duplicate: Optional[Callable[[InvoiceExtraction], bool]] = None) -> ValidationReport:
+             is_duplicate: Optional[Callable[[InvoiceExtraction], bool]] = None,
+             max_amount: Optional[Decimal] = None) -> ValidationReport:
     today = today or date.today()
     checks = [
         check_is_invoice(ex),
@@ -185,6 +213,7 @@ def validate(ex: InvoiceExtraction, today: Optional[date] = None,
         check_dates(ex, today),
         check_currency(ex),
         check_uncertain(ex),
+        check_amount_limits(ex, max_amount),
         check_duplicate(ex, is_duplicate),
     ]
     evaluated = [c for c in checks if c.status != SKIP]

@@ -6,14 +6,17 @@ Model names and prices change often, so both come from settings
 """
 import base64
 import json
+import logging
 
 from django.conf import settings
 from pydantic import ValidationError
 
-from ..errors import PermanentProcessingError, TransientProcessingError
+from ..errors import ModelOutputError, PermanentProcessingError, TransientProcessingError
 from ..ingest import DocumentInput
 from ..schema import INVOICE_JSON_SCHEMA, InvoiceExtraction
 from .base import FAST, STRONG, SYSTEM_PROMPT, USER_INSTRUCTION, ExtractionProvider, ProviderResult, estimate_cost
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAIProvider(ExtractionProvider):
@@ -27,7 +30,7 @@ class OpenAIProvider(ExtractionProvider):
         if self._client is None:
             import openai
 
-            self._client = openai.OpenAI(max_retries=2, timeout=120.0)
+            self._client = openai.OpenAI(max_retries=1, timeout=float(getattr(settings, "EXTRACTION_REQUEST_TIMEOUT", 60)))
         return self._client
 
     def model_for(self, tier: str) -> str:
@@ -63,21 +66,27 @@ class OpenAIProvider(ExtractionProvider):
         try:
             response = self.client.chat.completions.create(**params)
         except (openai.RateLimitError, openai.InternalServerError, openai.APIConnectionError) as exc:
-            raise TransientProcessingError(f"OpenAI API unavailable: {exc}") from exc
+            logger.warning("OpenAI API unavailable: %s", exc)
+            raise TransientProcessingError("The extraction service is busy or unreachable") from exc
         except openai.APIStatusError as exc:
+            logger.error("OpenAI API error %s: %s", exc.status_code, exc)
             if exc.status_code >= 500 or exc.status_code in (408, 409, 429):
-                raise TransientProcessingError(f"OpenAI API error {exc.status_code}") from exc
-            raise PermanentProcessingError(f"OpenAI rejected the request ({exc.status_code})") from exc
+                raise TransientProcessingError("The extraction service is busy or unreachable") from exc
+            raise PermanentProcessingError(f"The extraction service rejected the document (HTTP {exc.status_code})") from exc
+        except openai.APIResponseValidationError as exc:
+            logger.error("OpenAI API returned an unexpected response: %s", exc)
+            raise ModelOutputError("The extraction service returned an unexpected response") from exc
 
         choice = response.choices[0]
         if getattr(choice.message, "refusal", None):
-            raise PermanentProcessingError("OpenAI declined to process this document")
+            raise ModelOutputError("The model declined to process this document")
         if choice.finish_reason == "length":
-            raise PermanentProcessingError("Extraction output was cut off (length)")
+            raise ModelOutputError("The extraction was cut off before it finished")
         try:
             extraction = InvoiceExtraction.model_validate(json.loads(choice.message.content or ""))
         except (json.JSONDecodeError, ValidationError) as exc:
-            raise PermanentProcessingError(f"OpenAI returned invalid extraction JSON: {exc}") from exc
+            logger.warning("OpenAI returned invalid extraction JSON: %s", exc)
+            raise ModelOutputError("The model returned an invalid extraction") from exc
 
         usage = response.usage
         in_tok = getattr(usage, "prompt_tokens", 0) or 0

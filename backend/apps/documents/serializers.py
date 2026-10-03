@@ -64,6 +64,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = [
+            "organization",
             "page_count",
             "error_message",
             "processing_meta",

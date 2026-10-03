@@ -40,6 +40,16 @@ services:
       - db
       - redis
 
+  beat:
+    build: ./backend
+    command: celery -A config beat -l info
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
   frontend:
     build: ./frontend
     command: npm run dev -- --hostname 0.0.0.0 --port 3000

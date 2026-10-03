@@ -14,6 +14,12 @@ from apps.processing.schema import INVOICE_JSON_SCHEMA, InvoiceExtraction, parse
     ("€ 12,50", Decimal("12.50")),
     ("(12.00)", Decimal("-12.00")),
     ("-5", Decimal("-5.00")),
+    ("USD -5.00", Decimal("-5.00")),
+    ("1.234", Decimal("1234.00")),
+    ("1.234.567,89", Decimal("1234567.89")),
+    ("1,234", Decimal("1234.00")),
+    ("nan", None),
+    (float("inf"), None),
     ("", None),
     ("n/a", None),
     (None, None),
@@ -72,3 +78,9 @@ def test_to_json_is_serializable():
     data = json.loads(json.dumps(ex.to_json()))
     assert data["total_amount"] == "10.50"
     assert data["invoice_date"] == "2026-01-02"
+
+
+def test_quantity_decimal_comma():
+    from apps.processing.schema import LineItem
+
+    assert LineItem(quantity="1,5").quantity == Decimal("1.5")

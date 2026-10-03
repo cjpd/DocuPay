@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from apps.processing.schema import InvoiceExtraction
 from apps.processing.validation import FAIL, PASS, SKIP, validate
@@ -112,3 +113,26 @@ def test_field_confidences():
 def test_report_json():
     data = validate(_ex(), today=TODAY).to_json()
     assert {"name", "status", "severity", "message", "fields"} <= set(data[0])
+
+
+def test_self_consistent_huge_amount_does_not_auto_approve():
+    ex = _ex(subtotal=1e15, tax_amount=24, total_amount=1e15 + 24, line_items=[])
+    report = validate(ex, today=TODAY)
+    assert _status(report, "amount_limit") == FAIL
+    assert not report.can_auto_approve(0.0)
+
+
+def test_org_amount_ceiling():
+    assert _status(validate(_ex(), today=TODAY, max_amount=Decimal("1000")), "amount_limit") == PASS
+    assert _status(validate(_ex(), today=TODAY, max_amount=Decimal("100")), "amount_limit") == FAIL
+
+
+def test_nan_quantity_does_not_crash():
+    items = [dict(CLEAN_INVOICE["line_items"][0], quantity="nan"), CLEAN_INVOICE["line_items"][1]]
+    report = validate(_ex(line_items=items), today=TODAY)
+    assert report.score > 0
+
+
+def test_worth_escalating():
+    assert validate(_ex(total_amount=1.0), today=TODAY).worth_escalating
+    assert not validate(_ex(), today=TODAY, is_duplicate=lambda ex: True).worth_escalating
