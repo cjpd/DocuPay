@@ -200,9 +200,22 @@ def check_duplicate(ex: InvoiceExtraction, is_duplicate: Optional[Callable[[Invo
     return Check("duplicate", PASS, CRITICAL)
 
 
+def check_new_vendor(ex: InvoiceExtraction, is_new_vendor: Optional[Callable[[InvoiceExtraction], bool]]) -> Check:
+    """Optional accounts payable control: the first invoice from a vendor is always checked by a person."""
+    if is_new_vendor is None:
+        return Check("new_vendor", SKIP, CRITICAL, "Rule not enabled for this organization")
+    if not ex.vendor_name:
+        return Check("new_vendor", SKIP, CRITICAL, "No vendor name")
+    if is_new_vendor(ex):
+        return Check("new_vendor", FAIL, CRITICAL,
+                     f"First invoice from {ex.vendor_name}: a person must approve it", ("vendor_name",))
+    return Check("new_vendor", PASS, CRITICAL)
+
+
 def validate(ex: InvoiceExtraction, today: Optional[date] = None,
              is_duplicate: Optional[Callable[[InvoiceExtraction], bool]] = None,
-             max_amount: Optional[Decimal] = None) -> ValidationReport:
+             max_amount: Optional[Decimal] = None,
+             is_new_vendor: Optional[Callable[[InvoiceExtraction], bool]] = None) -> ValidationReport:
     today = today or date.today()
     checks = [
         check_is_invoice(ex),
@@ -215,6 +228,7 @@ def validate(ex: InvoiceExtraction, today: Optional[date] = None,
         check_uncertain(ex),
         check_amount_limits(ex, max_amount),
         check_duplicate(ex, is_duplicate),
+        check_new_vendor(ex, is_new_vendor),
     ]
     evaluated = [c for c in checks if c.status != SKIP]
     total = sum(WEIGHTS[c.severity] for c in evaluated)

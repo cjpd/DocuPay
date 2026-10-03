@@ -213,3 +213,34 @@ def test_out_of_range_amount_is_saved_for_review(org):
     assert doc.status == Document.Status.REQUIRES_REVIEW
     assert doc.extracted_data.total_amount is None
     assert doc.extracted_data.raw_extraction["total_amount"].startswith("1000000000000024")
+
+
+
+def test_new_vendor_rule(org):
+    org.review_new_vendors = True
+    org.save()
+    first = _run(make_document(org, INVOICE_TEXT.encode(), "a.txt"), FakeProvider(fast=CLEAN_INVOICE))
+    assert first.status == Document.Status.REQUIRES_REVIEW
+    assert any(c["name"] == "new_vendor" and c["status"] == "fail" for c in first.extracted_data.validation)
+    # A person approves the first invoice; the next one from the same vendor can auto-approve.
+    Document.objects.filter(id=first.id).update(status=Document.Status.APPROVED)
+    nxt = {**CLEAN_INVOICE, "vendor_name": "ACME Supplies, LLC", "invoice_number": "INV-1002"}
+    second = _run(make_document(org, INVOICE_TEXT.encode(), "b.txt"), FakeProvider(fast=nxt))
+    assert second.status == Document.Status.APPROVED
+
+
+def test_new_vendor_rule_is_off_by_default(org):
+    doc = _run(make_document(org, INVOICE_TEXT.encode()), FakeProvider(fast=CLEAN_INVOICE))
+    assert doc.status == Document.Status.APPROVED
+
+
+def test_slow_strong_call_keeps_fast_result_without_retry(org):
+    """A soft time limit during escalation must not retry (that would pay for the fast call again)."""
+    from celery.exceptions import SoftTimeLimitExceeded
+
+    bad = {**CLEAN_INVOICE, "total_amount": 1.0}
+    provider = FakeProvider(fast=bad, strong=SoftTimeLimitExceeded())
+    doc = _run(make_document(org, INVOICE_TEXT.encode()), provider)
+    assert provider.calls == ["fast", "strong"]
+    assert doc.status == Document.Status.REQUIRES_REVIEW
+    assert doc.processing_meta["escalation_error"] == "SoftTimeLimitExceeded"

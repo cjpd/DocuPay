@@ -14,6 +14,10 @@ class Organization(TimeStampedModel):
         max_digits=14, decimal_places=2, null=True, blank=True,
         help_text="Invoices with a total above this amount always go to human review. Empty = no limit.",
     )
+    review_new_vendors = models.BooleanField(
+        default=False,
+        help_text="Send the first invoice from each new vendor to human review.",
+    )
 
     def __str__(self) -> str:
         return self.name

@@ -136,3 +136,9 @@ def test_nan_quantity_does_not_crash():
 def test_worth_escalating():
     assert validate(_ex(total_amount=1.0), today=TODAY).worth_escalating
     assert not validate(_ex(), today=TODAY, is_duplicate=lambda ex: True).worth_escalating
+
+
+def test_new_vendor_check():
+    assert _status(validate(_ex(), today=TODAY), "new_vendor") == SKIP
+    assert _status(validate(_ex(), today=TODAY, is_new_vendor=lambda ex: True), "new_vendor") == FAIL
+    assert _status(validate(_ex(), today=TODAY, is_new_vendor=lambda ex: False), "new_vendor") == PASS

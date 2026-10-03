@@ -11,7 +11,7 @@ from django.utils import timezone
 from apps.documents.models import Document, ExtractedData, ReviewTask
 from apps.organizations.models import Organization
 
-from .errors import PermanentProcessingError, TransientProcessingError
+from .errors import PermanentProcessingError, ProcessingError, TransientProcessingError
 from .ingest import load_document
 from .pipeline import AUTO_APPROVE, REVIEW, run_pipeline
 from .providers import get_provider
@@ -60,6 +60,23 @@ def _duplicate_checker(doc: Document):
     return is_duplicate
 
 
+def _new_vendor_checker(doc: Document):
+    """None when the organization has not enabled the rule."""
+    if not doc.organization.review_new_vendors:
+        return None
+
+    def is_new_vendor(ex) -> bool:
+        key = dedupe_key(doc.organization_id, ex.vendor_name, "x")
+        prefix = key[: key.rfind(":") + 1]
+        return not (
+            ExtractedData.objects.filter(dedupe_key__startswith=prefix, document__status=Document.Status.APPROVED)
+            .exclude(document_id=doc.id)
+            .exists()
+        )
+
+    return is_new_vendor
+
+
 def _claim(document_id: int, task_id: str, force: bool) -> bool:
     """
     Take exclusive ownership of the document for this task.
@@ -103,6 +120,8 @@ def process_document(self, document_id: int, force: bool = False):
             threshold=doc.organization.auto_approve_threshold,
             is_duplicate=_duplicate_checker(doc),
             max_amount=doc.organization.auto_approve_max_amount,
+            is_new_vendor=_new_vendor_checker(doc),
+            escalation_errors=(ProcessingError, SoftTimeLimitExceeded),
         )
         saved = _save_result(doc, task_id, doc_input, result)
     except PermanentProcessingError as exc:
@@ -138,7 +157,8 @@ def _save_result(doc: Document, task_id: str, doc_input, result) -> bool:
             return False
 
         # Validate again under the lock: the duplicate check must see rows saved since the pipeline ran.
-        report = validate(ex, is_duplicate=_duplicate_checker(doc), max_amount=org.auto_approve_max_amount)
+        report = validate(ex, is_duplicate=_duplicate_checker(doc), max_amount=org.auto_approve_max_amount,
+                          is_new_vendor=_new_vendor_checker(doc))
         decision = AUTO_APPROVE if (result.decision == AUTO_APPROVE and report.can_auto_approve(
             org.auto_approve_threshold)) else REVIEW
 

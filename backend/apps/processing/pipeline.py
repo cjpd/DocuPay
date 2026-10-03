@@ -69,13 +69,21 @@ def run_pipeline(
     is_duplicate: Optional[Callable[[InvoiceExtraction], bool]] = None,
     escalate: Optional[bool] = None,
     max_amount: Optional[Decimal] = None,
+    is_new_vendor: Optional[Callable[[InvoiceExtraction], bool]] = None,
+    escalation_errors: tuple = (ProcessingError,),
 ) -> PipelineResult:
+    """
+    escalation_errors: errors during the strong attempt that keep the fast result instead
+    of failing the run. The Celery task adds its soft time limit, so a slow strong call
+    does not trigger a retry that would pay for the fast call again.
+    """
     if escalate is None:
         escalate = getattr(settings, "EXTRACTION_ESCALATE", True)
     can_escalate = escalate and provider.supports_escalation
 
     def check(result: ProviderResult) -> Attempt:
-        return Attempt(result, validate(result.extraction, is_duplicate=is_duplicate, max_amount=max_amount))
+        return Attempt(result, validate(result.extraction, is_duplicate=is_duplicate, max_amount=max_amount,
+                                       is_new_vendor=is_new_vendor))
 
     attempts = []
     escalation_error = None
@@ -93,8 +101,8 @@ def run_pipeline(
         # A failed escalation must not throw away a usable fast result: keep it and send it to review.
         try:
             attempts.append(check(provider.extract(doc, STRONG)))
-        except ProcessingError as exc:
-            escalation_error = str(exc)
+        except escalation_errors as exc:
+            escalation_error = str(exc) if isinstance(exc, ProcessingError) else type(exc).__name__
 
     # Prefer the attempt that can auto-approve; else the highest score; ties go to the later (stronger) one.
     best = max(
