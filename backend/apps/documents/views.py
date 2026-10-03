@@ -4,8 +4,8 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.organizations.models import OrgMembership
 from apps.organizations.permissions import IsOrgMember
+from apps.organizations.scoping import OrgScopedMixin, active_organization_id
 from .models import CorrectionExample, Document, ExtractedData, ReviewTask, WebhookConfig, WebhookDeliveryLog
 from .serializers import (
     CorrectionExampleSerializer,
@@ -18,20 +18,17 @@ from .serializers import (
 from apps.processing.tasks import process_document
 
 
-class DocumentViewSet(viewsets.ModelViewSet):
+class DocumentViewSet(OrgScopedMixin, viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
     # No PUT/PATCH: a document's file and organization never change after upload.
     http_method_names = ["get", "post", "delete", "head", "options"]
 
     def get_queryset(self):
-        user = self.request.user
-        return Document.objects.filter(organization__memberships__user=user).distinct().order_by("-created_at")
+        return self.scope(Document.objects.all()).order_by("-created_at")
 
     def perform_create(self, serializer):
-        org = OrgMembership.objects.filter(user=self.request.user).values_list("organization", flat=True).first()
-        if not org:
-            raise permissions.PermissionDenied("User is not a member of any organization")
+        org = active_organization_id(self.request, require=True)
         doc = serializer.save(uploaded_by=self.request.user, organization_id=org, status=Document.Status.PENDING)
         _queue(doc.id)
 
@@ -44,10 +41,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if not file:
             return Response({"detail": "file is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        org = OrgMembership.objects.filter(user=request.user).values_list("organization", flat=True).first()
-        if not org:
-            return Response({"detail": "No organization membership"}, status=status.HTTP_403_FORBIDDEN)
-
+        org = active_organization_id(request, require=True)
         document = Document.objects.create(
             organization_id=org,
             uploaded_by=request.user,
@@ -81,24 +75,27 @@ def _queue(document_id: int, force: bool = False) -> None:
     transaction.on_commit(lambda: process_document.delay(document_id, force=force))
 
 
-class ExtractedDataViewSet(viewsets.ReadOnlyModelViewSet):
+class ExtractedDataViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
     """Read only. Corrections go through reviews/<id>/approve/, which records them."""
 
     serializer_class = ExtractedDataSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
 
+    org_field = "document__organization"
+
     def get_queryset(self):
-        user = self.request.user
-        return ExtractedData.objects.filter(document__organization__memberships__user=user).distinct()
+        return self.scope(ExtractedData.objects.all()).order_by("-created_at")
 
 
-class ReviewTaskViewSet(viewsets.ModelViewSet):
+class ReviewTaskViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
+    """Review tasks change only through approve/reject, which record who decided and what changed."""
+
     serializer_class = ReviewTaskSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+    org_field = "document__organization"
 
     def get_queryset(self):
-        user = self.request.user
-        return ReviewTask.objects.filter(document__organization__memberships__user=user).distinct().order_by("-created_at")
+        return self.scope(ReviewTask.objects.select_related("document")).order_by("-created_at")
 
     @action(detail=True, methods=["post"], url_path="approve")
     def approve(self, request, pk=None):
@@ -155,19 +152,23 @@ class ReviewTaskViewSet(viewsets.ModelViewSet):
         return Response(ReviewTaskSerializer(task).data)
 
 
-class WebhookConfigViewSet(viewsets.ModelViewSet):
+class WebhookConfigViewSet(OrgScopedMixin, viewsets.ModelViewSet):
     serializer_class = WebhookConfigSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
 
     def get_queryset(self):
-        user = self.request.user
-        return WebhookConfig.objects.filter(organization__memberships__user=user).distinct()
+        return self.scope(WebhookConfig.objects.all()).order_by("-created_at")
+
+    def perform_create(self, serializer):
+        # The organization always comes from the request, never from the body: a webhook
+        # created for another organization would send that organization's data to this URL.
+        serializer.save(organization_id=active_organization_id(self.request, require=True))
 
 
-class WebhookDeliveryLogViewSet(viewsets.ReadOnlyModelViewSet):
+class WebhookDeliveryLogViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = WebhookDeliveryLogSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+    org_field = "document__organization"
 
     def get_queryset(self):
-        user = self.request.user
-        return WebhookDeliveryLog.objects.filter(document__organization__memberships__user=user).distinct()
+        return self.scope(WebhookDeliveryLog.objects.all()).order_by("-created_at")

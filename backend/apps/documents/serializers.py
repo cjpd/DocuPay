@@ -120,7 +120,9 @@ class WebhookConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebhookConfig
         fields = ["id", "organization", "target_url", "secret", "is_active", "created_at", "updated_at"]
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = ["organization", "created_at", "updated_at"]
+        # The signing secret is set by the customer and never sent back.
+        extra_kwargs = {"secret": {"write_only": True}}
 
 
 class WebhookDeliveryLogSerializer(serializers.ModelSerializer):
