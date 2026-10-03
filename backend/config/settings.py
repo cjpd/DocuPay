@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -99,7 +100,26 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://redis:6379/0")
+# Results live in Postgres (Document/ExtractedData), so Celery needs no result backend.
+CELERY_TASK_IGNORE_RESULT = True
+# Extraction waits on LLM APIs (I/O bound). It gets its own queue so it never
+# blocks other work; run a worker with: celery -A config worker -Q extraction,celery
+CELERY_TASK_ROUTES = {"apps.processing.tasks.process_document": {"queue": "extraction"}}
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+
+# Extraction pipeline
+EXTRACTION_PROVIDER = os.getenv("EXTRACTION_PROVIDER", "heuristic")  # anthropic | openai | heuristic
+EXTRACTION_ESCALATE = os.getenv("EXTRACTION_ESCALATE", "1") == "1"
+PROCESSING_MAX_PAGES = int(os.getenv("PROCESSING_MAX_PAGES", "20"))
+PROCESSING_MAX_FILE_BYTES = int(os.getenv("PROCESSING_MAX_FILE_BYTES", str(20 * 1024 * 1024)))
+ANTHROPIC_FAST_MODEL = os.getenv("ANTHROPIC_FAST_MODEL", "claude-haiku-4-5")
+ANTHROPIC_STRONG_MODEL = os.getenv("ANTHROPIC_STRONG_MODEL", "claude-opus-5-5")
+ANTHROPIC_STRONG_EFFORT = os.getenv("ANTHROPIC_STRONG_EFFORT", "medium")
+ANTHROPIC_REFUSAL_FALLBACKS = os.getenv("ANTHROPIC_REFUSAL_FALLBACKS", "1") == "1"
+OPENAI_FAST_MODEL = os.getenv("OPENAI_FAST_MODEL", "gpt-5-mini")
+OPENAI_STRONG_MODEL = os.getenv("OPENAI_STRONG_MODEL", "gpt-5")
+# Optional cost tracking for OpenAI: {"model": [input $/MTok, output $/MTok]} as JSON.
+OPENAI_PRICING = json.loads(os.getenv("OPENAI_PRICING", "{}"))
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")

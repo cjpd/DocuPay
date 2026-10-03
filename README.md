@@ -16,27 +16,36 @@ DocuPay is a multi-tenant SaaS template for automating document ingestion and ex
 - Infra: Docker + docker-compose (backend, frontend, db, redis, celery), .env configuration.
 - CI: GitHub Actions (backend tests, frontend lint/build) scaffold.
 
-## Current state (MVP scaffold)
-- Auth: JWT obtain/refresh; `/api/users/me/` endpoint; frontend auth gate + token-aware navbar with logout.
-- Orgs: Org model/membership; queries scoped to user’s org membership.
-- Documents: Models + API CRUD; upload endpoint `/api/documents/upload/` (multipart) sets status `queued`.
-- Processing: Celery task stubs (OCR/classify/extract/confidence) ready to wire; not executing real pipeline yet.
-- Review: ReviewTask model + API; approve/reject actions update task/document status; frontend review list/detail hooked to API.
-- Webhooks: Models + API stubs; UI list with mock data; delivery task stub.
-- Frontend: Dashboard, documents list, upload form (calls API), review queue/detail, webhooks settings; protected by AuthGate; Axios client attaches Bearer tokens; 401 interceptor clears tokens and redirects to login.
-- Docker: Backend installs tesseract; compose starts backend, celery, redis, postgres, frontend.
+## Extraction pipeline (v2)
+Code: `backend/apps/processing/`.
+
+1. **Ingest** (`ingest.py`): reads the file through the storage API (works on local disk and S3). Digital PDFs use the embedded text layer (free). Scanned PDFs and images become resized PNGs for a vision model. Page and size limits apply.
+2. **Extract** (`providers/`): one interface, three backends, selected with `EXTRACTION_PROVIDER`:
+   - `anthropic`: Claude with structured JSON output. Fast tier `claude-haiku-4-5`, strong tier `claude-opus-5-5`.
+   - `openai`: Chat Completions with a strict JSON Schema.
+   - `heuristic`: offline regex (and Tesseract for images). No key and no cost, but low accuracy. Use it for development only.
+3. **Validate** (`validation.py`): confidence comes from checks that can be proved. The checks cover required fields, subtotal + tax = total, line items adding up, quantity x price, date order, currency and duplicate invoice numbers. A document auto-approves only if no critical check fails, the amounts are proved, and the score reaches the organization's threshold.
+4. **Escalate** (`pipeline.py`): if the fast result cannot auto-approve, the strong model runs once. If it still fails, the document goes to human review with the failed checks.
+5. **Task** (`tasks.py`): retries transient provider errors with backoff, sets `FAILED` with a message on permanent errors, is idempotent, and runs on its own `extraction` queue. The model, tokens and estimated cost of each attempt are saved in `Document.processing_meta`.
+
+## Tests
+```
+cd backend
+pip install -r requirements-dev.txt
+pytest
+```
+Tests need no Postgres, Redis, S3 or API key.
 
 ## How to run (dev)
-1) Copy env: `cp .env.example .env` and adjust secrets (DB, Redis, OpenAI, AWS if using S3).
+1) Copy env: `cp .env.example .env` and adjust secrets (DB, Redis, LLM provider, AWS if using S3).
 2) Start services: `docker compose up --build`.
    - Backend: http://localhost:8000
    - Frontend: http://localhost:3000
-3) Create admin user: `docker compose exec backend python manage.py createsuperuser` (or use precreated admin/admin123 from setup).
-4) Log in at the frontend; upload a file; it will appear as `queued` (pipeline still stubbed).
+3) Create admin user: `docker compose exec backend python manage.py createsuperuser`.
+4) Log in at the frontend and upload a file. It is processed by the provider set in `EXTRACTION_PROVIDER`.
 
 ## Roadmap / TODO
-- Implement processing pipeline: pytesseract OCR + OpenAI classification/extraction + confidence scoring; update Document/ExtractedData/ReviewTask; add prompt templates per doc type.
 - Webhooks: CRUD UI + delivery task with retries and logs; export CSV/JSON endpoints.
 - Analytics: docs per org/day, review rate, webhook success.
 - Org selection (if multi-org user), improved permissions.
-- Testing: DRF API tests, frontend e2e/unit; harden CI (remove `|| true`).
+- Testing: frontend e2e/unit; remove `|| true` from the frontend CI job.

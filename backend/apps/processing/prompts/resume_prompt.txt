@@ -1,2 +1,0 @@
-{{ resume_context }}
-Extract resume fields as JSON.

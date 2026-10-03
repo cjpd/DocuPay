@@ -10,12 +10,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: |
+      - name: Install
+        run: |
           python -m venv .venv
           source .venv/bin/activate
-          pip install -r backend/requirements.txt
-          cd backend
-          python manage.py test || true
+          pip install -r backend/requirements-dev.txt
+      - name: Check migrations
+        working-directory: backend
+        run: ../.venv/bin/python manage.py makemigrations --check --dry-run --settings=config.settings_test
+      - name: Tests
+        working-directory: backend
+        run: ../.venv/bin/pytest
   frontend:
     runs-on: ubuntu-latest
     steps:

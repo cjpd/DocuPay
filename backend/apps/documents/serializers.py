@@ -21,15 +21,23 @@ class ExtractedDataSerializer(serializers.ModelSerializer):
             "invoice_date",
             "due_date",
             "vendor_name",
+            "customer_name",
+            "purchase_order",
+            "subtotal",
+            "tax_amount",
             "total_amount",
             "currency",
             "line_items",
             "overall_confidence",
             "field_confidences",
+            "validation",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "document", "created_at", "updated_at"]
+        read_only_fields = [
+            "id", "document", "raw_extraction", "overall_confidence", "field_confidences", "validation",
+            "created_at", "updated_at",
+        ]
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -49,10 +57,16 @@ class DocumentSerializer(serializers.ModelSerializer):
             "confidence",
             "extracted_data",
             "approved_at",
+            "page_count",
+            "error_message",
+            "processing_meta",
             "created_at",
             "updated_at",
         ]
         read_only_fields = [
+            "page_count",
+            "error_message",
+            "processing_meta",
             "uploaded_by",
             "status",
             "doc_type",

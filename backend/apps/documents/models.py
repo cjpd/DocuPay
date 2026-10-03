@@ -10,6 +10,7 @@ class Document(TimeStampedModel):
         REQUIRES_REVIEW = "requires_review", "Requires Review"
         APPROVED = "approved", "Approved"
         PROCESSED = "processed", "Processed"
+        FAILED = "failed", "Failed"
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="documents")
     uploaded_by = models.ForeignKey(
@@ -20,6 +21,13 @@ class Document(TimeStampedModel):
     doc_type = models.CharField(max_length=50, blank=True)
     ocr_text = models.TextField(blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
+    page_count = models.PositiveIntegerField(null=True, blank=True)
+    error_message = models.TextField(blank=True, default="")
+    # Models used, tokens, estimated cost and escalation path for each processing run.
+    processing_meta = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["organization", "status", "created_at"])]
 
     def __str__(self) -> str:
         return f"{self.doc_type or 'document'} #{self.pk}"
@@ -32,11 +40,26 @@ class ExtractedData(TimeStampedModel):
     invoice_date = models.DateField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
     vendor_name = models.CharField(max_length=255, blank=True, default="")
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    customer_name = models.CharField(max_length=255, blank=True, default="")
+    purchase_order = models.CharField(max_length=128, blank=True, default="")
+    subtotal = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    tax_amount = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     currency = models.CharField(max_length=8, blank=True, default="")
     line_items = models.JSONField(default=list, blank=True)
     overall_confidence = models.FloatField(default=0.0)
     field_confidences = models.JSONField(default=dict, blank=True)
+    # Result of each validation check (see apps.processing.validation).
+    validation = models.JSONField(default=list, blank=True)
+
+    # Fields a reviewer may correct. Anything else in a correction is rejected.
+    EDITABLE_FIELDS = (
+        "invoice_number", "invoice_date", "due_date", "vendor_name", "customer_name", "purchase_order",
+        "subtotal", "tax_amount", "total_amount", "currency", "line_items",
+    )
+
+    class Meta:
+        indexes = [models.Index(fields=["vendor_name", "invoice_number"])]
 
 
 class ReviewTask(TimeStampedModel):

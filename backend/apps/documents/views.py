@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -23,14 +24,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Document.objects.filter(organization__memberships__user=user).distinct()
+        return Document.objects.filter(organization__memberships__user=user).distinct().order_by("-created_at")
 
     def perform_create(self, serializer):
         org = OrgMembership.objects.filter(user=self.request.user).values_list("organization", flat=True).first()
         if not org:
             raise permissions.PermissionDenied("User is not a member of any organization")
-        doc = serializer.save(uploaded_by=self.request.user, organization_id=org, status=Document.Status.PROCESSING)
-        process_document.delay(doc.id)
+        doc = serializer.save(uploaded_by=self.request.user, organization_id=org, status=Document.Status.PENDING)
+        _queue(doc.id)
 
     @action(detail=False, methods=["post"], url_path="upload")
     def upload(self, request, *args, **kwargs):
@@ -49,11 +50,25 @@ class DocumentViewSet(viewsets.ModelViewSet):
             organization_id=org,
             uploaded_by=request.user,
             file=file,
-            status=Document.Status.PROCESSING,
+            status=Document.Status.PENDING,
         )
-        process_document.delay(document.id)
+        _queue(document.id)
         serializer = self.get_serializer(document)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path="reprocess")
+    def reprocess(self, request, *args, **kwargs):
+        """Run the pipeline again, for example after a FAILED status or a provider change."""
+        document = self.get_object()
+        Document.objects.filter(id=document.id).update(status=Document.Status.PENDING, error_message="")
+        _queue(document.id, force=True)
+        document.refresh_from_db()
+        return Response(self.get_serializer(document).data, status=status.HTTP_202_ACCEPTED)
+
+
+def _queue(document_id: int, force: bool = False) -> None:
+    # Queue after commit, so the worker never looks for a row that is not saved yet.
+    transaction.on_commit(lambda: process_document.delay(document_id, force=force))
 
 
 class ExtractedDataViewSet(viewsets.ModelViewSet):
@@ -71,7 +86,7 @@ class ReviewTaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return ReviewTask.objects.filter(document__organization__memberships__user=user).distinct()
+        return ReviewTask.objects.filter(document__organization__memberships__user=user).distinct().order_by("-created_at")
 
     @action(detail=True, methods=["post"], url_path="approve")
     def approve(self, request, pk=None):
@@ -82,15 +97,20 @@ class ReviewTaskViewSet(viewsets.ModelViewSet):
         if not isinstance(corrections, dict):
             return Response({"detail": "corrections must be an object"}, status=status.HTTP_400_BAD_REQUEST)
 
+        unknown = sorted(set(corrections) - set(ExtractedData.EDITABLE_FIELDS))
+        if unknown:
+            return Response({"detail": f"These fields cannot be corrected: {', '.join(unknown)}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         extracted = getattr(task.document, "extracted_data", None)
         if not extracted:
             extracted = ExtractedData.objects.create(document=task.document, raw_extraction={})
 
-        # apply corrections
-        for field, value in corrections.items():
-            if hasattr(extracted, field):
-                setattr(extracted, field, value)
-        extracted.save()
+        # Validate types (dates, decimals) through the serializer before saving.
+        corrected = ExtractedDataSerializer(extracted, data=corrections, partial=True)
+        if not corrected.is_valid():
+            return Response(corrected.errors, status=status.HTTP_400_BAD_REQUEST)
+        corrected.save()
 
         # store correction example
         CorrectionExample.objects.create(

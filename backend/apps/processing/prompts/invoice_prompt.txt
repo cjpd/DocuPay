@@ -1,2 +1,0 @@
-{{ invoice_context }}
-Extract invoice fields as JSON.

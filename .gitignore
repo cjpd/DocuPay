@@ -4,6 +4,7 @@ __pycache__/
 *.sqlite3
 env/
 .venv/
+.pytest_cache/
 
 # Node
 node_modules/
@@ -15,3 +16,9 @@ dist/
 .env.local
 .env.*
 .DS_Store
+
+# Uploaded files (never commit customer documents)
+backend/media/
+
+# Keep the env template
+!.env.example
