@@ -14,6 +14,11 @@ class Organization(TimeStampedModel):
         max_digits=14, decimal_places=2, null=True, blank=True,
         help_text="Invoices with a total above this amount always go to human review. Empty = no limit.",
     )
+    other_names = models.JSONField(
+        default=list, blank=True,
+        help_text="Other names the company uses on invoices (trade names, old names). Used to spot "
+                  "invoices where the customer was read as the vendor.",
+    )
     review_new_vendors = models.BooleanField(
         default=False,
         help_text="Send the first invoice from each new vendor to human review.",

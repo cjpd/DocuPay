@@ -161,11 +161,20 @@ def test_credit_note_needs_a_person():
 
 def test_vat_inclusive_invoice_can_prove_amounts():
     """Lines include VAT, no subtotal printed, VAT shown as 'of which'."""
-    ex = _ex(subtotal=None, tax_amount=54.0, total_amount=324.0,
+    ex = _ex(subtotal=None, tax_amount=54.0, total_amount=324.0, prices_include_tax=True,
              line_items=[{"description": "A", "quantity": 1, "unit_price": 324.0, "amount": 324.0}])
     report = validate(ex, today=TODAY)
     assert _status(report, "line_items_sum") == PASS
     assert report.can_auto_approve(0.92)
+
+
+def test_net_reported_as_total_does_not_pass():
+    """Regression found by the Evaluator: the model drops the subtotal and reports the net (300)
+    as the total. Lines = total, but the document never said prices include tax."""
+    ex = _ex(subtotal=None, tax_amount=24.0, total_amount=300.0)
+    report = validate(ex, today=TODAY)
+    assert _status(report, "line_items_sum") == FAIL
+    assert not report.can_auto_approve(0.0)
 
 
 def test_qty_times_price_error_blocks():
@@ -179,7 +188,7 @@ def test_ambiguous_date_needs_a_person():
     assert not validate(ex, today=TODAY).can_auto_approve(0.0)
 
 
-HISTORY = VendorHistory(count=3, currencies=frozenset({"USD"}), min_total=Decimal("200"), max_total=Decimal("500"))
+HISTORY = VendorHistory(count=3, currencies=frozenset({"USD"}), median_total=Decimal("300"))
 
 
 def test_vendor_history_currency_change():
@@ -209,3 +218,16 @@ def test_vendor_is_own_company():
     report = validate(_ex(vendor_name="Acme Supplies LLC"), today=TODAY, own_names=("ACME Supplies, LLC",))
     assert _status(report, "vendor_not_self") == FAIL
     assert _status(validate(_ex(), today=TODAY, own_names=("Buyer Corp",)), "vendor_not_self") == PASS
+    # Stored without the legal suffix that the invoice prints.
+    assert _status(validate(_ex(), today=TODAY, own_names=("Acme Supplies",)), "vendor_not_self") == FAIL
+
+
+def test_vendor_history_catches_x10():
+    ex = _ex(subtotal=3000.0, tax_amount=240.0, total_amount=3240.0,
+             line_items=[{"description": "A", "quantity": 1, "unit_price": 3000.0, "amount": 3000.0}])
+    assert _status(validate(ex, today=TODAY, vendor_history=lambda e: HISTORY), "vendor_history") == FAIL
+
+
+def test_vendor_history_needs_three_invoices_for_amounts():
+    few = VendorHistory(count=2, currencies=frozenset({"USD"}), median_total=Decimal("30"))
+    assert _status(validate(_ex(), today=TODAY, vendor_history=lambda e: few), "vendor_history") == PASS

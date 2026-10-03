@@ -60,6 +60,7 @@ INVOICE_JSON_SCHEMA = {
         "tax_amount": _nullable_num,
         "shipping_amount": _nullable_num,
         "total_amount": _nullable_num,
+        "prices_include_tax": {"type": ["boolean", "null"]},
         "line_items": {"type": "array", "items": LINE_ITEM_JSON_SCHEMA},
         "uncertain_fields": {"type": "array", "items": {"type": "string"}},
     },
@@ -67,7 +68,7 @@ INVOICE_JSON_SCHEMA = {
         "is_invoice", "vendor_name", "vendor_tax_id", "vendor_address", "customer_name",
         "invoice_number", "purchase_order", "invoice_date", "due_date", "payment_terms",
         "currency", "subtotal", "discount_amount", "tax_amount", "shipping_amount",
-        "total_amount", "line_items", "uncertain_fields",
+        "total_amount", "prices_include_tax", "line_items", "uncertain_fields",
     ],
     "additionalProperties": False,
 }
@@ -178,6 +179,8 @@ class InvoiceExtraction(BaseModel):
     tax_amount: Optional[Decimal] = None
     shipping_amount: Optional[Decimal] = None
     total_amount: Optional[Decimal] = None
+    # True only when the document says the prices already include tax ("incl. VAT").
+    prices_include_tax: Optional[bool] = None
     line_items: List[LineItem] = Field(default_factory=list)
     uncertain_fields: List[str] = Field(default_factory=list)
 

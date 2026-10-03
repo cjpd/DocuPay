@@ -12,6 +12,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Callable, List, Optional
 
+from .normalize import normalize_vendor
 from .schema import ISO_CURRENCIES, InvoiceExtraction
 
 PASS, FAIL, SKIP = "pass", "fail", "skip"
@@ -35,16 +36,17 @@ AMOUNT_PROOFS = ("line_items_sum", "totals_math")
 
 @dataclass
 class VendorHistory:
-    """What this organization has approved before from the same vendor."""
+    """What this organization has approved before from the same vendor (last 50 invoices)."""
     count: int
     currencies: frozenset
-    min_total: Decimal
-    max_total: Decimal
+    median_total: Decimal
 
 
-# A total outside [min / RANGE, max * RANGE] of the vendor's approved invoices needs a person
-# (catches a decimal point read in the wrong place: 1,234.00 read as 123,400).
-HISTORY_RANGE = Decimal("10")
+# A total more than HISTORY_RANGE times above or below the vendor's median needs a person.
+# This catches a decimal point read in the wrong place (x10, x100). The median, not the
+# min/max, so one wrong approval cannot widen the range. Needs HISTORY_MIN_COUNT invoices.
+HISTORY_RANGE = Decimal("5")
+HISTORY_MIN_COUNT = 3
 
 
 @dataclass
@@ -135,11 +137,14 @@ def check_line_items_sum(ex: InvoiceExtraction) -> Check:
         return Check("line_items_sum", SKIP, MAJOR, "No subtotal or total to compare")
     total = sum(amounts, Decimal("0"))
     if target_name == "total_amount":
-        # No subtotal printed. Either the line prices include tax (common for VAT invoices:
-        # lines add up to the total, tax shown as "of which VAT"), or the total adds tax and
-        # other charges to the lines.
+        # No subtotal printed. The lines can prove the total in two ways:
+        # - tax-inclusive prices, only when the document says so ("incl. VAT"). Without that
+        #   statement, lines = total with tax > 0 is also what a model produces when it reports
+        #   the net amount as the total, so it proves nothing;
+        # - lines + tax + charges - discount = total.
         with_charges = (total - abs(ex.discount_amount or 0) + (ex.tax_amount or 0) + (ex.shipping_amount or 0))
-        if _close(total, target) or _close(with_charges, target):
+        no_tax = not ex.tax_amount
+        if _close(with_charges, target) or (_close(total, target) and (no_tax or ex.prices_include_tax)):
             return Check("line_items_sum", PASS, MAJOR, fields=("line_items", "total_amount", "tax_amount"))
         return Check("line_items_sum", FAIL, MAJOR,
                      f"Line items add up to {total} ({with_charges} with tax and charges), but the total is {target}",
@@ -242,24 +247,22 @@ def check_vendor_history(ex: InvoiceExtraction, history: Optional[VendorHistory]
         return Check("vendor_history", FAIL, MAJOR,
                      f"This vendor has always billed in {', '.join(sorted(history.currencies))}, not {ex.currency}",
                      ("currency",))
-    if ex.total_amount is not None and ex.total_amount > 0 and not (
-        history.min_total / HISTORY_RANGE <= ex.total_amount <= history.max_total * HISTORY_RANGE
-    ):
+    if (history.count >= HISTORY_MIN_COUNT and ex.total_amount is not None and ex.total_amount > 0
+            and history.median_total > 0
+            and not history.median_total / HISTORY_RANGE <= ex.total_amount <= history.median_total * HISTORY_RANGE):
         return Check("vendor_history", FAIL, MAJOR,
-                     f"The total {ex.total_amount} is far outside this vendor's usual range "
-                     f"({history.min_total} to {history.max_total})", ("total_amount",))
+                     f"The total {ex.total_amount} is far from this vendor's usual amount ({history.median_total})",
+                     ("total_amount",))
     return Check("vendor_history", PASS, MAJOR)
 
 
 def check_vendor_not_self(ex: InvoiceExtraction, own_names) -> Check:
-    """The vendor must not be the organization itself: that means the model read the bill-to block."""
-    import re as _re
-
-    norm = lambda text: _re.sub(r"[^0-9a-z]", "", (text or "").lower())  # noqa: E731
-    names = {norm(n) for n in (own_names or ()) if norm(n)}
+    """The vendor must not be the organization itself: that means the model read the bill-to block.
+    Names are compared without legal suffixes, so "Globex" matches "Globex Corporation"."""
+    names = {normalize_vendor(n) for n in (own_names or ()) if normalize_vendor(n)}
     if not names or not ex.vendor_name:
         return Check("vendor_not_self", SKIP, CRITICAL, "Organization name unknown")
-    if norm(ex.vendor_name) in names:
+    if normalize_vendor(ex.vendor_name) in names:
         return Check("vendor_not_self", FAIL, CRITICAL,
                      "The vendor name is your own company: the customer block was probably read as the vendor",
                      ("vendor_name",))

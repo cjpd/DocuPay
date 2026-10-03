@@ -5,7 +5,7 @@ from datetime import timedelta
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.db import transaction
-from django.db.models import Max, Min, Q
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.documents.models import Document, ExtractedData, ReviewTask
@@ -13,6 +13,7 @@ from apps.organizations.models import Organization
 
 from .errors import PermanentProcessingError, ProcessingError, TransientProcessingError
 from .ingest import load_document
+from .normalize import normalize_invoice_number, normalize_vendor
 from .pipeline import AUTO_APPROVE, REVIEW, run_pipeline
 from .providers import get_provider
 from .validation import MAX_STORABLE_AMOUNT, VendorHistory, validate
@@ -24,26 +25,6 @@ MAX_RETRIES = 5
 # hard time limit, out of memory, or lost) and marked FAILED by fail_stale_documents.
 STALE_AFTER = timedelta(minutes=15)
 GENERIC_ERROR = "Processing failed because of an internal error. Use Reprocess to try again."
-
-
-_LEGAL_SUFFIXES = re.compile(
-    r"\b(incorporated|inc|llc|l\.l\.c|ltd|limited|corp|corporation|co|company|gmbh|ag|sa|sas|sarl|srl|"
-    r"spa|bv|nv|plc|pty|oy|ab|as|kg)\b\.?", re.IGNORECASE)
-_INVOICE_PREFIX = re.compile(r"^(invoice|inv|bill|no|nr|num|number|#)+", re.IGNORECASE)
-
-
-def normalize_vendor(name: str) -> str:
-    """"ACME Supplies, L.L.C." and "Acme Supplies" give the same key."""
-    name = _LEGAL_SUFFIXES.sub(" ", name.lower())
-    return re.sub(r"[^0-9a-z]", "", name)
-
-
-def normalize_invoice_number(number: str) -> str:
-    """"INV-001", "inv 1", "#0001" and "INV-OO1" (letter O read for zero) give the same key."""
-    text = re.sub(r"[^0-9a-z]", "", number.lower())
-    text = _INVOICE_PREFIX.sub("", text) or text
-    text = text.replace("o", "0") if re.fullmatch(r"[0-9o]+", text) else text
-    return text.lstrip("0") or "0"
 
 
 def dedupe_key(organization_id: int, vendor_name, invoice_number) -> str:
@@ -104,12 +85,11 @@ def _vendor_history(doc: Document):
         approved = ExtractedData.objects.filter(
             dedupe_key__startswith=prefix, document__status=Document.Status.APPROVED, total_amount__gt=0,
         ).exclude(document_id=doc.id)
-        stats = approved.aggregate(low=Min("total_amount"), high=Max("total_amount"))
-        if stats["low"] is None:
+        totals = sorted(approved.order_by("-created_at").values_list("total_amount", flat=True)[:50])
+        if not totals:
             return None
         currencies = frozenset(c for c in approved.values_list("currency", flat=True).distinct() if c)
-        return VendorHistory(count=approved.count(), currencies=currencies,
-                             min_total=stats["low"], max_total=stats["high"])
+        return VendorHistory(count=len(totals), currencies=currencies, median_total=totals[len(totals) // 2])
 
     return history
 
@@ -121,7 +101,7 @@ def _validation_options(doc: Document) -> dict:
         "max_amount": org.auto_approve_max_amount,
         "is_new_vendor": _new_vendor_checker(doc),
         "vendor_history": _vendor_history(doc),
-        "own_names": (org.name,),
+        "own_names": (org.name, *org.other_names),
     }
 
 
