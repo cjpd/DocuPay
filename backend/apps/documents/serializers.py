@@ -43,6 +43,11 @@ class ExtractedDataSerializer(serializers.ModelSerializer):
 class DocumentSerializer(serializers.ModelSerializer):
     confidence = serializers.SerializerMethodField()
     extracted_data = ExtractedDataSerializer(read_only=True)
+    file_name = serializers.SerializerMethodField()
+    review_task_id = serializers.SerializerMethodField()
+    # Upload only. The file is downloaded through /documents/<id>/file/, which checks access;
+    # a direct storage URL would bypass tenant checks.
+    file = serializers.FileField(write_only=True)
 
     class Meta:
         model = Document
@@ -51,6 +56,8 @@ class DocumentSerializer(serializers.ModelSerializer):
             "organization",
             "uploaded_by",
             "file",
+            "file_name",
+            "review_task_id",
             "status",
             "doc_type",
             "ocr_text",
@@ -79,6 +86,14 @@ class DocumentSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def get_file_name(self, obj):
+        return obj.file.name.rsplit("/", 1)[-1] if obj.file else ""
+
+    def get_review_task_id(self, obj):
+        """The open review task, so the UI can link straight to it."""
+        tasks = [t for t in obj.review_tasks.all() if t.status == ReviewTask.STATUS_PENDING]
+        return tasks[0].id if tasks else None
+
     def get_confidence(self, obj):
         extracted = getattr(obj, "extracted_data", None)
         if extracted:
@@ -87,11 +102,14 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class ReviewTaskSerializer(serializers.ModelSerializer):
+    document_detail = DocumentSerializer(source="document", read_only=True)
+
     class Meta:
         model = ReviewTask
         fields = [
             "id",
             "document",
+            "document_detail",
             "assigned_to",
             "status",
             "reviewed_by",
