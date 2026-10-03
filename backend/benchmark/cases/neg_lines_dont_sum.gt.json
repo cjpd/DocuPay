@@ -1,0 +1,46 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Müller Maschinenbau GmbH",
+  "vendor_tax_id": "DE811234567",
+  "vendor_address": "Industriestraße 12, 70173 Stuttgart",
+  "customer_name": "DocuPay Demo Corp.",
+  "invoice_number": "INV-2026815",
+  "purchase_order": "PO-36965",
+  "invoice_date": "2026-08-31",
+  "due_date": "2026-09-30",
+  "payment_terms": "Net 30",
+  "currency": "EUR",
+  "subtotal": "19214.29",
+  "discount_amount": null,
+  "tax_amount": "3650.72",
+  "shipping_amount": null,
+  "total_amount": "22865.01",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Maintenance visit",
+      "quantity": "1",
+      "unit_price": "562.84",
+      "amount": "562.84"
+    },
+    {
+      "description": "Office chairs",
+      "quantity": "5",
+      "unit_price": "315.31",
+      "amount": "1576.55"
+    },
+    {
+      "description": "Software license (annual)",
+      "quantity": "10",
+      "unit_price": "1081.00",
+      "amount": "10810.00"
+    },
+    {
+      "description": "Training workshop",
+      "quantity": "5",
+      "unit_price": "1302.98",
+      "amount": "6514.90"
+    }
+  ],
+  "uncertain_fields": []
+}

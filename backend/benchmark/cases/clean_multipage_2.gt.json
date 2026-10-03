@@ -1,0 +1,202 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Acme Industrial Supply Inc.",
+  "vendor_tax_id": "12-3456789",
+  "vendor_address": "400 Market St, Springfield, IL 62701",
+  "customer_name": "Stark Components BV",
+  "invoice_number": "INV-2026995",
+  "purchase_order": "PO-22533",
+  "invoice_date": "2026-08-28",
+  "due_date": "2026-09-27",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "33519.93",
+  "discount_amount": null,
+  "tax_amount": "2765.39",
+  "shipping_amount": null,
+  "total_amount": "36285.32",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Catering - lunch buffet #1",
+      "quantity": "2",
+      "unit_price": "23.09",
+      "amount": "46.18"
+    },
+    {
+      "description": "Freight handling #2",
+      "quantity": "12",
+      "unit_price": "46.93",
+      "amount": "563.16"
+    },
+    {
+      "description": "Training workshop #3",
+      "quantity": "2",
+      "unit_price": "1738.63",
+      "amount": "3477.26"
+    },
+    {
+      "description": "Steel brackets M8 #4",
+      "quantity": "4",
+      "unit_price": "6.27",
+      "amount": "25.08"
+    },
+    {
+      "description": "Safety gloves (box) #5",
+      "quantity": "4",
+      "unit_price": "8.19",
+      "amount": "32.76"
+    },
+    {
+      "description": "Cable ties 200pc #6",
+      "quantity": "2",
+      "unit_price": "6.28",
+      "amount": "12.56"
+    },
+    {
+      "description": "Software license (annual) #7",
+      "quantity": "2",
+      "unit_price": "1214.04",
+      "amount": "2428.08"
+    },
+    {
+      "description": "Hydraulic pump #8",
+      "quantity": "2",
+      "unit_price": "886.64",
+      "amount": "1773.28"
+    },
+    {
+      "description": "Maintenance visit #9",
+      "quantity": "1",
+      "unit_price": "290.19",
+      "amount": "290.19"
+    },
+    {
+      "description": "Consulting services #10",
+      "quantity": "1",
+      "unit_price": "145.52",
+      "amount": "145.52"
+    },
+    {
+      "description": "Ergonomic keyboard #11",
+      "quantity": "1",
+      "unit_price": "154.64",
+      "amount": "154.64"
+    },
+    {
+      "description": "Cloud hosting - monthly #12",
+      "quantity": "5",
+      "unit_price": "512.50",
+      "amount": "2562.50"
+    },
+    {
+      "description": "Design hours #13",
+      "quantity": "4",
+      "unit_price": "129.49",
+      "amount": "517.96"
+    },
+    {
+      "description": "Laminated signage #14",
+      "quantity": "4",
+      "unit_price": "76.24",
+      "amount": "304.96"
+    },
+    {
+      "description": "Printer toner cartridge #15",
+      "quantity": "5",
+      "unit_price": "70.15",
+      "amount": "350.75"
+    },
+    {
+      "description": "Office chairs #16",
+      "quantity": "1",
+      "unit_price": "271.29",
+      "amount": "271.29"
+    },
+    {
+      "description": "Catering - lunch buffet #17",
+      "quantity": "1",
+      "unit_price": "26.02",
+      "amount": "26.02"
+    },
+    {
+      "description": "Office chairs #18",
+      "quantity": "5",
+      "unit_price": "394.62",
+      "amount": "1973.10"
+    },
+    {
+      "description": "Printer toner cartridge #19",
+      "quantity": "1",
+      "unit_price": "32.66",
+      "amount": "32.66"
+    },
+    {
+      "description": "Hydraulic pump #20",
+      "quantity": "1",
+      "unit_price": "1552.82",
+      "amount": "1552.82"
+    },
+    {
+      "description": "Cable ties 200pc #21",
+      "quantity": "1",
+      "unit_price": "4.64",
+      "amount": "4.64"
+    },
+    {
+      "description": "Steel brackets M8 #22",
+      "quantity": "12",
+      "unit_price": "6.19",
+      "amount": "74.28"
+    },
+    {
+      "description": "Cloud hosting - monthly #23",
+      "quantity": "25",
+      "unit_price": "414.87",
+      "amount": "10371.75"
+    },
+    {
+      "description": "Consulting services #24",
+      "quantity": "10",
+      "unit_price": "118.03",
+      "amount": "1180.30"
+    },
+    {
+      "description": "Hydraulic pump #25",
+      "quantity": "2",
+      "unit_price": "757.24",
+      "amount": "1514.48"
+    },
+    {
+      "description": "Design hours #26",
+      "quantity": "1",
+      "unit_price": "63.08",
+      "amount": "63.08"
+    },
+    {
+      "description": "Hydraulic pump #27",
+      "quantity": "1",
+      "unit_price": "947.30",
+      "amount": "947.30"
+    },
+    {
+      "description": "Printer toner cartridge #28",
+      "quantity": "1",
+      "unit_price": "47.14",
+      "amount": "47.14"
+    },
+    {
+      "description": "Printer toner cartridge #29",
+      "quantity": "2",
+      "unit_price": "59.97",
+      "amount": "119.94"
+    },
+    {
+      "description": "Ergonomic keyboard #30",
+      "quantity": "25",
+      "unit_price": "106.25",
+      "amount": "2656.25"
+    }
+  ],
+  "uncertain_fields": []
+}

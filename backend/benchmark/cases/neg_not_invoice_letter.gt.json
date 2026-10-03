@@ -1,0 +1,21 @@
+{
+  "is_invoice": false,
+  "vendor_name": "Northwind Traders LLC",
+  "vendor_tax_id": null,
+  "vendor_address": null,
+  "customer_name": null,
+  "invoice_number": null,
+  "purchase_order": null,
+  "invoice_date": null,
+  "due_date": null,
+  "payment_terms": null,
+  "currency": null,
+  "subtotal": null,
+  "discount_amount": null,
+  "tax_amount": null,
+  "shipping_amount": null,
+  "total_amount": null,
+  "prices_include_tax": null,
+  "line_items": [],
+  "uncertain_fields": []
+}

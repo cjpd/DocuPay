@@ -1,0 +1,52 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Granite Peak Consulting",
+  "vendor_tax_id": "71-2233445",
+  "vendor_address": "15 Summit Dr, Denver, CO 80202",
+  "customer_name": "Umbrella Retail SA",
+  "invoice_number": "INV-2026320",
+  "purchase_order": "PO-96551",
+  "invoice_date": "2026-07-09",
+  "due_date": "2026-08-08",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "1923.91",
+  "discount_amount": "192.39",
+  "tax_amount": "103.89",
+  "shipping_amount": null,
+  "total_amount": "1835.41",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Steel brackets M8",
+      "quantity": "3",
+      "unit_price": "3.74",
+      "amount": "11.22"
+    },
+    {
+      "description": "Freight handling",
+      "quantity": "5",
+      "unit_price": "136.65",
+      "amount": "683.25"
+    },
+    {
+      "description": "Design hours",
+      "quantity": "4",
+      "unit_price": "84.66",
+      "amount": "338.64"
+    },
+    {
+      "description": "Laminated signage",
+      "quantity": "12",
+      "unit_price": "32.60",
+      "amount": "391.20"
+    },
+    {
+      "description": "Consulting services",
+      "quantity": "2",
+      "unit_price": "249.80",
+      "amount": "499.60"
+    }
+  ],
+  "uncertain_fields": []
+}

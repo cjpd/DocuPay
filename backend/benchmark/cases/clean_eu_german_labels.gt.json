@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Müller Maschinenbau GmbH",
+  "vendor_tax_id": "DE811234567",
+  "vendor_address": "Industriestraße 12, 70173 Stuttgart",
+  "customer_name": "Initech Ltd",
+  "invoice_number": "INV-2026672",
+  "purchase_order": "PO-41199",
+  "invoice_date": "2026-08-14",
+  "due_date": "2026-09-13",
+  "payment_terms": "Net 30",
+  "currency": "EUR",
+  "subtotal": "7022.72",
+  "discount_amount": null,
+  "tax_amount": "1334.32",
+  "shipping_amount": null,
+  "total_amount": "8357.04",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Office chairs",
+      "quantity": "10",
+      "unit_price": "250.85",
+      "amount": "2508.50"
+    },
+    {
+      "description": "Maintenance visit",
+      "quantity": "3",
+      "unit_price": "185.94",
+      "amount": "557.82"
+    },
+    {
+      "description": "Hydraulic pump",
+      "quantity": "3",
+      "unit_price": "1318.80",
+      "amount": "3956.40"
+    }
+  ],
+  "uncertain_fields": []
+}

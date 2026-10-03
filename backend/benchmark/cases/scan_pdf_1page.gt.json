@@ -1,0 +1,46 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Highland Print & Design Ltd",
+  "vendor_tax_id": "GB987654321",
+  "vendor_address": "5 Royal Mile, Edinburgh EH1 1RE",
+  "customer_name": "Stark Components BV",
+  "invoice_number": "INV-2026191",
+  "purchase_order": "PO-92325",
+  "invoice_date": "2026-07-06",
+  "due_date": "2026-08-05",
+  "payment_terms": "Net 30",
+  "currency": "GBP",
+  "subtotal": "59781.89",
+  "discount_amount": null,
+  "tax_amount": "11956.38",
+  "shipping_amount": null,
+  "total_amount": "71738.27",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Freight handling",
+      "quantity": "5",
+      "unit_price": "45.73",
+      "amount": "228.65"
+    },
+    {
+      "description": "Software license (annual)",
+      "quantity": "25",
+      "unit_price": "2331.18",
+      "amount": "58279.50"
+    },
+    {
+      "description": "Laminated signage",
+      "quantity": "3",
+      "unit_price": "23.21",
+      "amount": "69.63"
+    },
+    {
+      "description": "Maintenance visit",
+      "quantity": "3",
+      "unit_price": "401.37",
+      "amount": "1204.11"
+    }
+  ],
+  "uncertain_fields": []
+}

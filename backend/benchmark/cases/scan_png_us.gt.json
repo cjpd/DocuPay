@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Northwind Traders LLC",
+  "vendor_tax_id": "98-7654321",
+  "vendor_address": "77 Harbor Way, Seattle, WA 98101",
+  "customer_name": "Umbrella Retail SA",
+  "invoice_number": "INV-2026293",
+  "purchase_order": "PO-58188",
+  "invoice_date": "2026-09-09",
+  "due_date": "2026-10-09",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "1670.29",
+  "discount_amount": null,
+  "tax_amount": "108.57",
+  "shipping_amount": null,
+  "total_amount": "1778.86",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Design hours",
+      "quantity": "3",
+      "unit_price": "119.62",
+      "amount": "358.86"
+    },
+    {
+      "description": "Freight handling",
+      "quantity": "5",
+      "unit_price": "106.73",
+      "amount": "533.65"
+    },
+    {
+      "description": "Maintenance visit",
+      "quantity": "2",
+      "unit_price": "388.89",
+      "amount": "777.78"
+    }
+  ],
+  "uncertain_fields": []
+}

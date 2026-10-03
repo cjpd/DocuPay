@@ -1,0 +1,18 @@
+Brightline Software Corp.
+1 Infinite Loop Rd, Austin, TX 73301
+
+INVOICE
+Invoice Number: INV-2026771
+Invoice Date: 2026-09-12
+Due Date: 2026-10-12
+Bill To: Initech Ltd
+
+Description Qty Unit Amount
+Steel brackets M8 4 $7.35 $29.40
+Printer toner cartridge 10 $85.78 $857.80
+Office chairs 25 $298.01 $7,450.25
+
+Subtotal: $8,337.45
+Tax: $667.00
+Total: $9,004.45
+Currency: USD

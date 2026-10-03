@@ -1,0 +1,34 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Highland Print & Design Ltd",
+  "vendor_tax_id": "GB987654321",
+  "vendor_address": "5 Royal Mile, Edinburgh EH1 1RE",
+  "customer_name": "Initech Ltd",
+  "invoice_number": "INV-2026344",
+  "purchase_order": "PO-93307",
+  "invoice_date": "2026-11-02",
+  "due_date": "2026-12-02",
+  "payment_terms": "Net 30",
+  "currency": "GBP",
+  "subtotal": "65513.63",
+  "discount_amount": null,
+  "tax_amount": "13102.73",
+  "shipping_amount": null,
+  "total_amount": "78616.36",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Training workshop",
+      "quantity": "25",
+      "unit_price": "2603.45",
+      "amount": "65086.25"
+    },
+    {
+      "description": "Consulting services",
+      "quantity": "2",
+      "unit_price": "213.69",
+      "amount": "427.38"
+    }
+  ],
+  "uncertain_fields": []
+}

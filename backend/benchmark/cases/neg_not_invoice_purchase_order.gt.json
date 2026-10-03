@@ -1,0 +1,40 @@
+{
+  "is_invoice": false,
+  "vendor_name": "Acme Industrial Supply Inc.",
+  "vendor_tax_id": "12-3456789",
+  "vendor_address": "400 Market St, Springfield, IL 62701",
+  "customer_name": "Globex Corporation",
+  "invoice_number": "PO-55120",
+  "purchase_order": null,
+  "invoice_date": "2026-09-09",
+  "due_date": "2026-10-09",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "1656.07",
+  "discount_amount": null,
+  "tax_amount": null,
+  "shipping_amount": null,
+  "total_amount": "1656.07",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Maintenance visit",
+      "quantity": "5",
+      "unit_price": "301.67",
+      "amount": "1508.35"
+    },
+    {
+      "description": "Catering - lunch buffet",
+      "quantity": "3",
+      "unit_price": "21.47",
+      "amount": "64.41"
+    },
+    {
+      "description": "Consulting services",
+      "quantity": "1",
+      "unit_price": "83.31",
+      "amount": "83.31"
+    }
+  ],
+  "uncertain_fields": []
+}

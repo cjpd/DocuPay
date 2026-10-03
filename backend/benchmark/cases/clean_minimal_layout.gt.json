@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Northwind Traders LLC",
+  "vendor_tax_id": "98-7654321",
+  "vendor_address": "77 Harbor Way, Seattle, WA 98101",
+  "customer_name": "Umbrella Retail SA",
+  "invoice_number": "INV-2026053",
+  "purchase_order": "PO-91611",
+  "invoice_date": "2026-09-10",
+  "due_date": "2026-10-10",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "4916.79",
+  "discount_amount": null,
+  "tax_amount": "442.51",
+  "shipping_amount": null,
+  "total_amount": "5359.30",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Maintenance visit",
+      "quantity": "4",
+      "unit_price": "438.67",
+      "amount": "1754.68"
+    },
+    {
+      "description": "Office chairs",
+      "quantity": "10",
+      "unit_price": "314.50",
+      "amount": "3145.00"
+    },
+    {
+      "description": "Catering - lunch buffet",
+      "quantity": "1",
+      "unit_price": "17.11",
+      "amount": "17.11"
+    }
+  ],
+  "uncertain_fields": []
+}

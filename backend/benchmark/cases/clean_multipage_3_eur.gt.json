@@ -1,0 +1,322 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Müller Maschinenbau GmbH",
+  "vendor_tax_id": "DE811234567",
+  "vendor_address": "Industriestraße 12, 70173 Stuttgart",
+  "customer_name": "Umbrella Retail SA",
+  "invoice_number": "INV-2026029",
+  "purchase_order": "PO-26484",
+  "invoice_date": "2026-09-08",
+  "due_date": "2026-10-08",
+  "payment_terms": "Net 30",
+  "currency": "EUR",
+  "subtotal": "231601.26",
+  "discount_amount": "6948.04",
+  "tax_amount": "42684.11",
+  "shipping_amount": null,
+  "total_amount": "267337.33",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Catering - lunch buffet #1",
+      "quantity": "10",
+      "unit_price": "12.80",
+      "amount": "128.00"
+    },
+    {
+      "description": "Design hours #2",
+      "quantity": "1",
+      "unit_price": "90.77",
+      "amount": "90.77"
+    },
+    {
+      "description": "Hydraulic pump #3",
+      "quantity": "5",
+      "unit_price": "1182.24",
+      "amount": "5911.20"
+    },
+    {
+      "description": "Software license (annual) #4",
+      "quantity": "12",
+      "unit_price": "1144.92",
+      "amount": "13739.04"
+    },
+    {
+      "description": "Laminated signage #5",
+      "quantity": "1",
+      "unit_price": "41.54",
+      "amount": "41.54"
+    },
+    {
+      "description": "Training workshop #6",
+      "quantity": "12",
+      "unit_price": "2811.71",
+      "amount": "33740.52"
+    },
+    {
+      "description": "Freight handling #7",
+      "quantity": "10",
+      "unit_price": "53.61",
+      "amount": "536.10"
+    },
+    {
+      "description": "Cloud hosting - monthly #8",
+      "quantity": "4",
+      "unit_price": "483.48",
+      "amount": "1933.92"
+    },
+    {
+      "description": "Safety gloves (box) #9",
+      "quantity": "5",
+      "unit_price": "13.40",
+      "amount": "67.00"
+    },
+    {
+      "description": "Printer toner cartridge #10",
+      "quantity": "12",
+      "unit_price": "62.64",
+      "amount": "751.68"
+    },
+    {
+      "description": "Steel brackets M8 #11",
+      "quantity": "1",
+      "unit_price": "9.56",
+      "amount": "9.56"
+    },
+    {
+      "description": "Office chairs #12",
+      "quantity": "1",
+      "unit_price": "164.70",
+      "amount": "164.70"
+    },
+    {
+      "description": "Maintenance visit #13",
+      "quantity": "25",
+      "unit_price": "152.67",
+      "amount": "3816.75"
+    },
+    {
+      "description": "Ergonomic keyboard #14",
+      "quantity": "10",
+      "unit_price": "67.89",
+      "amount": "678.90"
+    },
+    {
+      "description": "Consulting services #15",
+      "quantity": "10",
+      "unit_price": "185.29",
+      "amount": "1852.90"
+    },
+    {
+      "description": "Cable ties 200pc #16",
+      "quantity": "4",
+      "unit_price": "7.68",
+      "amount": "30.72"
+    },
+    {
+      "description": "Hydraulic pump #17",
+      "quantity": "5",
+      "unit_price": "975.13",
+      "amount": "4875.65"
+    },
+    {
+      "description": "Cable ties 200pc #18",
+      "quantity": "10",
+      "unit_price": "5.68",
+      "amount": "56.80"
+    },
+    {
+      "description": "Ergonomic keyboard #19",
+      "quantity": "5",
+      "unit_price": "99.49",
+      "amount": "497.45"
+    },
+    {
+      "description": "Software license (annual) #20",
+      "quantity": "4",
+      "unit_price": "1556.75",
+      "amount": "6227.00"
+    },
+    {
+      "description": "Hydraulic pump #21",
+      "quantity": "12",
+      "unit_price": "649.34",
+      "amount": "7792.08"
+    },
+    {
+      "description": "Cable ties 200pc #22",
+      "quantity": "1",
+      "unit_price": "7.87",
+      "amount": "7.87"
+    },
+    {
+      "description": "Office chairs #23",
+      "quantity": "25",
+      "unit_price": "169.19",
+      "amount": "4229.75"
+    },
+    {
+      "description": "Hydraulic pump #24",
+      "quantity": "10",
+      "unit_price": "570.27",
+      "amount": "5702.70"
+    },
+    {
+      "description": "Training workshop #25",
+      "quantity": "25",
+      "unit_price": "2397.67",
+      "amount": "59941.75"
+    },
+    {
+      "description": "Office chairs #26",
+      "quantity": "5",
+      "unit_price": "163.24",
+      "amount": "816.20"
+    },
+    {
+      "description": "Office chairs #27",
+      "quantity": "1",
+      "unit_price": "219.99",
+      "amount": "219.99"
+    },
+    {
+      "description": "Safety gloves (box) #28",
+      "quantity": "5",
+      "unit_price": "24.07",
+      "amount": "120.35"
+    },
+    {
+      "description": "Steel brackets M8 #29",
+      "quantity": "2",
+      "unit_price": "7.79",
+      "amount": "15.58"
+    },
+    {
+      "description": "Printer toner cartridge #30",
+      "quantity": "4",
+      "unit_price": "55.16",
+      "amount": "220.64"
+    },
+    {
+      "description": "Steel brackets M8 #31",
+      "quantity": "10",
+      "unit_price": "4.41",
+      "amount": "44.10"
+    },
+    {
+      "description": "Safety gloves (box) #32",
+      "quantity": "1",
+      "unit_price": "18.40",
+      "amount": "18.40"
+    },
+    {
+      "description": "Cable ties 200pc #33",
+      "quantity": "5",
+      "unit_price": "6.05",
+      "amount": "30.25"
+    },
+    {
+      "description": "Cable ties 200pc #34",
+      "quantity": "1",
+      "unit_price": "8.93",
+      "amount": "8.93"
+    },
+    {
+      "description": "Cloud hosting - monthly #35",
+      "quantity": "3",
+      "unit_price": "600.07",
+      "amount": "1800.21"
+    },
+    {
+      "description": "Cloud hosting - monthly #36",
+      "quantity": "1",
+      "unit_price": "317.13",
+      "amount": "317.13"
+    },
+    {
+      "description": "Freight handling #37",
+      "quantity": "1",
+      "unit_price": "64.73",
+      "amount": "64.73"
+    },
+    {
+      "description": "Freight handling #38",
+      "quantity": "3",
+      "unit_price": "147.01",
+      "amount": "441.03"
+    },
+    {
+      "description": "Laminated signage #39",
+      "quantity": "1",
+      "unit_price": "45.69",
+      "amount": "45.69"
+    },
+    {
+      "description": "Hydraulic pump #40",
+      "quantity": "4",
+      "unit_price": "904.15",
+      "amount": "3616.60"
+    },
+    {
+      "description": "Cloud hosting - monthly #41",
+      "quantity": "10",
+      "unit_price": "757.04",
+      "amount": "7570.40"
+    },
+    {
+      "description": "Cable ties 200pc #42",
+      "quantity": "25",
+      "unit_price": "5.57",
+      "amount": "139.25"
+    },
+    {
+      "description": "Maintenance visit #43",
+      "quantity": "2",
+      "unit_price": "360.12",
+      "amount": "720.24"
+    },
+    {
+      "description": "Freight handling #44",
+      "quantity": "3",
+      "unit_price": "86.71",
+      "amount": "260.13"
+    },
+    {
+      "description": "Training workshop #45",
+      "quantity": "25",
+      "unit_price": "2327.57",
+      "amount": "58189.25"
+    },
+    {
+      "description": "Printer toner cartridge #46",
+      "quantity": "12",
+      "unit_price": "71.80",
+      "amount": "861.60"
+    },
+    {
+      "description": "Cable ties 200pc #47",
+      "quantity": "2",
+      "unit_price": "7.39",
+      "amount": "14.78"
+    },
+    {
+      "description": "Design hours #48",
+      "quantity": "25",
+      "unit_price": "61.53",
+      "amount": "1538.25"
+    },
+    {
+      "description": "Design hours #49",
+      "quantity": "10",
+      "unit_price": "105.04",
+      "amount": "1050.40"
+    },
+    {
+      "description": "Office chairs #50",
+      "quantity": "2",
+      "unit_price": "326.39",
+      "amount": "652.78"
+    }
+  ],
+  "uncertain_fields": []
+}

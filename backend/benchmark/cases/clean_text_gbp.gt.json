@@ -1,0 +1,34 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Thames Office Supplies Ltd",
+  "vendor_tax_id": "GB123456789",
+  "vendor_address": "22 Fleet Street, London EC4Y 1AA",
+  "customer_name": "Globex Corporation",
+  "invoice_number": "INV-2026547",
+  "purchase_order": "PO-45003",
+  "invoice_date": "2026-09-02",
+  "due_date": "2026-10-02",
+  "payment_terms": "Net 30",
+  "currency": "GBP",
+  "subtotal": "1057.23",
+  "discount_amount": null,
+  "tax_amount": "211.45",
+  "shipping_amount": null,
+  "total_amount": "1268.68",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Laminated signage",
+      "quantity": "10",
+      "unit_price": "21.09",
+      "amount": "210.90"
+    },
+    {
+      "description": "Maintenance visit",
+      "quantity": "3",
+      "unit_price": "282.11",
+      "amount": "846.33"
+    }
+  ],
+  "uncertain_fields": []
+}

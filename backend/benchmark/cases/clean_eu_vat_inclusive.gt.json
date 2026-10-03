@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Lumière Conseil SARL",
+  "vendor_tax_id": "FR40123456789",
+  "vendor_address": "12 Rue de Rivoli, 75001 Paris",
+  "customer_name": "Initech Ltd",
+  "invoice_number": "INV-2026959",
+  "purchase_order": "PO-25483",
+  "invoice_date": "2026-09-16",
+  "due_date": "2026-10-16",
+  "payment_terms": "Net 30",
+  "currency": "EUR",
+  "subtotal": null,
+  "discount_amount": null,
+  "tax_amount": "669.21",
+  "shipping_amount": null,
+  "total_amount": "4015.26",
+  "prices_include_tax": true,
+  "line_items": [
+    {
+      "description": "Training workshop",
+      "quantity": "4",
+      "unit_price": "795.64",
+      "amount": "3182.56"
+    },
+    {
+      "description": "Catering - lunch buffet",
+      "quantity": "10",
+      "unit_price": "30.51",
+      "amount": "305.10"
+    },
+    {
+      "description": "Ergonomic keyboard",
+      "quantity": "5",
+      "unit_price": "105.52",
+      "amount": "527.60"
+    }
+  ],
+  "uncertain_fields": []
+}

@@ -1,0 +1,118 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Pacific Coast Catering Co.",
+  "vendor_tax_id": "33-4455667",
+  "vendor_address": "900 Ocean Ave, San Diego, CA 92101",
+  "customer_name": "Umbrella Retail SA",
+  "invoice_number": "INV-2026116",
+  "purchase_order": "PO-95357",
+  "invoice_date": "2026-06-30",
+  "due_date": "2026-07-30",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "66616.17",
+  "discount_amount": null,
+  "tax_amount": "5162.75",
+  "shipping_amount": null,
+  "total_amount": "71778.92",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Laminated signage",
+      "quantity": "3",
+      "unit_price": "60.65",
+      "amount": "181.95"
+    },
+    {
+      "description": "Ergonomic keyboard",
+      "quantity": "12",
+      "unit_price": "132.09",
+      "amount": "1585.08"
+    },
+    {
+      "description": "Software license (annual)",
+      "quantity": "3",
+      "unit_price": "936.47",
+      "amount": "2809.41"
+    },
+    {
+      "description": "Consulting services",
+      "quantity": "10",
+      "unit_price": "171.44",
+      "amount": "1714.40"
+    },
+    {
+      "description": "Training workshop",
+      "quantity": "12",
+      "unit_price": "2018.34",
+      "amount": "24220.08"
+    },
+    {
+      "description": "Maintenance visit",
+      "quantity": "10",
+      "unit_price": "484.44",
+      "amount": "4844.40"
+    },
+    {
+      "description": "Catering - lunch buffet",
+      "quantity": "10",
+      "unit_price": "21.92",
+      "amount": "219.20"
+    },
+    {
+      "description": "Design hours",
+      "quantity": "12",
+      "unit_price": "88.60",
+      "amount": "1063.20"
+    },
+    {
+      "description": "Hydraulic pump",
+      "quantity": "25",
+      "unit_price": "836.73",
+      "amount": "20918.25"
+    },
+    {
+      "description": "Printer toner cartridge",
+      "quantity": "25",
+      "unit_price": "61.90",
+      "amount": "1547.50"
+    },
+    {
+      "description": "Freight handling",
+      "quantity": "5",
+      "unit_price": "133.05",
+      "amount": "665.25"
+    },
+    {
+      "description": "Cloud hosting - monthly",
+      "quantity": "5",
+      "unit_price": "287.21",
+      "amount": "1436.05"
+    },
+    {
+      "description": "Cable ties 200pc",
+      "quantity": "25",
+      "unit_price": "10.60",
+      "amount": "265.00"
+    },
+    {
+      "description": "Safety gloves (box)",
+      "quantity": "12",
+      "unit_price": "12.81",
+      "amount": "153.72"
+    },
+    {
+      "description": "Office chairs",
+      "quantity": "25",
+      "unit_price": "199.15",
+      "amount": "4978.75"
+    },
+    {
+      "description": "Steel brackets M8",
+      "quantity": "1",
+      "unit_price": "13.93",
+      "amount": "13.93"
+    }
+  ],
+  "uncertain_fields": []
+}

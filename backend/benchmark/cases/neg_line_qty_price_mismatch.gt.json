@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Thames Office Supplies Ltd",
+  "vendor_tax_id": "GB123456789",
+  "vendor_address": "22 Fleet Street, London EC4Y 1AA",
+  "customer_name": "Stark Components BV",
+  "invoice_number": "INV-2026990",
+  "purchase_order": "PO-30528",
+  "invoice_date": "2026-09-03",
+  "due_date": "2026-10-03",
+  "payment_terms": "Net 30",
+  "currency": "GBP",
+  "subtotal": "3558.01",
+  "discount_amount": null,
+  "tax_amount": "711.60",
+  "shipping_amount": null,
+  "total_amount": "4269.61",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Catering - lunch buffet",
+      "quantity": "11",
+      "unit_price": "16.72",
+      "amount": "167.20"
+    },
+    {
+      "description": "Laminated signage",
+      "quantity": "12",
+      "unit_price": "73.38",
+      "amount": "880.56"
+    },
+    {
+      "description": "Freight handling",
+      "quantity": "25",
+      "unit_price": "100.41",
+      "amount": "2510.25"
+    }
+  ],
+  "uncertain_fields": []
+}

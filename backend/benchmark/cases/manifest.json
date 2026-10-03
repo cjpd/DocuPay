@@ -1,0 +1,602 @@
+[
+  {
+    "id": "clean_us_classic_iso",
+    "file": "clean_us_classic_iso.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "iso_date",
+      "tax"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_us_modern_usdate",
+    "file": "clean_us_modern_usdate.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "us_date",
+      "title_first"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_us_mon_date",
+    "file": "clean_us_mon_date.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "mon_date",
+      "no_tax"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_us_long_date_discount",
+    "file": "clean_us_long_date_discount.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "long_date",
+      "discount",
+      "tax"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_us_shipping",
+    "file": "clean_us_shipping.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "shipping",
+      "tax",
+      "title_first"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_us_code_currency",
+    "file": "clean_us_code_currency.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "no_symbol"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_us_amount_only",
+    "file": "clean_us_amount_only.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "no_qty_columns"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_eu_decimal_comma",
+    "file": "clean_eu_decimal_comma.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "eur",
+      "decimal_comma",
+      "eu_dot_date",
+      "vat"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_eu_german_labels",
+    "file": "clean_eu_german_labels.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "eur",
+      "decimal_comma",
+      "german"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_eu_slash_date",
+    "file": "clean_eu_slash_date.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "eur",
+      "decimal_comma",
+      "eu_slash_date_ambiguous"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_eu_slash_date_unambiguous",
+    "file": "clean_eu_slash_date_unambiguous.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "eur",
+      "decimal_comma",
+      "eu_slash_date"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_eu_discount_shipping_tax",
+    "file": "clean_eu_discount_shipping_tax.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "eur",
+      "decimal_comma",
+      "discount",
+      "shipping",
+      "vat"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_gb_vat_mon",
+    "file": "clean_gb_vat_mon.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "gbp",
+      "vat",
+      "mon_date"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_gb_dmy_mon",
+    "file": "clean_gb_dmy_mon.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "gbp",
+      "dmy_mon_date",
+      "shipping"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_minimal_layout",
+    "file": "clean_minimal_layout.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "title_first",
+      "terse_labels"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_multipage_2",
+    "file": "clean_multipage_2.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "multipage"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_multipage_3_eur",
+    "file": "clean_multipage_3_eur.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "eur",
+      "multipage",
+      "decimal_comma",
+      "discount"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_many_lines_single_page",
+    "file": "clean_many_lines_single_page.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "usd",
+      "many_lines"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_eu_vat_inclusive",
+    "file": "clean_eu_vat_inclusive.pdf",
+    "category": "clean_digital",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "eur",
+      "decimal_comma",
+      "vat_inclusive",
+      "no_subtotal"
+    ],
+    "note": "Line prices include VAT; 'incl. VAT 20%' is informational; total = sum of lines."
+  },
+  {
+    "id": "clean_text_usd",
+    "file": "clean_text_usd.txt",
+    "category": "clean_text",
+    "expected": "auto_approve",
+    "format": "txt",
+    "tags": [
+      "text_file"
+    ],
+    "note": ""
+  },
+  {
+    "id": "clean_text_gbp",
+    "file": "clean_text_gbp.txt",
+    "category": "clean_text",
+    "expected": "auto_approve",
+    "format": "txt",
+    "tags": [
+      "text_file"
+    ],
+    "note": ""
+  },
+  {
+    "id": "scan_png_us",
+    "file": "scan_png_us.png",
+    "category": "clean_scan",
+    "expected": "auto_approve",
+    "format": "png",
+    "tags": [
+      "image",
+      "png"
+    ],
+    "note": ""
+  },
+  {
+    "id": "scan_jpg_eu",
+    "file": "scan_jpg_eu.jpg",
+    "category": "clean_scan",
+    "expected": "auto_approve",
+    "format": "jpg",
+    "tags": [
+      "image",
+      "jpg",
+      "noisy",
+      "decimal_comma"
+    ],
+    "note": ""
+  },
+  {
+    "id": "scan_pdf_1page",
+    "file": "scan_pdf_1page.pdf",
+    "category": "clean_scan",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "scanned_pdf"
+    ],
+    "note": ""
+  },
+  {
+    "id": "scan_pdf_2page",
+    "file": "scan_pdf_2page.pdf",
+    "category": "clean_scan",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "scanned_pdf",
+      "multipage"
+    ],
+    "note": ""
+  },
+  {
+    "id": "scan_pdf_with_scanner_stamp",
+    "file": "scan_pdf_with_scanner_stamp.pdf",
+    "category": "clean_scan",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "scanned_pdf",
+      "tiny_text_layer"
+    ],
+    "note": ""
+  },
+  {
+    "id": "scan_tiff_2page",
+    "file": "scan_tiff_2page.tiff",
+    "category": "clean_scan",
+    "expected": "auto_approve",
+    "format": "tiff",
+    "tags": [
+      "image",
+      "tiff",
+      "multipage"
+    ],
+    "note": ""
+  },
+  {
+    "id": "mixed_text_then_scan",
+    "file": "mixed_text_then_scan.pdf",
+    "category": "clean_scan",
+    "expected": "auto_approve",
+    "format": "pdf",
+    "tags": [
+      "mixed_pdf",
+      "multipage",
+      "totals_on_scanned_page"
+    ],
+    "note": "Page 1 has a text layer; page 2 (with the totals) is an image."
+  },
+  {
+    "id": "neg_total_mismatch",
+    "file": "neg_total_mismatch.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "totals_dont_add_up"
+    ],
+    "note": "Printed total is 100.00 more than subtotal + tax."
+  },
+  {
+    "id": "neg_total_mismatch_no_subtotal",
+    "file": "neg_total_mismatch_no_subtotal.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "totals_dont_add_up",
+      "no_subtotal"
+    ],
+    "note": "No subtotal printed; total != lines + tax."
+  },
+  {
+    "id": "neg_lines_dont_sum",
+    "file": "neg_lines_dont_sum.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "line_items_dont_sum"
+    ],
+    "note": "One line is 50.00 higher; subtotal/tax/total are self-consistent."
+  },
+  {
+    "id": "neg_line_qty_price_mismatch",
+    "file": "neg_line_qty_price_mismatch.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "line_math_wrong"
+    ],
+    "note": "Line 1: qty x unit price != amount (vendor arithmetic error); sums are consistent."
+  },
+  {
+    "id": "neg_missing_invoice_number",
+    "file": "neg_missing_invoice_number.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "missing_invoice_number"
+    ],
+    "note": "No invoice number anywhere on the document."
+  },
+  {
+    "id": "neg_due_before_invoice",
+    "file": "neg_due_before_invoice.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "due_before_invoice_date"
+    ],
+    "note": "Due date is 10 days before the invoice date."
+  },
+  {
+    "id": "neg_future_invoice_date",
+    "file": "neg_future_invoice_date.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "future_date"
+    ],
+    "note": "Invoice date is after the benchmark date (2026-10-03)."
+  },
+  {
+    "id": "neg_credit_note",
+    "file": "neg_credit_note.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "digital_pdf",
+      "credit_note",
+      "negative_amounts"
+    ],
+    "note": "A credit note (negative total). Must not be auto-approved for payment as if it were an invoice."
+  },
+  {
+    "id": "neg_not_invoice_letter",
+    "file": "neg_not_invoice_letter.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "non_invoice",
+      "mentions_invoice"
+    ],
+    "note": "Business letter that mentions invoices."
+  },
+  {
+    "id": "neg_not_invoice_quote",
+    "file": "neg_not_invoice_quote.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "non_invoice",
+      "quotation"
+    ],
+    "note": "A quotation: same structure as an invoice, consistent totals, but not a bill."
+  },
+  {
+    "id": "neg_not_invoice_purchase_order",
+    "file": "neg_not_invoice_purchase_order.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "non_invoice",
+      "purchase_order"
+    ],
+    "note": "A purchase order issued BY the customer; looks like an invoice."
+  },
+  {
+    "id": "neg_duplicate_resubmission",
+    "file": "neg_duplicate_resubmission.pdf",
+    "category": "negative",
+    "expected": "review",
+    "format": "pdf",
+    "tags": [
+      "duplicate"
+    ],
+    "note": "Same vendor and invoice number as clean_us_classic_iso (processed earlier)."
+  },
+  {
+    "id": "ingest_21_pages",
+    "file": "ingest_21_pages.pdf",
+    "category": "ingest_only",
+    "expected": "permanent_error",
+    "format": "pdf",
+    "tags": [
+      "ingest_only"
+    ],
+    "note": "21-page PDF (limit is 20)"
+  },
+  {
+    "id": "ingest_empty_file",
+    "file": "ingest_empty_file.pdf",
+    "category": "ingest_only",
+    "expected": "permanent_error",
+    "format": "pdf",
+    "tags": [
+      "ingest_only"
+    ],
+    "note": "Zero-byte upload"
+  },
+  {
+    "id": "ingest_truncated_pdf",
+    "file": "ingest_truncated_pdf.pdf",
+    "category": "ingest_only",
+    "expected": "permanent_error",
+    "format": "pdf",
+    "tags": [
+      "ingest_only"
+    ],
+    "note": "PDF cut off after 400 bytes"
+  },
+  {
+    "id": "ingest_docx_zip",
+    "file": "ingest_docx_zip.docx",
+    "category": "ingest_only",
+    "expected": "permanent_error",
+    "format": "docx",
+    "tags": [
+      "ingest_only"
+    ],
+    "note": "Office/zip file (unsupported)"
+  },
+  {
+    "id": "ingest_latin1_text",
+    "file": "ingest_latin1_text.txt",
+    "category": "ingest_only",
+    "expected": "text",
+    "format": "txt",
+    "tags": [
+      "ingest_only"
+    ],
+    "note": "Latin-1 encoded text invoice (common from legacy ERPs)"
+  },
+  {
+    "id": "ingest_webp_image",
+    "file": "ingest_webp_image.webp",
+    "category": "ingest_only",
+    "expected": "image",
+    "format": "webp",
+    "tags": [
+      "ingest_only"
+    ],
+    "note": "WEBP phone capture"
+  },
+  {
+    "id": "ingest_exif_rotated_photo",
+    "file": "ingest_exif_rotated_photo.jpg",
+    "category": "ingest_only",
+    "expected": "image",
+    "format": "jpg",
+    "tags": [
+      "ingest_only"
+    ],
+    "note": "Phone photo with EXIF Orientation=6"
+  }
+]

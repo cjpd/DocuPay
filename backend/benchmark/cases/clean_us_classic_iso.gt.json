@@ -1,0 +1,46 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Acme Industrial Supply Inc.",
+  "vendor_tax_id": "12-3456789",
+  "vendor_address": "400 Market St, Springfield, IL 62701",
+  "customer_name": "DocuPay Demo Corp.",
+  "invoice_number": "INV-2026305",
+  "purchase_order": "PO-12399",
+  "invoice_date": "2026-09-03",
+  "due_date": "2026-10-03",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "1996.26",
+  "discount_amount": null,
+  "tax_amount": "164.69",
+  "shipping_amount": null,
+  "total_amount": "2160.95",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Consulting services",
+      "quantity": "2",
+      "unit_price": "243.11",
+      "amount": "486.22"
+    },
+    {
+      "description": "Safety gloves (box)",
+      "quantity": "4",
+      "unit_price": "29.48",
+      "amount": "117.92"
+    },
+    {
+      "description": "Ergonomic keyboard",
+      "quantity": "1",
+      "unit_price": "146.62",
+      "amount": "146.62"
+    },
+    {
+      "description": "Freight handling",
+      "quantity": "10",
+      "unit_price": "124.55",
+      "amount": "1245.50"
+    }
+  ],
+  "uncertain_fields": []
+}

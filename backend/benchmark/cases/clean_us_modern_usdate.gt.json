@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Northwind Traders LLC",
+  "vendor_tax_id": "98-7654321",
+  "vendor_address": "77 Harbor Way, Seattle, WA 98101",
+  "customer_name": "Stark Components BV",
+  "invoice_number": "INV-2026230",
+  "purchase_order": "PO-74356",
+  "invoice_date": "2026-08-05",
+  "due_date": "2026-09-04",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "224.67",
+  "discount_amount": null,
+  "tax_amount": "15.73",
+  "shipping_amount": null,
+  "total_amount": "240.40",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Ergonomic keyboard",
+      "quantity": "1",
+      "unit_price": "148.86",
+      "amount": "148.86"
+    },
+    {
+      "description": "Catering - lunch buffet",
+      "quantity": "2",
+      "unit_price": "32.95",
+      "amount": "65.90"
+    },
+    {
+      "description": "Cable ties 200pc",
+      "quantity": "1",
+      "unit_price": "9.91",
+      "amount": "9.91"
+    }
+  ],
+  "uncertain_fields": []
+}

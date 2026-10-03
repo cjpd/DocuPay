@@ -1,0 +1,46 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Granite Peak Consulting",
+  "vendor_tax_id": "71-2233445",
+  "vendor_address": "15 Summit Dr, Denver, CO 80202",
+  "customer_name": "Initech Ltd",
+  "invoice_number": "INV-2026702",
+  "purchase_order": "PO-53795",
+  "invoice_date": "2026-09-02",
+  "due_date": "2026-10-02",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": null,
+  "discount_amount": null,
+  "tax_amount": "2637.25",
+  "shipping_amount": null,
+  "total_amount": "46628.94",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Freight handling",
+      "quantity": "2",
+      "unit_price": "76.89",
+      "amount": "153.78"
+    },
+    {
+      "description": "Software license (annual)",
+      "quantity": "10",
+      "unit_price": "1452.47",
+      "amount": "14524.70"
+    },
+    {
+      "description": "Training workshop",
+      "quantity": "25",
+      "unit_price": "1166.07",
+      "amount": "29151.75"
+    },
+    {
+      "description": "Design hours",
+      "quantity": "1",
+      "unit_price": "123.96",
+      "amount": "123.96"
+    }
+  ],
+  "uncertain_fields": []
+}

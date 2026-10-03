@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Brightline Software Corp.",
+  "vendor_tax_id": "45-1122334",
+  "vendor_address": "1 Infinite Loop Rd, Austin, TX 73301",
+  "customer_name": "Initech Ltd",
+  "invoice_number": "INV-2026771",
+  "purchase_order": "PO-47801",
+  "invoice_date": "2026-09-12",
+  "due_date": "2026-10-12",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "8337.45",
+  "discount_amount": null,
+  "tax_amount": "667.00",
+  "shipping_amount": null,
+  "total_amount": "9004.45",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Steel brackets M8",
+      "quantity": "4",
+      "unit_price": "7.35",
+      "amount": "29.40"
+    },
+    {
+      "description": "Printer toner cartridge",
+      "quantity": "10",
+      "unit_price": "85.78",
+      "amount": "857.80"
+    },
+    {
+      "description": "Office chairs",
+      "quantity": "25",
+      "unit_price": "298.01",
+      "amount": "7450.25"
+    }
+  ],
+  "uncertain_fields": []
+}

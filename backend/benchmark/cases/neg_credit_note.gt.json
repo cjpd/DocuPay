@@ -1,0 +1,34 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Northwind Traders LLC",
+  "vendor_tax_id": "98-7654321",
+  "vendor_address": "77 Harbor Way, Seattle, WA 98101",
+  "customer_name": "DocuPay Demo Corp.",
+  "invoice_number": "CN-2026583",
+  "purchase_order": "PO-67336",
+  "invoice_date": "2026-09-22",
+  "due_date": null,
+  "payment_terms": null,
+  "currency": "USD",
+  "subtotal": "-12872.90",
+  "discount_amount": null,
+  "tax_amount": "-1029.83",
+  "shipping_amount": null,
+  "total_amount": "-13902.73",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Cloud hosting - monthly",
+      "quantity": "12",
+      "unit_price": "-539.65",
+      "amount": "-6475.80"
+    },
+    {
+      "description": "Hydraulic pump",
+      "quantity": "5",
+      "unit_price": "-1279.42",
+      "amount": "-6397.10"
+    }
+  ],
+  "uncertain_fields": []
+}

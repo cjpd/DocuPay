@@ -1,0 +1,46 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Müller Maschinenbau GmbH",
+  "vendor_tax_id": "DE811234567",
+  "vendor_address": "Industriestraße 12, 70173 Stuttgart",
+  "customer_name": "Globex Corporation",
+  "invoice_number": "INV-2026075",
+  "purchase_order": "PO-34517",
+  "invoice_date": "2026-09-07",
+  "due_date": "2026-10-07",
+  "payment_terms": "Net 30",
+  "currency": "EUR",
+  "subtotal": "8504.11",
+  "discount_amount": null,
+  "tax_amount": "1615.78",
+  "shipping_amount": null,
+  "total_amount": "10119.89",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Catering - lunch buffet",
+      "quantity": "12",
+      "unit_price": "32.10",
+      "amount": "385.20"
+    },
+    {
+      "description": "Ergonomic keyboard",
+      "quantity": "1",
+      "unit_price": "87.76",
+      "amount": "87.76"
+    },
+    {
+      "description": "Software license (annual)",
+      "quantity": "1",
+      "unit_price": "1403.15",
+      "amount": "1403.15"
+    },
+    {
+      "description": "Office chairs",
+      "quantity": "25",
+      "unit_price": "265.12",
+      "amount": "6628.00"
+    }
+  ],
+  "uncertain_fields": []
+}

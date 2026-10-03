@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Brightline Software Corp.",
+  "vendor_tax_id": "45-1122334",
+  "vendor_address": "1 Infinite Loop Rd, Austin, TX 73301",
+  "customer_name": "Umbrella Retail SA",
+  "invoice_number": null,
+  "purchase_order": "PO-74363",
+  "invoice_date": "2026-09-18",
+  "due_date": "2026-10-18",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "1556.99",
+  "discount_amount": null,
+  "tax_amount": "128.45",
+  "shipping_amount": null,
+  "total_amount": "1685.44",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Steel brackets M8",
+      "quantity": "12",
+      "unit_price": "6.77",
+      "amount": "81.24"
+    },
+    {
+      "description": "Maintenance visit",
+      "quantity": "5",
+      "unit_price": "228.55",
+      "amount": "1142.75"
+    },
+    {
+      "description": "Safety gloves (box)",
+      "quantity": "12",
+      "unit_price": "27.75",
+      "amount": "333.00"
+    }
+  ],
+  "uncertain_fields": []
+}

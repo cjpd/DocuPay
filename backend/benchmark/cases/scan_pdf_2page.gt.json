@@ -1,0 +1,166 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Acme Industrial Supply Inc.",
+  "vendor_tax_id": "12-3456789",
+  "vendor_address": "400 Market St, Springfield, IL 62701",
+  "customer_name": "Globex Corporation",
+  "invoice_number": "INV-2026351",
+  "purchase_order": "PO-66361",
+  "invoice_date": "2026-08-12",
+  "due_date": "2026-09-11",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "53830.68",
+  "discount_amount": null,
+  "tax_amount": "4441.03",
+  "shipping_amount": null,
+  "total_amount": "58271.71",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Freight handling #1",
+      "quantity": "5",
+      "unit_price": "46.87",
+      "amount": "234.35"
+    },
+    {
+      "description": "Steel brackets M8 #2",
+      "quantity": "2",
+      "unit_price": "13.78",
+      "amount": "27.56"
+    },
+    {
+      "description": "Printer toner cartridge #3",
+      "quantity": "3",
+      "unit_price": "79.67",
+      "amount": "239.01"
+    },
+    {
+      "description": "Office chairs #4",
+      "quantity": "1",
+      "unit_price": "316.21",
+      "amount": "316.21"
+    },
+    {
+      "description": "Laminated signage #5",
+      "quantity": "4",
+      "unit_price": "43.27",
+      "amount": "173.08"
+    },
+    {
+      "description": "Design hours #6",
+      "quantity": "10",
+      "unit_price": "134.42",
+      "amount": "1344.20"
+    },
+    {
+      "description": "Hydraulic pump #7",
+      "quantity": "4",
+      "unit_price": "965.55",
+      "amount": "3862.20"
+    },
+    {
+      "description": "Cable ties 200pc #8",
+      "quantity": "4",
+      "unit_price": "5.38",
+      "amount": "21.52"
+    },
+    {
+      "description": "Catering - lunch buffet #9",
+      "quantity": "3",
+      "unit_price": "18.22",
+      "amount": "54.66"
+    },
+    {
+      "description": "Safety gloves (box) #10",
+      "quantity": "3",
+      "unit_price": "14.39",
+      "amount": "43.17"
+    },
+    {
+      "description": "Maintenance visit #11",
+      "quantity": "25",
+      "unit_price": "175.65",
+      "amount": "4391.25"
+    },
+    {
+      "description": "Training workshop #12",
+      "quantity": "4",
+      "unit_price": "907.39",
+      "amount": "3629.56"
+    },
+    {
+      "description": "Cloud hosting - monthly #13",
+      "quantity": "12",
+      "unit_price": "623.94",
+      "amount": "7487.28"
+    },
+    {
+      "description": "Consulting services #14",
+      "quantity": "3",
+      "unit_price": "238.00",
+      "amount": "714.00"
+    },
+    {
+      "description": "Software license (annual) #15",
+      "quantity": "10",
+      "unit_price": "1697.29",
+      "amount": "16972.90"
+    },
+    {
+      "description": "Ergonomic keyboard #16",
+      "quantity": "10",
+      "unit_price": "84.29",
+      "amount": "842.90"
+    },
+    {
+      "description": "Training workshop #17",
+      "quantity": "3",
+      "unit_price": "1000.81",
+      "amount": "3002.43"
+    },
+    {
+      "description": "Design hours #18",
+      "quantity": "4",
+      "unit_price": "64.68",
+      "amount": "258.72"
+    },
+    {
+      "description": "Consulting services #19",
+      "quantity": "1",
+      "unit_price": "180.81",
+      "amount": "180.81"
+    },
+    {
+      "description": "Ergonomic keyboard #20",
+      "quantity": "12",
+      "unit_price": "100.20",
+      "amount": "1202.40"
+    },
+    {
+      "description": "Steel brackets M8 #21",
+      "quantity": "12",
+      "unit_price": "7.80",
+      "amount": "93.60"
+    },
+    {
+      "description": "Maintenance visit #22",
+      "quantity": "12",
+      "unit_price": "544.62",
+      "amount": "6535.44"
+    },
+    {
+      "description": "Cable ties 200pc #23",
+      "quantity": "25",
+      "unit_price": "7.91",
+      "amount": "197.75"
+    },
+    {
+      "description": "Consulting services #24",
+      "quantity": "12",
+      "unit_price": "167.14",
+      "amount": "2005.68"
+    }
+  ],
+  "uncertain_fields": []
+}

@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Northwind Traders LLC",
+  "vendor_tax_id": "98-7654321",
+  "vendor_address": "77 Harbor Way, Seattle, WA 98101",
+  "customer_name": "Umbrella Retail SA",
+  "invoice_number": "INV-2026557",
+  "purchase_order": "PO-44811",
+  "invoice_date": "2026-09-14",
+  "due_date": "2026-10-14",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "1079.13",
+  "discount_amount": null,
+  "tax_amount": "86.33",
+  "shipping_amount": null,
+  "total_amount": "1265.46",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Steel brackets M8",
+      "quantity": "25",
+      "unit_price": "8.35",
+      "amount": "208.75"
+    },
+    {
+      "description": "Ergonomic keyboard",
+      "quantity": "1",
+      "unit_price": "104.42",
+      "amount": "104.42"
+    },
+    {
+      "description": "Freight handling",
+      "quantity": "12",
+      "unit_price": "63.83",
+      "amount": "765.96"
+    }
+  ],
+  "uncertain_fields": []
+}

@@ -1,0 +1,166 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Brightline Software Corp.",
+  "vendor_tax_id": "45-1122334",
+  "vendor_address": "1 Infinite Loop Rd, Austin, TX 73301",
+  "customer_name": "Initech Ltd",
+  "invoice_number": "INV-2026322",
+  "purchase_order": "PO-78318",
+  "invoice_date": "2026-09-05",
+  "due_date": "2026-10-05",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "42805.06",
+  "discount_amount": null,
+  "tax_amount": "3424.40",
+  "shipping_amount": null,
+  "total_amount": "46229.46",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Cloud hosting - monthly #1",
+      "quantity": "3",
+      "unit_price": "138.01",
+      "amount": "414.03"
+    },
+    {
+      "description": "Cable ties 200pc #2",
+      "quantity": "10",
+      "unit_price": "5.27",
+      "amount": "52.70"
+    },
+    {
+      "description": "Laminated signage #3",
+      "quantity": "12",
+      "unit_price": "58.34",
+      "amount": "700.08"
+    },
+    {
+      "description": "Office chairs #4",
+      "quantity": "5",
+      "unit_price": "106.27",
+      "amount": "531.35"
+    },
+    {
+      "description": "Freight handling #5",
+      "quantity": "4",
+      "unit_price": "122.72",
+      "amount": "490.88"
+    },
+    {
+      "description": "Safety gloves (box) #6",
+      "quantity": "1",
+      "unit_price": "19.05",
+      "amount": "19.05"
+    },
+    {
+      "description": "Training workshop #7",
+      "quantity": "5",
+      "unit_price": "836.47",
+      "amount": "4182.35"
+    },
+    {
+      "description": "Software license (annual) #8",
+      "quantity": "4",
+      "unit_price": "1830.28",
+      "amount": "7321.12"
+    },
+    {
+      "description": "Design hours #9",
+      "quantity": "12",
+      "unit_price": "134.70",
+      "amount": "1616.40"
+    },
+    {
+      "description": "Steel brackets M8 #10",
+      "quantity": "1",
+      "unit_price": "13.22",
+      "amount": "13.22"
+    },
+    {
+      "description": "Printer toner cartridge #11",
+      "quantity": "1",
+      "unit_price": "85.71",
+      "amount": "85.71"
+    },
+    {
+      "description": "Catering - lunch buffet #12",
+      "quantity": "10",
+      "unit_price": "29.66",
+      "amount": "296.60"
+    },
+    {
+      "description": "Ergonomic keyboard #13",
+      "quantity": "1",
+      "unit_price": "150.84",
+      "amount": "150.84"
+    },
+    {
+      "description": "Consulting services #14",
+      "quantity": "3",
+      "unit_price": "101.32",
+      "amount": "303.96"
+    },
+    {
+      "description": "Maintenance visit #15",
+      "quantity": "10",
+      "unit_price": "570.36",
+      "amount": "5703.60"
+    },
+    {
+      "description": "Hydraulic pump #16",
+      "quantity": "4",
+      "unit_price": "1358.33",
+      "amount": "5433.32"
+    },
+    {
+      "description": "Printer toner cartridge #17",
+      "quantity": "4",
+      "unit_price": "66.84",
+      "amount": "267.36"
+    },
+    {
+      "description": "Safety gloves (box) #18",
+      "quantity": "5",
+      "unit_price": "9.78",
+      "amount": "48.90"
+    },
+    {
+      "description": "Cloud hosting - monthly #19",
+      "quantity": "2",
+      "unit_price": "560.27",
+      "amount": "1120.54"
+    },
+    {
+      "description": "Maintenance visit #20",
+      "quantity": "25",
+      "unit_price": "503.68",
+      "amount": "12592.00"
+    },
+    {
+      "description": "Maintenance visit #21",
+      "quantity": "1",
+      "unit_price": "505.49",
+      "amount": "505.49"
+    },
+    {
+      "description": "Catering - lunch buffet #22",
+      "quantity": "2",
+      "unit_price": "22.59",
+      "amount": "45.18"
+    },
+    {
+      "description": "Safety gloves (box) #23",
+      "quantity": "25",
+      "unit_price": "27.32",
+      "amount": "683.00"
+    },
+    {
+      "description": "Maintenance visit #24",
+      "quantity": "1",
+      "unit_price": "227.38",
+      "amount": "227.38"
+    }
+  ],
+  "uncertain_fields": []
+}

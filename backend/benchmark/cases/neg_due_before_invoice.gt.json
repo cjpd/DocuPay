@@ -1,0 +1,34 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Van der Berg Logistiek B.V.",
+  "vendor_tax_id": "NL123456789B01",
+  "vendor_address": "Havenweg 4, 3011 Rotterdam",
+  "customer_name": "Umbrella Retail SA",
+  "invoice_number": "INV-2026548",
+  "purchase_order": "PO-73686",
+  "invoice_date": "2026-09-20",
+  "due_date": "2026-09-10",
+  "payment_terms": null,
+  "currency": "EUR",
+  "subtotal": "156.54",
+  "discount_amount": null,
+  "tax_amount": "32.87",
+  "shipping_amount": null,
+  "total_amount": "189.41",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Printer toner cartridge",
+      "quantity": "3",
+      "unit_price": "49.10",
+      "amount": "147.30"
+    },
+    {
+      "description": "Cable ties 200pc",
+      "quantity": "1",
+      "unit_price": "9.24",
+      "amount": "9.24"
+    }
+  ],
+  "uncertain_fields": []
+}

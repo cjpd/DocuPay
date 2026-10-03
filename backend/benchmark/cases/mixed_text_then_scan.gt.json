@@ -1,0 +1,178 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Pacific Coast Catering Co.",
+  "vendor_tax_id": "33-4455667",
+  "vendor_address": "900 Ocean Ave, San Diego, CA 92101",
+  "customer_name": "DocuPay Demo Corp.",
+  "invoice_number": "INV-2026454",
+  "purchase_order": "PO-72430",
+  "invoice_date": "2026-08-22",
+  "due_date": "2026-09-21",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "33438.80",
+  "discount_amount": null,
+  "tax_amount": "2591.51",
+  "shipping_amount": null,
+  "total_amount": "36030.31",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Design hours #1",
+      "quantity": "1",
+      "unit_price": "80.19",
+      "amount": "80.19"
+    },
+    {
+      "description": "Freight handling #2",
+      "quantity": "4",
+      "unit_price": "101.79",
+      "amount": "407.16"
+    },
+    {
+      "description": "Office chairs #3",
+      "quantity": "25",
+      "unit_price": "152.29",
+      "amount": "3807.25"
+    },
+    {
+      "description": "Hydraulic pump #4",
+      "quantity": "1",
+      "unit_price": "528.95",
+      "amount": "528.95"
+    },
+    {
+      "description": "Steel brackets M8 #5",
+      "quantity": "10",
+      "unit_price": "11.18",
+      "amount": "111.80"
+    },
+    {
+      "description": "Cable ties 200pc #6",
+      "quantity": "1",
+      "unit_price": "11.87",
+      "amount": "11.87"
+    },
+    {
+      "description": "Software license (annual) #7",
+      "quantity": "3",
+      "unit_price": "2015.77",
+      "amount": "6047.31"
+    },
+    {
+      "description": "Training workshop #8",
+      "quantity": "12",
+      "unit_price": "1191.04",
+      "amount": "14292.48"
+    },
+    {
+      "description": "Maintenance visit #9",
+      "quantity": "4",
+      "unit_price": "345.54",
+      "amount": "1382.16"
+    },
+    {
+      "description": "Consulting services #10",
+      "quantity": "1",
+      "unit_price": "159.55",
+      "amount": "159.55"
+    },
+    {
+      "description": "Printer toner cartridge #11",
+      "quantity": "4",
+      "unit_price": "57.11",
+      "amount": "228.44"
+    },
+    {
+      "description": "Ergonomic keyboard #12",
+      "quantity": "12",
+      "unit_price": "49.55",
+      "amount": "594.60"
+    },
+    {
+      "description": "Safety gloves (box) #13",
+      "quantity": "3",
+      "unit_price": "20.97",
+      "amount": "62.91"
+    },
+    {
+      "description": "Cloud hosting - monthly #14",
+      "quantity": "2",
+      "unit_price": "605.93",
+      "amount": "1211.86"
+    },
+    {
+      "description": "Catering - lunch buffet #15",
+      "quantity": "2",
+      "unit_price": "17.51",
+      "amount": "35.02"
+    },
+    {
+      "description": "Laminated signage #16",
+      "quantity": "1",
+      "unit_price": "70.22",
+      "amount": "70.22"
+    },
+    {
+      "description": "Steel brackets M8 #17",
+      "quantity": "25",
+      "unit_price": "9.72",
+      "amount": "243.00"
+    },
+    {
+      "description": "Steel brackets M8 #18",
+      "quantity": "3",
+      "unit_price": "6.84",
+      "amount": "20.52"
+    },
+    {
+      "description": "Safety gloves (box) #19",
+      "quantity": "3",
+      "unit_price": "12.53",
+      "amount": "37.59"
+    },
+    {
+      "description": "Consulting services #20",
+      "quantity": "1",
+      "unit_price": "231.96",
+      "amount": "231.96"
+    },
+    {
+      "description": "Freight handling #21",
+      "quantity": "3",
+      "unit_price": "168.31",
+      "amount": "504.93"
+    },
+    {
+      "description": "Laminated signage #22",
+      "quantity": "4",
+      "unit_price": "52.18",
+      "amount": "208.72"
+    },
+    {
+      "description": "Software license (annual) #23",
+      "quantity": "1",
+      "unit_price": "735.08",
+      "amount": "735.08"
+    },
+    {
+      "description": "Consulting services #24",
+      "quantity": "1",
+      "unit_price": "93.79",
+      "amount": "93.79"
+    },
+    {
+      "description": "Office chairs #25",
+      "quantity": "4",
+      "unit_price": "184.77",
+      "amount": "739.08"
+    },
+    {
+      "description": "Software license (annual) #26",
+      "quantity": "4",
+      "unit_price": "398.09",
+      "amount": "1592.36"
+    }
+  ],
+  "uncertain_fields": []
+}

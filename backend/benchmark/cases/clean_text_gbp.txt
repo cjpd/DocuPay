@@ -1,0 +1,17 @@
+Thames Office Supplies Ltd
+22 Fleet Street, London EC4Y 1AA
+
+INVOICE
+Invoice Number: INV-2026547
+Invoice Date: 2026-09-02
+Due Date: 2026-10-02
+Bill To: Globex Corporation
+
+Description Qty Unit Amount
+Laminated signage 10 £21.09 £210.90
+Maintenance visit 3 £282.11 £846.33
+
+Subtotal: £1,057.23
+Tax: £211.45
+Total: £1,268.68
+Currency: GBP

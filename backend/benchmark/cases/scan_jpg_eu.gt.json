@@ -1,0 +1,40 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Lumière Conseil SARL",
+  "vendor_tax_id": "FR40123456789",
+  "vendor_address": "12 Rue de Rivoli, 75001 Paris",
+  "customer_name": "Initech Ltd",
+  "invoice_number": "INV-2026144",
+  "purchase_order": "PO-13799",
+  "invoice_date": "2026-08-18",
+  "due_date": "2026-09-17",
+  "payment_terms": "Net 30",
+  "currency": "EUR",
+  "subtotal": "2281.48",
+  "discount_amount": null,
+  "tax_amount": "456.30",
+  "shipping_amount": null,
+  "total_amount": "2737.78",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Office chairs",
+      "quantity": "2",
+      "unit_price": "172.76",
+      "amount": "345.52"
+    },
+    {
+      "description": "Ergonomic keyboard",
+      "quantity": "12",
+      "unit_price": "130.06",
+      "amount": "1560.72"
+    },
+    {
+      "description": "Consulting services",
+      "quantity": "3",
+      "unit_price": "125.08",
+      "amount": "375.24"
+    }
+  ],
+  "uncertain_fields": []
+}

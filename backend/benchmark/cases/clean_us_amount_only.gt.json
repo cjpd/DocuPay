@@ -1,0 +1,46 @@
+{
+  "is_invoice": true,
+  "vendor_name": "Granite Peak Consulting",
+  "vendor_tax_id": "71-2233445",
+  "vendor_address": "15 Summit Dr, Denver, CO 80202",
+  "customer_name": "Globex Corporation",
+  "invoice_number": "INV-2026640",
+  "purchase_order": "PO-75300",
+  "invoice_date": "2026-07-02",
+  "due_date": "2026-08-01",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "1962.35",
+  "discount_amount": null,
+  "tax_amount": null,
+  "shipping_amount": null,
+  "total_amount": "1962.35",
+  "prices_include_tax": null,
+  "line_items": [
+    {
+      "description": "Design hours",
+      "quantity": "10",
+      "unit_price": "81.25",
+      "amount": "812.50"
+    },
+    {
+      "description": "Hydraulic pump",
+      "quantity": "1",
+      "unit_price": "900.53",
+      "amount": "900.53"
+    },
+    {
+      "description": "Freight handling",
+      "quantity": "1",
+      "unit_price": "199.22",
+      "amount": "199.22"
+    },
+    {
+      "description": "Safety gloves (box)",
+      "quantity": "5",
+      "unit_price": "10.02",
+      "amount": "50.10"
+    }
+  ],
+  "uncertain_fields": []
+}
