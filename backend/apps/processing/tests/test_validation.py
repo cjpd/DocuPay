@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 
 from apps.processing.schema import InvoiceExtraction
-from apps.processing.validation import FAIL, PASS, SKIP, validate
+from apps.processing.validation import FAIL, PASS, SKIP, VendorHistory, validate
 
 from .factories import CLEAN_INVOICE
 
@@ -142,3 +142,70 @@ def test_new_vendor_check():
     assert _status(validate(_ex(), today=TODAY), "new_vendor") == SKIP
     assert _status(validate(_ex(), today=TODAY, is_new_vendor=lambda ex: True), "new_vendor") == FAIL
     assert _status(validate(_ex(), today=TODAY, is_new_vendor=lambda ex: False), "new_vendor") == PASS
+
+
+def test_any_major_failure_blocks_even_with_high_score():
+    """22 of 24 weight points pass = 0.917; the old gate approved this at a 0.91 threshold."""
+    report = validate(_ex(due_date="2026-08-01"), today=TODAY, is_duplicate=lambda ex: False)
+    assert report.score > 0.9
+    assert not report.can_auto_approve(0.5)
+
+
+def test_credit_note_needs_a_person():
+    ex = _ex(subtotal=-300.0, tax_amount=-24.0, total_amount=-324.0,
+             line_items=[{"description": "Refund", "quantity": 1, "unit_price": -300.0, "amount": -300.0}])
+    report = validate(ex, today=TODAY)
+    assert _status(report, "positive_total") == FAIL
+    assert not report.can_auto_approve(0.0)
+
+
+def test_vat_inclusive_invoice_can_prove_amounts():
+    """Lines include VAT, no subtotal printed, VAT shown as 'of which'."""
+    ex = _ex(subtotal=None, tax_amount=54.0, total_amount=324.0,
+             line_items=[{"description": "A", "quantity": 1, "unit_price": 324.0, "amount": 324.0}])
+    report = validate(ex, today=TODAY)
+    assert _status(report, "line_items_sum") == PASS
+    assert report.can_auto_approve(0.92)
+
+
+def test_qty_times_price_error_blocks():
+    items = [dict(CLEAN_INVOICE["line_items"][0], quantity=3), CLEAN_INVOICE["line_items"][1]]
+    assert not validate(_ex(line_items=items), today=TODAY).can_auto_approve(0.0)
+
+
+def test_ambiguous_date_needs_a_person():
+    ex = _ex(invoice_date="01/09/2026", due_date="2026-10-01")
+    assert "invoice_date" in ex.uncertain_fields
+    assert not validate(ex, today=TODAY).can_auto_approve(0.0)
+
+
+HISTORY = VendorHistory(count=3, currencies=frozenset({"USD"}), min_total=Decimal("200"), max_total=Decimal("500"))
+
+
+def test_vendor_history_currency_change():
+    report = validate(_ex(currency="EUR"), today=TODAY, vendor_history=lambda ex: HISTORY)
+    assert _status(report, "vendor_history") == FAIL
+    assert report.worth_escalating
+
+
+def test_vendor_history_amount_scale():
+    """1,234.00 read as 123,400 adds up perfectly, so only history can catch it."""
+    ex = _ex(subtotal=30000.0, tax_amount=2400.0, total_amount=32400.0,
+             line_items=[{"description": "Paper A4", "quantity": 10, "unit_price": 2000.0, "amount": 20000.0},
+                         {"description": "Toner", "quantity": 1, "unit_price": 10000.0, "amount": 10000.0}])
+    report = validate(ex, today=TODAY, vendor_history=lambda ex: HISTORY)
+    assert _status(report, "totals_math") == PASS
+    assert _status(report, "vendor_history") == FAIL
+    assert not report.can_auto_approve(0.0)
+
+
+def test_vendor_history_normal_invoice_passes():
+    report = validate(_ex(), today=TODAY, vendor_history=lambda ex: HISTORY)
+    assert _status(report, "vendor_history") == PASS
+    assert report.can_auto_approve(0.92)
+
+
+def test_vendor_is_own_company():
+    report = validate(_ex(vendor_name="Acme Supplies LLC"), today=TODAY, own_names=("ACME Supplies, LLC",))
+    assert _status(report, "vendor_not_self") == FAIL
+    assert _status(validate(_ex(), today=TODAY, own_names=("Buyer Corp",)), "vendor_not_self") == PASS

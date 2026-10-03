@@ -186,9 +186,20 @@ def test_stale_runs_are_marked_failed(org):
     assert fresh.status == Document.Status.PROCESSING
 
 
+@pytest.mark.parametrize("a,b", [
+    (("ACME Inc.", "INV-001"), ("acme inc", "inv 001")),
+    (("Acme Supplies, L.L.C.", "INV-1001"), ("ACME SUPPLIES", "1001")),
+    (("Acme GmbH", "#0042"), ("Acme", "42")),
+    (("Acme", "INV-OO42"), ("Acme", "INV-0042")),
+])
+def test_dedupe_key_variants_match(a, b):
+    assert tasks.dedupe_key(1, *a) == tasks.dedupe_key(1, *b)
+
+
 def test_dedupe_key_normalization():
-    assert tasks.dedupe_key(1, "ACME Inc.", "INV-001") == tasks.dedupe_key(1, "acme inc", "inv 001")
     assert tasks.dedupe_key(1, "Acme", "1") != tasks.dedupe_key(2, "Acme", "1")
+    assert tasks.dedupe_key(1, "Acme", "1001") != tasks.dedupe_key(1, "Acme", "1002")
+    assert tasks.dedupe_key(1, "Acme", "A-17") != tasks.dedupe_key(1, "Beta", "A-17")
     assert tasks.dedupe_key(1, None, "1") == ""
 
 
@@ -244,3 +255,20 @@ def test_slow_strong_call_keeps_fast_result_without_retry(org):
     assert provider.calls == ["fast", "strong"]
     assert doc.status == Document.Status.REQUIRES_REVIEW
     assert doc.processing_meta["escalation_error"] == "SoftTimeLimitExceeded"
+
+
+
+def test_vendor_history_from_approved_invoices(org):
+    _run(make_document(org, INVOICE_TEXT.encode(), "a.txt"), FakeProvider(fast=CLEAN_INVOICE))
+    in_euros = {**CLEAN_INVOICE, "invoice_number": "INV-1002", "currency": "EUR"}
+    doc = _run(make_document(org, INVOICE_TEXT.encode(), "b.txt"), FakeProvider(fast=in_euros, strong=in_euros))
+    assert doc.status == Document.Status.REQUIRES_REVIEW
+    check = next(c for c in doc.extracted_data.validation if c["name"] == "vendor_history")
+    assert check["status"] == "fail" and "USD" in check["message"]
+
+
+def test_vendor_equal_to_own_organization_goes_to_review(org):
+    org.name = "Acme Supplies LLC"
+    org.save()
+    doc = _run(make_document(org, INVOICE_TEXT.encode()), FakeProvider(fast=CLEAN_INVOICE, strong=CLEAN_INVOICE))
+    assert doc.status == Document.Status.REQUIRES_REVIEW

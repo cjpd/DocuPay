@@ -27,9 +27,24 @@ AMOUNT_FIELDS = ("subtotal", "discount_amount", "tax_amount", "shipping_amount",
 # second model call would only cost money.
 EXTRACTION_QUALITY_CHECKS = frozenset({
     "required_fields", "totals_math", "line_items_sum", "line_item_math", "date_order", "currency", "model_uncertain",
+    "vendor_history", "vendor_not_self",
 })
 # Checks that prove the amounts. At least one must pass to auto-approve.
 AMOUNT_PROOFS = ("line_items_sum", "totals_math")
+
+
+@dataclass
+class VendorHistory:
+    """What this organization has approved before from the same vendor."""
+    count: int
+    currencies: frozenset
+    min_total: Decimal
+    max_total: Decimal
+
+
+# A total outside [min / RANGE, max * RANGE] of the vendor's approved invoices needs a person
+# (catches a decimal point read in the wrong place: 1,234.00 read as 123,400).
+HISTORY_RANGE = Decimal("10")
 
 
 @dataclass
@@ -56,7 +71,10 @@ class ValidationReport:
         return [c for c in self.checks if c.status == FAIL]
 
     def can_auto_approve(self, threshold: float) -> bool:
-        return not self.critical_failures and self.amounts_proved and self.score >= threshold
+        """Fail closed: any critical or major failure blocks, whatever the score.
+        (A score alone can pass with one major failure when many checks pass, e.g. 22/24 = 0.917.)"""
+        blocking = [c for c in self.failures if c.severity in (CRITICAL, MAJOR)]
+        return not blocking and self.amounts_proved and self.score >= threshold
 
     @property
     def worth_escalating(self) -> bool:
@@ -116,10 +134,16 @@ def check_line_items_sum(ex: InvoiceExtraction) -> Check:
     if target is None:
         return Check("line_items_sum", SKIP, MAJOR, "No subtotal or total to compare")
     total = sum(amounts, Decimal("0"))
-    if target_name == "total_amount" and any(
-        v not in (None, Decimal("0")) for v in (ex.tax_amount, ex.discount_amount, ex.shipping_amount)
-    ):
-        return Check("line_items_sum", SKIP, MAJOR, "No subtotal, and the total includes tax or other charges")
+    if target_name == "total_amount":
+        # No subtotal printed. Either the line prices include tax (common for VAT invoices:
+        # lines add up to the total, tax shown as "of which VAT"), or the total adds tax and
+        # other charges to the lines.
+        with_charges = (total - abs(ex.discount_amount or 0) + (ex.tax_amount or 0) + (ex.shipping_amount or 0))
+        if _close(total, target) or _close(with_charges, target):
+            return Check("line_items_sum", PASS, MAJOR, fields=("line_items", "total_amount", "tax_amount"))
+        return Check("line_items_sum", FAIL, MAJOR,
+                     f"Line items add up to {total} ({with_charges} with tax and charges), but the total is {target}",
+                     ("line_items", "total_amount"))
     if _close(total, target):
         return Check("line_items_sum", PASS, MAJOR, fields=("line_items", target_name))
     return Check("line_items_sum", FAIL, MAJOR,
@@ -129,15 +153,15 @@ def check_line_items_sum(ex: InvoiceExtraction) -> Check:
 def check_line_item_math(ex: InvoiceExtraction) -> Check:
     rows = [li for li in ex.line_items if None not in (li.quantity, li.unit_price, li.amount)]
     if not rows:
-        return Check("line_item_math", SKIP, MINOR, "No line has quantity, unit price and amount")
+        return Check("line_item_math", SKIP, MAJOR, "No line has quantity, unit price and amount")
     bad = [i for i, li in enumerate(rows, 1)
            if abs(li.quantity) > MAX_STORABLE_AMOUNT
            or not _close((li.quantity * li.unit_price).quantize(Decimal("0.01")), li.amount)]
     if bad:
-        return Check("line_item_math", FAIL, MINOR,
+        return Check("line_item_math", FAIL, MAJOR,
                      "Quantity x unit price does not equal the amount on line(s) " + ", ".join(map(str, bad)),
                      ("line_items",))
-    return Check("line_item_math", PASS, MINOR, fields=("line_items",))
+    return Check("line_item_math", PASS, MAJOR, fields=("line_items",))
 
 
 def check_totals_math(ex: InvoiceExtraction) -> Check:
@@ -149,6 +173,17 @@ def check_totals_math(ex: InvoiceExtraction) -> Check:
         return Check("totals_math", PASS, CRITICAL, fields=fields)
     return Check("totals_math", FAIL, CRITICAL,
                  f"Subtotal - discount + tax + shipping = {expected}, but the total is {ex.total_amount}", fields)
+
+
+def check_sign(ex: InvoiceExtraction) -> Check:
+    """Credit notes, refunds and zero invoices change money in the other direction (or not at all):
+    a person must look at them."""
+    if ex.total_amount is None:
+        return Check("positive_total", SKIP, CRITICAL, "No total")
+    if ex.total_amount <= 0:
+        return Check("positive_total", FAIL, CRITICAL,
+                     f"The total is {ex.total_amount}: credit notes and zero invoices need a person", ("total_amount",))
+    return Check("positive_total", PASS, CRITICAL, fields=("total_amount",))
 
 
 def check_dates(ex: InvoiceExtraction, today: date) -> Check:
@@ -200,6 +235,37 @@ def check_duplicate(ex: InvoiceExtraction, is_duplicate: Optional[Callable[[Invo
     return Check("duplicate", PASS, CRITICAL)
 
 
+def check_vendor_history(ex: InvoiceExtraction, history: Optional[VendorHistory]) -> Check:
+    if history is None or history.count == 0:
+        return Check("vendor_history", SKIP, MAJOR, "No approved invoices from this vendor yet")
+    if ex.currency and history.currencies and ex.currency not in history.currencies:
+        return Check("vendor_history", FAIL, MAJOR,
+                     f"This vendor has always billed in {', '.join(sorted(history.currencies))}, not {ex.currency}",
+                     ("currency",))
+    if ex.total_amount is not None and ex.total_amount > 0 and not (
+        history.min_total / HISTORY_RANGE <= ex.total_amount <= history.max_total * HISTORY_RANGE
+    ):
+        return Check("vendor_history", FAIL, MAJOR,
+                     f"The total {ex.total_amount} is far outside this vendor's usual range "
+                     f"({history.min_total} to {history.max_total})", ("total_amount",))
+    return Check("vendor_history", PASS, MAJOR)
+
+
+def check_vendor_not_self(ex: InvoiceExtraction, own_names) -> Check:
+    """The vendor must not be the organization itself: that means the model read the bill-to block."""
+    import re as _re
+
+    norm = lambda text: _re.sub(r"[^0-9a-z]", "", (text or "").lower())  # noqa: E731
+    names = {norm(n) for n in (own_names or ()) if norm(n)}
+    if not names or not ex.vendor_name:
+        return Check("vendor_not_self", SKIP, CRITICAL, "Organization name unknown")
+    if norm(ex.vendor_name) in names:
+        return Check("vendor_not_self", FAIL, CRITICAL,
+                     "The vendor name is your own company: the customer block was probably read as the vendor",
+                     ("vendor_name",))
+    return Check("vendor_not_self", PASS, CRITICAL)
+
+
 def check_new_vendor(ex: InvoiceExtraction, is_new_vendor: Optional[Callable[[InvoiceExtraction], bool]]) -> Check:
     """Optional accounts payable control: the first invoice from a vendor is always checked by a person."""
     if is_new_vendor is None:
@@ -215,11 +281,14 @@ def check_new_vendor(ex: InvoiceExtraction, is_new_vendor: Optional[Callable[[In
 def validate(ex: InvoiceExtraction, today: Optional[date] = None,
              is_duplicate: Optional[Callable[[InvoiceExtraction], bool]] = None,
              max_amount: Optional[Decimal] = None,
-             is_new_vendor: Optional[Callable[[InvoiceExtraction], bool]] = None) -> ValidationReport:
+             is_new_vendor: Optional[Callable[[InvoiceExtraction], bool]] = None,
+             vendor_history: Optional[Callable[[InvoiceExtraction], Optional[VendorHistory]]] = None,
+             own_names: tuple = ()) -> ValidationReport:
     today = today or date.today()
     checks = [
         check_is_invoice(ex),
         check_required(ex),
+        check_sign(ex),
         check_totals_math(ex),
         check_line_items_sum(ex),
         check_line_item_math(ex),
@@ -229,6 +298,8 @@ def validate(ex: InvoiceExtraction, today: Optional[date] = None,
         check_amount_limits(ex, max_amount),
         check_duplicate(ex, is_duplicate),
         check_new_vendor(ex, is_new_vendor),
+        check_vendor_history(ex, vendor_history(ex) if vendor_history and ex.vendor_name else None),
+        check_vendor_not_self(ex, own_names),
     ]
     evaluated = [c for c in checks if c.status != SKIP]
     total = sum(WEIGHTS[c.severity] for c in evaluated)

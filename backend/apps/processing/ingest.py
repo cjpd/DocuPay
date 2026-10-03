@@ -83,11 +83,23 @@ def sniff(data: bytes) -> str:
         return "image"
     if data[:4] in (b"II*\x00", b"MM\x00*"):
         return "image"
-    try:
-        data.decode("utf-8")
-        return "text"
-    except UnicodeDecodeError:
-        return "unknown"
+    return "text" if decode_text(data) is not None else "unknown"
+
+
+def decode_text(data: bytes):
+    """UTF-8, else Windows-1252 (common for exports from older accounting tools). None for binary data."""
+    if b"\x00" in data[:4096]:
+        return None
+    for encoding in ("utf-8-sig", "cp1252"):
+        try:
+            text = data.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+        sample = text[:4096]
+        printable = sum(ch.isprintable() or ch in "\r\n\t\f" for ch in sample)
+        if sample and printable / len(sample) >= 0.95:
+            return text
+    return None
 
 
 def load_document(file_field) -> DocumentInput:
@@ -96,13 +108,15 @@ def load_document(file_field) -> DocumentInput:
     if kind == "pdf":
         return _from_pdf(data)
     if kind == "image":
-        return DocumentInput(source="image", page_count=1, images=[_image_part(_open_image(data))])
+        return _from_image(data)
     if kind == "text":
-        return DocumentInput(source="text", page_count=1, text=data.decode("utf-8"))
+        return DocumentInput(source="text", page_count=1, text=decode_text(data))
     raise PermanentProcessingError("Unsupported file type. Upload a PDF, an image or a text file.")
 
 
 def _from_pdf(data: bytes) -> DocumentInput:
+    """Route each page on its own: a PDF can mix text pages with scanned pages
+    (for example a typed cover page and a scanned invoice), and no page may be dropped."""
     import pypdfium2 as pdfium
 
     try:
@@ -115,25 +129,38 @@ def _from_pdf(data: bytes) -> DocumentInput:
             raise PermanentProcessingError("The PDF has no pages")
         if count > max_pages():
             raise PermanentProcessingError(f"The PDF has {count} pages. The limit is {max_pages()}.")
-        texts = []
-        for i in range(count):
-            textpage = pdf[i].get_textpage()
-            texts.append(textpage.get_text_bounded() or "")
-            textpage.close()
-        text = "\n\f\n".join(t.strip() for t in texts)
-        if len(text.strip()) / count >= MIN_TEXT_CHARS_PER_PAGE:
-            return DocumentInput(source="pdf_text", page_count=count, text=text)
-        images = []
+        texts, images = [], []
         for i in range(count):
             page = pdf[i]
+            textpage = page.get_textpage()
+            text = (textpage.get_text_bounded() or "").strip()
+            textpage.close()
+            if len(text) >= MIN_TEXT_CHARS_PER_PAGE:
+                texts.append(f"--- page {i + 1} ---\n{text}")
+                continue
             # Render at the target size directly: a huge page (PDF allows 200 x 200 inches)
             # must never be rasterized at full resolution.
             scale = min(MAX_RENDER_SCALE, MAX_IMAGE_EDGE / max(page.get_size()))
-            bitmap = page.render(scale=scale)
-            images.append(_image_part(bitmap.to_pil()))
-        return DocumentInput(source="pdf_scan", page_count=count, images=images)
+            images.append(_image_part(page.render(scale=scale).to_pil()))
+        source = "pdf_text" if not images else "pdf_scan" if not texts else "pdf_mixed"
+        return DocumentInput(source=source, page_count=count, text="\n\n".join(texts) or None, images=images)
     finally:
         pdf.close()
+
+
+def _from_image(data: bytes) -> DocumentInput:
+    """Every frame of a multi-page TIFF or GIF, upright (phone photos carry EXIF rotation)."""
+    from PIL import ImageOps, ImageSequence
+
+    img = _open_image(data)
+    frames = []
+    for frame in ImageSequence.Iterator(img):
+        if len(frames) >= max_pages():
+            raise PermanentProcessingError(f"The image has more than {max_pages()} pages.")
+        if frame.width * frame.height > MAX_SOURCE_PIXELS:
+            raise PermanentProcessingError("The image is too large. Upload a smaller scan.")
+        frames.append(_image_part(ImageOps.exif_transpose(frame.copy())))
+    return DocumentInput(source="image", page_count=len(frames), images=frames)
 
 
 def _open_image(data: bytes) -> Image.Image:

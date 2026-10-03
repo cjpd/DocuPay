@@ -30,7 +30,10 @@ class OpenAIProvider(ExtractionProvider):
         if self._client is None:
             import openai
 
-            self._client = openai.OpenAI(max_retries=1, timeout=float(getattr(settings, "EXTRACTION_REQUEST_TIMEOUT", 60)))
+            try:
+                self._client = openai.OpenAI(max_retries=1, timeout=float(getattr(settings, "EXTRACTION_REQUEST_TIMEOUT", 60)))
+            except (openai.OpenAIError, TypeError) as exc:  # no API key configured
+                raise PermanentProcessingError("The extraction provider is not configured (API key missing)") from exc
         return self._client
 
     def model_for(self, tier: str) -> str:

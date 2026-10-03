@@ -5,7 +5,7 @@ from datetime import timedelta
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Max, Min, Q
 from django.utils import timezone
 
 from apps.documents.models import Document, ExtractedData, ReviewTask
@@ -15,7 +15,7 @@ from .errors import PermanentProcessingError, ProcessingError, TransientProcessi
 from .ingest import load_document
 from .pipeline import AUTO_APPROVE, REVIEW, run_pipeline
 from .providers import get_provider
-from .validation import MAX_STORABLE_AMOUNT, validate
+from .validation import MAX_STORABLE_AMOUNT, VendorHistory, validate
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +26,32 @@ STALE_AFTER = timedelta(minutes=15)
 GENERIC_ERROR = "Processing failed because of an internal error. Use Reprocess to try again."
 
 
+_LEGAL_SUFFIXES = re.compile(
+    r"\b(incorporated|inc|llc|l\.l\.c|ltd|limited|corp|corporation|co|company|gmbh|ag|sa|sas|sarl|srl|"
+    r"spa|bv|nv|plc|pty|oy|ab|as|kg)\b\.?", re.IGNORECASE)
+_INVOICE_PREFIX = re.compile(r"^(invoice|inv|bill|no|nr|num|number|#)+", re.IGNORECASE)
+
+
+def normalize_vendor(name: str) -> str:
+    """"ACME Supplies, L.L.C." and "Acme Supplies" give the same key."""
+    name = _LEGAL_SUFFIXES.sub(" ", name.lower())
+    return re.sub(r"[^0-9a-z]", "", name)
+
+
+def normalize_invoice_number(number: str) -> str:
+    """"INV-001", "inv 1", "#0001" and "INV-OO1" (letter O read for zero) give the same key."""
+    text = re.sub(r"[^0-9a-z]", "", number.lower())
+    text = _INVOICE_PREFIX.sub("", text) or text
+    text = text.replace("o", "0") if re.fullmatch(r"[0-9o]+", text) else text
+    return text.lstrip("0") or "0"
+
+
 def dedupe_key(organization_id: int, vendor_name, invoice_number) -> str:
-    """Normalized key, so "ACME Inc." / "acme inc" and "INV-001" / "inv 001" match."""
+    """Normalized key for duplicate detection: false matches only send a document to review,
+    missed matches can pay an invoice twice, so normalization is generous."""
     if not (vendor_name and invoice_number):
         return ""
-    norm = lambda text: re.sub(r"[^0-9a-z]", "", text.lower())  # noqa: E731
-    return f"{organization_id}:{norm(vendor_name)}:{norm(invoice_number)}"[:400]
+    return f"{organization_id}:{normalize_vendor(vendor_name)}:{normalize_invoice_number(invoice_number)}"[:400]
 
 
 def _storable(amount):
@@ -77,6 +97,34 @@ def _new_vendor_checker(doc: Document):
     return is_new_vendor
 
 
+def _vendor_history(doc: Document):
+    def history(ex):
+        key = dedupe_key(doc.organization_id, ex.vendor_name, "x")
+        prefix = key[: key.rfind(":") + 1]
+        approved = ExtractedData.objects.filter(
+            dedupe_key__startswith=prefix, document__status=Document.Status.APPROVED, total_amount__gt=0,
+        ).exclude(document_id=doc.id)
+        stats = approved.aggregate(low=Min("total_amount"), high=Max("total_amount"))
+        if stats["low"] is None:
+            return None
+        currencies = frozenset(c for c in approved.values_list("currency", flat=True).distinct() if c)
+        return VendorHistory(count=approved.count(), currencies=currencies,
+                             min_total=stats["low"], max_total=stats["high"])
+
+    return history
+
+
+def _validation_options(doc: Document) -> dict:
+    org = doc.organization
+    return {
+        "is_duplicate": _duplicate_checker(doc),
+        "max_amount": org.auto_approve_max_amount,
+        "is_new_vendor": _new_vendor_checker(doc),
+        "vendor_history": _vendor_history(doc),
+        "own_names": (org.name,),
+    }
+
+
 def _claim(document_id: int, task_id: str, force: bool) -> bool:
     """
     Take exclusive ownership of the document for this task.
@@ -118,9 +166,7 @@ def process_document(self, document_id: int, force: bool = False):
             doc_input,
             provider=get_provider(),
             threshold=doc.organization.auto_approve_threshold,
-            is_duplicate=_duplicate_checker(doc),
-            max_amount=doc.organization.auto_approve_max_amount,
-            is_new_vendor=_new_vendor_checker(doc),
+            **_validation_options(doc),
             escalation_errors=(ProcessingError, SoftTimeLimitExceeded),
         )
         saved = _save_result(doc, task_id, doc_input, result)
@@ -157,8 +203,7 @@ def _save_result(doc: Document, task_id: str, doc_input, result) -> bool:
             return False
 
         # Validate again under the lock: the duplicate check must see rows saved since the pipeline ran.
-        report = validate(ex, is_duplicate=_duplicate_checker(doc), max_amount=org.auto_approve_max_amount,
-                          is_new_vendor=_new_vendor_checker(doc))
+        report = validate(ex, **_validation_options(doc))
         decision = AUTO_APPROVE if (result.decision == AUTO_APPROVE and report.can_auto_approve(
             org.auto_approve_threshold)) else REVIEW
 

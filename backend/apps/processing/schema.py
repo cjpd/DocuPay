@@ -10,7 +10,7 @@ from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 ISO_CURRENCIES = {
     "AED", "ARS", "AUD", "BRL", "CAD", "CHF", "CLP", "CNY", "COP", "CZK", "DKK", "EUR", "GBP",
@@ -19,9 +19,10 @@ ISO_CURRENCIES = {
 }
 
 _DATE_FORMATS = (
-    "%Y-%m-%d", "%Y/%m/%d", "%m/%d/%Y", "%d.%m.%Y", "%d-%m-%Y",
+    "%Y-%m-%d", "%Y/%m/%d", "%d.%m.%Y", "%d-%m-%Y",
     "%b %d, %Y", "%B %d, %Y", "%d %b %Y", "%d %B %Y",
 )
+_SLASH_DATE = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
 
 _nullable_str = {"type": ["string", "null"]}
 _nullable_num = {"type": ["number", "null"]}
@@ -109,6 +110,15 @@ def parse_money(value: Any) -> Optional[Decimal]:
     return number.quantize(Decimal("0.01")) if number is not None else None
 
 
+def is_ambiguous_date(value: Any) -> bool:
+    """01/09/2026 is 9 January in the US and 1 September in Europe."""
+    m = _SLASH_DATE.match(str(value).strip()) if isinstance(value, str) else None
+    if not m:
+        return False
+    a, b, _ = (int(g) for g in m.groups())
+    return a <= 12 and b <= 12 and a != b
+
+
 def parse_date(value: Any) -> Optional[date]:
     if value is None:
         return None
@@ -117,6 +127,15 @@ def parse_date(value: Any) -> Optional[date]:
     if isinstance(value, date):
         return value
     text = str(value).strip()
+    m = _SLASH_DATE.match(text)
+    if m:
+        a, b, year = (int(g) for g in m.groups())
+        # US order (month/day) unless the first number cannot be a month (25/08/2026).
+        month, day = (b, a) if a > 12 else (a, b)
+        try:
+            return date(year, month, day)
+        except ValueError:
+            return None
     for fmt in _DATE_FORMATS:
         try:
             return datetime.strptime(text, fmt).date()
@@ -161,6 +180,16 @@ class InvoiceExtraction(BaseModel):
     total_amount: Optional[Decimal] = None
     line_items: List[LineItem] = Field(default_factory=list)
     uncertain_fields: List[str] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _flag_ambiguous_dates(cls, data):
+        """A day/month order that cannot be decided is a reason for a person to look."""
+        if isinstance(data, dict):
+            ambiguous = [f for f in ("invoice_date", "due_date") if is_ambiguous_date(data.get(f))]
+            if ambiguous:
+                data = {**data, "uncertain_fields": list(dict.fromkeys([*(data.get("uncertain_fields") or []), *ambiguous]))}
+        return data
 
     @field_validator(
         "vendor_name", "vendor_tax_id", "vendor_address", "customer_name",

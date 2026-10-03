@@ -103,3 +103,55 @@ def test_image_with_too_many_pixels_is_refused(org):
     doc = make_document(org, image_bytes("PNG", size=(8000, 6000)), "big.png")
     with pytest.raises(PermanentProcessingError, match="too large"):
         load_document(doc.file)
+
+
+def test_mixed_pdf_keeps_text_and_scanned_pages(org):
+    """A text page followed by a scanned page: the scanned page (often with the totals) must not be dropped."""
+    import pypdfium2 as pdfium
+
+    merged = pdfium.PdfDocument.new()
+    for blob in (text_pdf(), scanned_pdf()):
+        merged.import_pages(pdfium.PdfDocument(blob))
+    from io import BytesIO
+
+    buf = BytesIO()
+    merged.save(buf)
+    result = load_document(make_document(org, buf.getvalue(), "mixed.pdf").file)
+    assert result.source == "pdf_mixed"
+    assert result.page_count == 2
+    assert "INV-1001" in result.text
+    assert len(result.images) == 1
+
+
+def test_multipage_tiff_sends_every_page(org):
+    from io import BytesIO
+
+    from PIL import Image
+
+    pages = [Image.new("RGB", (600, 800), color) for color in ("white", "gray")]
+    buf = BytesIO()
+    pages[0].save(buf, format="TIFF", save_all=True, append_images=pages[1:])
+    result = load_document(make_document(org, buf.getvalue(), "scan.tiff").file)
+    assert result.page_count == 2
+    assert len(result.images) == 2
+
+
+def test_exif_rotation_is_applied(org):
+    from io import BytesIO
+
+    from PIL import Image
+
+    img = Image.new("RGB", (1000, 600), "white")  # stored landscape
+    exif = Image.Exif()
+    exif[0x0112] = 6  # orientation: rotate 90 degrees to display
+    buf = BytesIO()
+    img.save(buf, format="JPEG", exif=exif)
+    result = load_document(make_document(org, buf.getvalue(), "photo.jpg").file)
+    width, height = Image.open(BytesIO(result.images[0].data)).size
+    assert height > width  # displayed upright (portrait)
+
+
+def test_windows_1252_text_is_read(org):
+    content = "Café Müller GmbH\nInvoice Number: INV-7\nTotal: 12,50 €\n".encode("cp1252")
+    result = load_document(make_document(org, content, "export.txt").file)
+    assert "Café Müller" in result.text

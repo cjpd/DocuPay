@@ -77,7 +77,7 @@ class HeuristicProvider(ExtractionProvider):
     supports_escalation = False
 
     def extract(self, doc: DocumentInput, tier: str = FAST) -> ProviderResult:
-        text = doc.text or ocr_images(doc)
+        text = "\n".join(t for t in (doc.text, ocr_images(doc) if doc.images else "") if t)
         return ProviderResult(
             extraction=extract_from_text(text or ""),
             provider=self.name, model="regex-v2", tier=tier, cost_usd=parse_money(0),

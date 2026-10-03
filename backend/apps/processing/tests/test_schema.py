@@ -84,3 +84,8 @@ def test_quantity_decimal_comma():
     from apps.processing.schema import LineItem
 
     assert LineItem(quantity="1,5").quantity == Decimal("1.5")
+
+
+def test_day_first_slash_date():
+    assert parse_date("25/08/2026") == date(2026, 8, 25)
+    assert parse_date("31/02/2026") is None

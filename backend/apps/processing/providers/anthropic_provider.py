@@ -47,7 +47,10 @@ class AnthropicProvider(ExtractionProvider):
         if self._client is None:
             import anthropic
 
-            self._client = anthropic.Anthropic(max_retries=1, timeout=float(getattr(settings, "EXTRACTION_REQUEST_TIMEOUT", 60)))
+            try:
+                self._client = anthropic.Anthropic(max_retries=1, timeout=float(getattr(settings, "EXTRACTION_REQUEST_TIMEOUT", 60)))
+            except (anthropic.AnthropicError, TypeError) as exc:  # no API key configured
+                raise PermanentProcessingError("The extraction provider is not configured (API key missing)") from exc
         return self._client
 
     def model_for(self, tier: str) -> str:
@@ -103,6 +106,9 @@ class AnthropicProvider(ExtractionProvider):
             if exc.status_code >= 500 or exc.status_code in (408, 409, 429):
                 raise TransientProcessingError("The extraction service is busy or unreachable") from exc
             raise PermanentProcessingError(f"The extraction service rejected the document (HTTP {exc.status_code})") from exc
+        except TypeError as exc:
+            # The SDK raises TypeError at request time when no credentials are configured.
+            raise PermanentProcessingError("The extraction provider is not configured (API key missing)") from exc
         except anthropic.APIResponseValidationError as exc:
             logger.error("Claude API returned an unexpected response: %s", exc)
             raise ModelOutputError("The extraction service returned an unexpected response") from exc

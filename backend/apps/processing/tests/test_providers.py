@@ -174,3 +174,11 @@ def test_get_provider(name, cls):
 def test_get_provider_unknown():
     with pytest.raises(ValueError):
         get_provider("nope")
+
+
+def test_missing_api_key_is_a_clear_permanent_error(monkeypatch):
+    for var in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("ANTHROPIC_CONFIG_DIR", "/nonexistent")
+    with pytest.raises(PermanentProcessingError, match="not configured"):
+        AnthropicProvider().extract(TEXT_DOC)
