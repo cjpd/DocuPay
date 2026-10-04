@@ -21,6 +21,9 @@ export type VendorSummary = {
 
 export type Vendor = VendorSummary & {
   bank_code: string;
+  proposed_bank_account: string;
+  proposed_bank_code: string;
+  proposed_bank_document: number | null;
   aliases: string[];
   notes: string;
   invoice_count: number;

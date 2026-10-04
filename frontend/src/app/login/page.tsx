@@ -16,6 +16,17 @@ export default function LoginPage() {
   );
 }
 
+/** Only a page of this site: "/\\evil.com" and "//evil.com" resolve to other sites and are refused. */
+function safeNext(next: string | null): string {
+  if (!next) return "/";
+  try {
+    const url = new URL(next, window.location.origin);
+    return url.origin === window.location.origin ? url.pathname + url.search + url.hash : "/";
+  } catch {
+    return "/";
+  }
+}
+
 function Login() {
   const router = useRouter();
   const params = useSearchParams();
@@ -30,8 +41,7 @@ function Login() {
     setError(null);
     try {
       await signIn(username, password);
-      const next = params.get("next");
-      router.replace(next && next.startsWith("/") && !next.startsWith("//") ? next : "/");
+      router.replace(safeNext(params.get("next")));
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);

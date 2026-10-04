@@ -215,9 +215,11 @@ class VendorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vendor
-        fields = ["id", "name", "aliases", "tax_id", "default_currency", "bank_account", "bank_code", "is_blocked", "notes",
+        fields = ["id", "name", "aliases", "tax_id", "default_currency", "bank_account", "bank_code",
+                  "proposed_bank_account", "proposed_bank_code", "proposed_bank_document", "is_blocked", "notes",
                   "invoice_count", "last_invoice_at", "created_at", "updated_at"]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        read_only_fields = ["id", "proposed_bank_account", "proposed_bank_code", "proposed_bank_document",
+                            "created_at", "updated_at"]
 
     def validate_aliases(self, value):
         if not isinstance(value, list) or not all(isinstance(a, str) for a in value):

@@ -97,3 +97,40 @@ def test_session_id_changes_on_sign_in(user):
     client.cookies["sessionid"] = "attacker-chosen"
     resp = sign_in(client)
     assert resp.cookies["sessionid"].value != "attacker-chosen"
+
+
+def test_token_endpoint_is_rate_limited(user):
+    client = APIClient()
+    codes = [client.post("/api/auth/token/", {"username": "user-acme", "password": "bad"}, format="json").status_code
+             for _ in range(12)]
+    assert codes[-1] == 429
+
+
+def test_forged_forwarded_for_does_not_reset_the_limit(user):
+    """Critic finding 10: a new X-Forwarded-For on each try gave unlimited attempts."""
+    client = browser()
+    codes = []
+    for i in range(12):
+        token = client.get("/api/auth/csrf/").data["csrfToken"]
+        codes.append(client.post("/api/auth/login/", {"username": "user-acme", "password": "bad"}, format="json",
+                                 HTTP_X_CSRFTOKEN=token, HTTP_X_FORWARDED_FOR=f"203.0.113.{i}").status_code)
+    assert codes[-1] == 429
+
+
+def test_username_limit_across_addresses(user, settings):
+    settings.REST_FRAMEWORK = {**settings.REST_FRAMEWORK,
+                               "DEFAULT_THROTTLE_RATES": {"login": "1000/min", "login_user": "5/hour"}}
+    from rest_framework.settings import api_settings
+    from rest_framework.throttling import SimpleRateThrottle
+
+    api_settings.reload()
+    SimpleRateThrottle.THROTTLE_RATES = api_settings.DEFAULT_THROTTLE_RATES
+    try:
+        codes = []
+        for i in range(7):
+            client = APIClient(REMOTE_ADDR=f"198.51.100.{i}")
+            codes.append(client.post("/api/auth/token/", {"username": "USER-ACME", "password": "bad"}, format="json").status_code)
+        assert codes[-1] == 429
+    finally:
+        api_settings.reload()
+        SimpleRateThrottle.THROTTLE_RATES = api_settings.DEFAULT_THROTTLE_RATES

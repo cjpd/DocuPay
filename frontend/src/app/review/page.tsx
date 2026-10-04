@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Check, CheckCircle2, ChevronDown, PartyPopper, ShieldAlert, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { DocumentPreview } from "@/components/DocumentPreview";
 import { Badge, Button, Card, EmptyState, ErrorState, Kbd, Skeleton, cx } from "@/components/ui";
+import { ApiError } from "@/lib/api";
 import { FIELD_LABELS, ago, checkLabel, money } from "@/lib/format";
 import { useApprove, useReject, useReviewQueue, useReviewTask } from "@/lib/hooks";
 import type { Check as CheckT, ExtractedData, ReviewTask } from "@/lib/types";
@@ -115,6 +116,9 @@ const EDITABLE: (keyof ExtractedData)[] = [
   "vendor_name", "vendor_tax_id", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax_amount", "total_amount", "amount_due", "purchase_order", "bank_account", "bank_code",
 ];
 const DATE_FIELDS = new Set(["invoice_date", "due_date"]);
+// Failures about where the money goes or whether it was already paid: approving them needs an
+// owner or admin and an explicit confirmation, never a single key press.
+const FRAUD_CHECKS = new Set(["bank_account", "vendor_master", "duplicate"]);
 const MONEY_FIELDS = new Set(["subtotal", "tax_amount", "total_amount", "amount_due"]);
 
 function Decision({ task, position, onDone, onNext, onPrev }: {
@@ -127,47 +131,68 @@ function Decision({ task, position, onDone, onNext, onPrev }: {
   const approve = useApprove();
   const reject = useReject();
   const busy = approve.isPending || reject.isPending;
+  const inFlight = useRef(false);
+  const [confirming, setConfirming] = useState<{ name: string; message: string }[] | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
 
   const failed = data?.validation.filter((c) => c.status === "fail") ?? [];
+  const fraud = failed.filter((c) => FRAUD_CHECKS.has(c.name) && c.severity === "critical");
   const passed = data?.validation.filter((c) => c.status === "pass") ?? [];
   const flagged = new Set(failed.flatMap((c) => c.fields));
   const changed = Object.keys(values).filter((k) => values[k] !== initial[k]);
 
-  const doApprove = useCallback(async () => {
+  // Plain functions: the React Compiler memoizes them.
+  async function doApprove(confirm = false) {
+    if (inFlight.current) return; // one decision at a time, even with a fast double press
+    if (!confirm && fraud.length) {
+      setConfirming(fraud.map((c) => ({ name: c.name, message: c.message })));
+      return;
+    }
     // Empty dates and amounts are sent as null; empty text stays "".
     const corrections = Object.fromEntries(
       changed.map((k) => [k, values[k] === "" && (DATE_FIELDS.has(k) || MONEY_FIELDS.has(k)) ? null : values[k]]),
     );
+    inFlight.current = true;
     try {
-      await approve.mutateAsync({ taskId: task.id, corrections });
+      await approve.mutateAsync({ taskId: task.id, corrections, confirm });
       onDone("approved");
     } catch (e) {
-      toast.error((e as Error).message);
+      const data = e instanceof ApiError ? (e.data as { requires_confirmation?: boolean; checks?: { name: string; message: string }[] }) : null;
+      if (data?.requires_confirmation && data.checks) setConfirming(data.checks); // a correction created a new risk
+      else toast.error((e as Error).message);
+    } finally {
+      inFlight.current = false;
     }
-  }, [approve, changed, values, task.id, onDone]);
+  }
 
-  const doReject = useCallback(async () => {
+  async function doReject() {
     try {
       await reject.mutateAsync(task.id);
       onDone("rejected");
     } catch (e) {
       toast.error((e as Error).message);
     }
-  }, [reject, task.id, onDone]);
+  }
 
+  // The key listener is added once and always calls the latest handlers.
+  const keys = useRef({ busy, doApprove, doReject, onNext, onPrev });
+  useEffect(() => {
+    keys.current = { busy, doApprove, doReject, onNext, onPrev };
+  });
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const target = e.target as HTMLElement;
-      if (busy || e.metaKey || e.ctrlKey || e.altKey || ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName)) return;
+      const h = keys.current;
+      if (h.busy || e.repeat || e.metaKey || e.ctrlKey || e.altKey || ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName)) return;
       const k = e.key.toLowerCase();
-      if (k === "a") { e.preventDefault(); doApprove(); }
-      else if (k === "r") { e.preventDefault(); doReject(); }
-      else if (k === "j") onNext();
-      else if (k === "k") onPrev();
+      if (k === "a") { e.preventDefault(); h.doApprove(false); } // opens the confirmation instead when a fraud check failed
+      else if (k === "r") { e.preventDefault(); h.doReject(); }
+      else if (k === "j") h.onNext();
+      else if (k === "k") h.onPrev();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [busy, doApprove, doReject, onNext, onPrev]);
+  }, []);
 
   return (
     <Card className="flex max-h-none flex-col xl:max-h-[80vh]">
@@ -227,11 +252,29 @@ function Decision({ task, position, onDone, onNext, onPrev }: {
         {passed.length > 0 && <PassedChecks checks={passed} />}
       </div>
 
+      {confirming && (
+        <div role="alertdialog" aria-labelledby="confirm-title" className="border-t border-bad/30 bg-bad-soft px-5 py-4">
+          <p id="confirm-title" className="flex items-center gap-2 text-sm font-semibold text-bad">
+            <ShieldAlert aria-hidden className="size-4" /> Check before you approve
+          </p>
+          <ul className="mt-1.5 space-y-1 text-xs text-ink">{confirming.map((c) => <li key={c.name}>{c.message}</li>)}</ul>
+          <label className="mt-3 flex items-start gap-2 text-xs text-ink">
+            <input type="checkbox" className="mt-0.5" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
+            I checked this myself. For a bank account, I called the vendor on a number I already had (not one from this invoice or email).
+          </label>
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="ghost" onClick={() => { setConfirming(null); setConfirmed(false); }}>Cancel</Button>
+            <Button size="sm" variant="danger" disabled={!confirmed || busy} onClick={() => doApprove(true)}>Approve anyway</Button>
+          </div>
+          <p className="mt-2 text-[11px] text-muted">Only an owner or admin can approve this invoice.</p>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 border-t border-line px-5 py-4">
         <Button variant="danger" onClick={doReject} disabled={busy} aria-keyshortcuts="r">
           <ThumbsDown aria-hidden className="size-4" /> Reject
         </Button>
-        <Button variant="success" onClick={doApprove} disabled={busy} className="flex-1" aria-keyshortcuts="a">
+        <Button variant="success" onClick={() => doApprove(false)} disabled={busy || !!confirming} className="flex-1" aria-keyshortcuts="a">
           <Check aria-hidden className="size-4" /> {changed.length ? `Approve with ${changed.length} fix${changed.length === 1 ? "" : "es"}` : "Approve"}
         </Button>
       </div>

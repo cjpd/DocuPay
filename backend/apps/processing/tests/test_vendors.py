@@ -100,12 +100,13 @@ def test_approval_adds_vendor(org):
     assert data.vendor_id == vendor.id
 
 
-def test_approval_adds_alias_and_fills_gaps_but_never_overwrites(org):
+def test_approval_fills_gaps_but_never_overwrites_or_adds_names(org):
     vendor = Vendor.objects.create(organization=org, name="Acme Supplies LLC", tax_id="DE811234567")
-    _, data, _ = _review(org, vendor_name="ACME Wholesale", vendor_tax_id="DE811234567", currency="EUR")
+    # Matched by tax ID with a different name: possibly an impostor, so the name is not learned.
+    _, data, _ = _review(org, vendor_name="Totally Other Name", vendor_tax_id="DE811234567", currency="EUR")
     learn_from_approval(data)
     vendor.refresh_from_db()
-    assert vendor.aliases == ["ACME Wholesale"]
+    assert vendor.aliases == []
     assert vendor.default_currency == "EUR"  # was empty
     _, data2, _ = _review(org, vendor_name="Acme Supplies LLC", vendor_tax_id="", currency="USD")
     learn_from_approval(data2)
@@ -235,3 +236,21 @@ def test_cannot_approve_without_the_essentials(org):
     assert task.status == ReviewTask.STATUS_PENDING
     resp = client.post(url, {"corrections": {"invoice_date": "2026-09-01", "total_amount": "10.00"}}, format="json")
     assert resp.status_code == 200
+
+
+def test_non_latin_names_are_kept_apart(org):
+    from apps.processing.normalize import normalize_vendor
+
+    assert normalize_vendor("ООО Ромашка") == "ромашка"
+    assert normalize_vendor("株式会社山田") == "山田"
+    a = Vendor.objects.create(organization=org, name="ООО Ромашка")
+    b = Vendor.objects.create(organization=org, name="株式会社山田")
+    assert match_vendor(org.id, "Ромашка") == a and match_vendor(org.id, "山田") == b
+    assert tasks.dedupe_key(org.id, "ООО Ромашка", "1") != tasks.dedupe_key(org.id, "株式会社山田", "1")
+
+
+def test_unusable_name_is_never_a_vendor(org):
+    doc = make_document(org, b"x", status=Document.Status.REQUIRES_REVIEW)
+    data = ExtractedData.objects.create(document=doc, vendor_name="—, .")
+    assert learn_from_approval(data) is None
+    assert match_vendor(org.id, "—, .") is None

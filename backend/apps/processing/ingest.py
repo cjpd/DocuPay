@@ -218,10 +218,15 @@ def preview_page(data: bytes, page: int = 1):
         finally:
             pdf.close()
     if kind == "image":
-        from PIL import ImageOps, ImageSequence
+        from PIL import ImageOps
 
-        frames = list(ImageSequence.Iterator(_open_image(data)))[: max_pages()]
-        if not 1 <= page <= len(frames):
+        img = _open_image(data)
+        count = min(getattr(img, "n_frames", 1), max_pages())
+        if not 1 <= page <= count:
             raise PermanentProcessingError(f"Page {page} does not exist")
-        return _image_part(ImageOps.exif_transpose(frames[page - 1].copy())).data, "image/jpeg", len(frames)
+        # ImageSequence yields the same object for every frame: seek to the page, then copy it.
+        img.seek(page - 1)
+        if img.width * img.height > MAX_SOURCE_PIXELS:
+            raise PermanentProcessingError("The image is too large. Upload a smaller scan.")
+        return _image_part(ImageOps.exif_transpose(img.copy())).data, "image/jpeg", count
     raise PermanentProcessingError("Unsupported file type")

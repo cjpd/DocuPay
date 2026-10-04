@@ -1,3 +1,4 @@
+import io
 """Endpoints the frontend depends on: stats, file download, review queue with its document."""
 from decimal import Decimal
 
@@ -132,3 +133,19 @@ def test_preview_is_tenant_scoped(setup):
     other_org, _ = make_org(slug="other")
     doc = make_document(other_org, text_pdf(), "a.pdf")
     assert client.get(f"/api/documents/{doc.id}/preview/").status_code == 404
+
+
+def test_tiff_preview_pages_are_different(setup):
+    """Critic finding 9: every page of a multi-page TIFF showed the first page."""
+    from PIL import Image
+
+    org, client = setup
+    buf = io.BytesIO()
+    pages = [Image.new("RGB", (400, 500), c) for c in ("white", "black")]
+    pages[0].save(buf, format="TIFF", save_all=True, append_images=pages[1:])
+    doc = make_document(org, buf.getvalue(), "scan.tiff")
+    one = client.get(f"/api/documents/{doc.id}/preview/?page=1")
+    two = client.get(f"/api/documents/{doc.id}/preview/?page=2")
+    assert one["X-Page-Count"] == "2"
+    assert one.content != two.content
+    assert Image.open(io.BytesIO(two.content)).getpixel((10, 10))[0] < 50  # the black page

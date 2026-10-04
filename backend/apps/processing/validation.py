@@ -22,14 +22,17 @@ WEIGHTS = {CRITICAL: 3.0, MAJOR: 2.0, MINOR: 1.0}
 REQUIRED_FIELDS = ("vendor_name", "invoice_number", "invoice_date", "total_amount")
 # Largest amount the database can store (DecimalField max_digits=14, decimal_places=2).
 MAX_STORABLE_AMOUNT = Decimal("999999999999.99")
-AMOUNT_FIELDS = ("subtotal", "discount_amount", "tax_amount", "shipping_amount", "total_amount")
+AMOUNT_FIELDS = ("subtotal", "discount_amount", "tax_amount", "shipping_amount", "total_amount", "amount_due")
 # Failures that a stronger model can fix by reading the document better. Others
 # (duplicate, not an invoice, amount limit) are facts about the document, so a
 # second model call would only cost money.
 EXTRACTION_QUALITY_CHECKS = frozenset({
     "required_fields", "totals_math", "line_items_sum", "line_item_math", "date_order", "currency", "model_uncertain",
-    "vendor_history", "vendor_not_self", "amounts_verified", "vendor_master", "bank_account",
+    "vendor_history", "vendor_not_self", "amounts_verified", "vendor_master", "bank_account", "amount_due",
 })
+# Failures about where money goes and to whom. A person can approve them only as an owner or
+# admin, and only by confirming explicitly (not with a single key press).
+FRAUD_CHECKS = frozenset({"bank_account", "vendor_master", "duplicate"})
 # The line items must add up to auto-approve. "Subtotal + tax = total" alone is not enough:
 # a model that misses the line items (or a document whose lines do not add up) would pass it.
 AMOUNT_PROOFS = ("line_items_sum",)
@@ -45,6 +48,7 @@ class VendorRecord:
     is_blocked: bool = False
     matched_by: str = "name"  # "tax_id" or "name"
     bank_account: str = ""
+    bank_code: str = ""
 
 
 @dataclass
@@ -262,10 +266,24 @@ def check_amount_limits(ex: InvoiceExtraction, max_amount: Optional[Decimal]) ->
                 if any(v is not None and abs(v) > MAX_STORABLE_AMOUNT for v in (li.unit_price, li.amount))]
     if too_big:
         return Check("amount_limit", FAIL, CRITICAL, "Amount out of range: " + ", ".join(too_big), tuple(too_big))
-    if max_amount is not None and ex.total_amount is not None and abs(ex.total_amount) > max_amount:
+    largest = max((abs(v) for v in (ex.total_amount, ex.amount_due) if v is not None), default=None)
+    if max_amount is not None and largest is not None and largest > max_amount:
         return Check("amount_limit", FAIL, CRITICAL,
-                     f"The total {ex.total_amount} is above the auto-approve limit of {max_amount}", ("total_amount",))
+                     f"The amount {largest} is above the auto-approve limit of {max_amount}", ("total_amount",))
     return Check("amount_limit", PASS, CRITICAL)
+
+
+def check_amount_due(ex: InvoiceExtraction) -> Check:
+    """What is paid is the amount due: it must be positive and never more than the invoice total."""
+    if ex.amount_due is None:
+        return Check("amount_due", SKIP, MAJOR, "No amount due printed")
+    if ex.amount_due <= 0:
+        return Check("amount_due", FAIL, MAJOR, f"The amount due is {ex.amount_due}", ("amount_due",))
+    if ex.total_amount is not None and ex.amount_due > ex.total_amount + Decimal("0.01"):
+        return Check("amount_due", FAIL, MAJOR,
+                     f"The amount due ({ex.amount_due}) is more than the invoice total ({ex.total_amount})",
+                     ("amount_due", "total_amount"))
+    return Check("amount_due", PASS, MAJOR, fields=("amount_due",))
 
 
 def check_duplicate(ex: InvoiceExtraction, is_duplicate: Optional[Callable[[InvoiceExtraction], bool]]) -> Check:
@@ -315,23 +333,37 @@ def check_vendor_master(ex: InvoiceExtraction, vendor: Optional[VendorRecord]) -
 
 def check_bank_account(ex: InvoiceExtraction, vendor: Optional[VendorRecord]) -> Check:
     """
-    A bank account that differs from the one on file is the most common invoice fraud
-    (a fake "our bank details have changed" invoice). It always goes to a person.
+    Where the money goes. A bank account that is not the vendor's confirmed account is the
+    most common invoice fraud ("our bank details have changed", or a look-alike vendor name
+    with the fraudster's account). It always goes to a person, whatever the settings.
     """
     from .normalize import iban_is_valid, looks_like_iban, mask_account
 
     account = ex.bank_account or ""
+    code = ex.bank_code or ""
     if not account:
         return Check("bank_account", SKIP, CRITICAL, "No bank account on the invoice")
     if looks_like_iban(account) and not iban_is_valid(account):
         return Check("bank_account", FAIL, MAJOR,
                      f"The IBAN {mask_account(account)} fails its checksum: a character was probably misread",
                      ("bank_account",))
-    if vendor and vendor.bank_account and account != vendor.bank_account:
+    if vendor is None:
         return Check("bank_account", FAIL, CRITICAL,
-                     f"The bank account on this invoice ({mask_account(account)}) is not the one on file for "
-                     f"{vendor.name} ({mask_account(vendor.bank_account)}). Confirm the change with the vendor by "
-                     "phone, using a number you already have, before paying.", ("bank_account",))
+                     f"This vendor is not in your vendor list, and the invoice asks for payment to "
+                     f"{mask_account(account)}. Check the vendor and the account before paying.",
+                     ("bank_account", "vendor_name"))
+    if not vendor.bank_account:
+        return Check("bank_account", FAIL, CRITICAL,
+                     f"{vendor.name} has no confirmed bank account yet. Confirm {mask_account(account)} with the "
+                     "vendor (by phone, using a number you already have), then confirm it on the Vendors page.",
+                     ("bank_account",))
+    changed = account != vendor.bank_account or (vendor.bank_code and code and code != vendor.bank_code)
+    if changed:
+        what = "bank account" if account != vendor.bank_account else "bank code (routing or sort code)"
+        return Check("bank_account", FAIL, CRITICAL,
+                     f"The {what} on this invoice ({mask_account(account)}{' / ' + code if code else ''}) is not the "
+                     f"one on file for {vendor.name} ({mask_account(vendor.bank_account)}). Confirm the change with "
+                     "the vendor by phone, using a number you already have, before paying.", ("bank_account",))
     return Check("bank_account", PASS, CRITICAL, fields=("bank_account",))
 
 
@@ -379,6 +411,7 @@ def validate(ex: InvoiceExtraction, today: Optional[date] = None,
         check_currency(ex),
         check_uncertain(ex),
         check_amount_limits(ex, max_amount),
+        check_amount_due(ex),
         check_duplicate(ex, is_duplicate),
         check_new_vendor(ex, is_new_vendor),
         check_vendor_history(ex, vendor_history(ex) if vendor_history and ex.vendor_name else None),

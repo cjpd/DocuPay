@@ -21,12 +21,15 @@ def world():
     task = ReviewTask.objects.create(document=doc)
     hook = WebhookConfig.objects.create(organization=org_a, target_url="https://a.example.com/hook", secret="s3cret")
     log = WebhookDeliveryLog.objects.create(webhook_config=hook, document=doc)
+    from apps.documents.models import Vendor
+
+    vendor = Vendor.objects.create(organization=org_a, name="Victim Vendor", proposed_bank_account="DE89370400440532013000")
     attacker = APIClient()
     attacker.force_authenticate(user_b)
     owner = APIClient()
     owner.force_authenticate(user_a)
     return {"org_a": org_a, "org_b": org_b, "user_a": user_a, "user_b": user_b, "doc": doc, "data": data,
-            "task": task, "hook": hook, "log": log, "attacker": attacker, "owner": owner}
+            "task": task, "hook": hook, "log": log, "vendor": vendor, "attacker": attacker, "owner": owner}
 
 
 DETAIL_URLS = [
@@ -41,6 +44,14 @@ DETAIL_URLS = [
     ("/api/documents/webhooks/{hook}/", "patch"),
     ("/api/documents/webhooks/{hook}/", "delete"),
     ("/api/documents/webhook-deliveries/{log}/", "get"),
+    ("/api/documents/{doc}/file/", "get"),
+    ("/api/documents/{doc}/preview/", "get"),
+    ("/api/documents/vendors/{vendor}/", "get"),
+    ("/api/documents/vendors/{vendor}/", "patch"),
+    ("/api/documents/vendors/{vendor}/bank-account/", "post"),
+    ("/api/documents/webhooks/{hook}/test/", "post"),
+    ("/api/documents/webhooks/{hook}/rotate-secret/", "post"),
+    ("/api/documents/webhook-deliveries/{log}/retry/", "post"),
     ("/api/organizations/{org_a}/", "get"),
     ("/api/organizations/{org_a}/", "patch"),
     ("/api/organizations/{org_a}/", "delete"),
@@ -49,7 +60,7 @@ DETAIL_URLS = [
 
 @pytest.mark.parametrize("url,method", DETAIL_URLS)
 def test_other_tenant_gets_404(world, url, method):
-    ids = {k: world[k].id for k in ("doc", "data", "task", "hook", "log", "org_a")}
+    ids = {k: world[k].id for k in ("doc", "data", "task", "hook", "log", "vendor", "org_a")}
     resp = getattr(world["attacker"], method)(url.format(**ids), {}, format="json")
     assert resp.status_code == 404, resp.content
     assert Document.objects.filter(id=world["doc"].id, status=Document.Status.REQUIRES_REVIEW).exists()
@@ -58,7 +69,7 @@ def test_other_tenant_gets_404(world, url, method):
 
 @pytest.mark.parametrize("url", [
     "/api/documents/", "/api/documents/extracted/", "/api/documents/reviews/",
-    "/api/documents/webhooks/", "/api/documents/webhook-deliveries/", "/api/organizations/",
+    "/api/documents/webhooks/", "/api/documents/webhook-deliveries/", "/api/organizations/", "/api/documents/vendors/",
 ])
 def test_lists_exclude_other_tenant(world, url):
     seen = {row["id"] for row in world["attacker"].get(url).data["results"]}

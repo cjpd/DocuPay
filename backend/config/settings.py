@@ -100,7 +100,13 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
-    "DEFAULT_THROTTLE_RATES": {"login": os.getenv("LOGIN_RATE_LIMIT", "10/min")},
+    "DEFAULT_THROTTLE_RATES": {
+        "login": os.getenv("LOGIN_RATE_LIMIT", "10/min"),
+        "login_user": os.getenv("LOGIN_USER_RATE_LIMIT", "20/hour"),
+    },
+    # Number of trusted proxies in front of the app. 0 = use the connection address and
+    # ignore X-Forwarded-For (a client could set it to anything). Set to 1 behind one load balancer.
+    "NUM_PROXIES": int(os.getenv("NUM_PROXIES", "0")),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
@@ -125,6 +131,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+# Shared cache (sign-in rate limits must count across all processes).
+if os.getenv("REDIS_URL"):
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": os.getenv("REDIS_URL")}}
 # Results live in Postgres (Document/ExtractedData), so Celery needs no result backend.
 CELERY_TASK_IGNORE_RESULT = True
 # Extraction waits on LLM APIs (I/O bound). It gets its own queue so it never

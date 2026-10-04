@@ -35,6 +35,22 @@ def dedupe_key(organization_id: int, vendor_name, invoice_number) -> str:
     return f"{organization_id}:{normalize_vendor(vendor_name)}:{normalize_invoice_number(invoice_number)}"[:400]
 
 
+def extraction_from_data(data):
+    """The stored (possibly corrected) invoice as an InvoiceExtraction, for re-validation.
+    A person reviewed it, so the model's "could not read" flags no longer apply."""
+    from .schema import InvoiceExtraction
+
+    fields = {**(data.raw_extraction or {})}
+    for name in ("vendor_name", "vendor_tax_id", "customer_name", "invoice_number", "purchase_order", "invoice_date",
+                 "due_date", "currency", "subtotal", "tax_amount", "total_amount", "amount_due", "bank_account",
+                 "bank_code", "line_items"):
+        value = getattr(data, name)
+        fields[name] = value.isoformat() if hasattr(value, "isoformat") else value
+    fields["uncertain_fields"] = []
+    fields.setdefault("is_invoice", True)
+    return InvoiceExtraction.model_validate(fields)
+
+
 def _storable(amount):
     """Amounts the column cannot hold are saved as null (the raw value stays in raw_extraction;
     the amount_limit check has already sent the document to review)."""
@@ -65,8 +81,14 @@ def _duplicate_checker(doc: Document):
 def _vendor_lookup(doc: Document):
     from apps.documents.vendors import match_vendor, vendor_record
 
+    cache = {}
+
     def lookup(ex):
-        return vendor_record(match_vendor(doc.organization_id, ex.vendor_name, ex.vendor_tax_id), ex.vendor_tax_id)
+        # Called by every attempt and by the re-check under the lock: match once per name and tax ID.
+        key = (ex.vendor_name, ex.vendor_tax_id)
+        if key not in cache:
+            cache[key] = vendor_record(match_vendor(doc.organization_id, ex.vendor_name, ex.vendor_tax_id), ex.vendor_tax_id)
+        return cache[key]
 
     return lookup
 
@@ -110,13 +132,14 @@ def _vendor_history(doc: Document):
 
 def _validation_options(doc: Document) -> dict:
     org = doc.organization
+    lookup = _vendor_lookup(doc)
     return {
         "is_duplicate": _duplicate_checker(doc),
         "max_amount": org.auto_approve_max_amount,
         "is_new_vendor": _new_vendor_checker(doc),
         "vendor_history": _vendor_history(doc),
         "own_names": (org.name, *org.other_names),
-        "vendor_lookup": _vendor_lookup(doc),
+        "vendor_lookup": lookup,
     }
 
 
@@ -198,7 +221,8 @@ def _save_result(doc: Document, task_id: str, doc_input, result) -> bool:
             return False
 
         # Validate again under the lock: the duplicate check must see rows saved since the pipeline ran.
-        report = validate(ex, **_validation_options(doc))
+        options = _validation_options(doc)
+        report = validate(ex, **options)
         decision = AUTO_APPROVE if (result.decision == AUTO_APPROVE and report.can_auto_approve(
             org.auto_approve_threshold)) else REVIEW
 
@@ -211,7 +235,7 @@ def _save_result(doc: Document, task_id: str, doc_input, result) -> bool:
                 "due_date": ex.due_date,
                 "vendor_name": ex.vendor_name or "",
                 "vendor_tax_id": ex.vendor_tax_id or "",
-                "vendor_id": getattr(_vendor_lookup(doc)(ex), "id", None),
+                "vendor_id": getattr(options["vendor_lookup"](ex), "id", None),
                 "customer_name": ex.customer_name or "",
                 "purchase_order": ex.purchase_order or "",
                 "subtotal": _storable(ex.subtotal),

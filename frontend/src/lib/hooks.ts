@@ -101,8 +101,8 @@ export function useUpload() {
 export function useApprove() {
   const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: ({ taskId, corrections }: { taskId: number; corrections: Record<string, unknown> }) =>
-      api(`/api/documents/reviews/${taskId}/approve/`, { body: { corrections } }),
+    mutationFn: ({ taskId, corrections, confirm }: { taskId: number; corrections: Record<string, unknown>; confirm?: boolean }) =>
+      api(`/api/documents/reviews/${taskId}/approve/`, { body: { corrections, confirm_fraud_checks: !!confirm } }),
     onSuccess: invalidate,
   });
 }
@@ -202,3 +202,12 @@ export const useRotateSecret = () =>
   useWebhookMutation((id: number) => api<Webhook>(`/api/documents/webhooks/${id}/rotate-secret/`, { method: "POST" }));
 export const useRetryDelivery = () =>
   useWebhookMutation((id: number) => api(`/api/documents/webhook-deliveries/${id}/retry/`, { method: "POST" }));
+
+export function useDecideBankAccount() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, decision }: { id: number; decision: "confirm" | "reject" }) =>
+      api<Vendor>(`/api/documents/vendors/${id}/bank-account/`, { body: { decision } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["vendors"] }),
+  });
+}

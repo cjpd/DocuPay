@@ -13,6 +13,9 @@ from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+from .throttles import LoginUsernameThrottle
 from rest_framework.views import APIView
 
 from .serializers import UserSerializer
@@ -35,7 +38,7 @@ class CsrfView(APIView):
 class LoginView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
-    throttle_classes = [ScopedRateThrottle]
+    throttle_classes = [ScopedRateThrottle, LoginUsernameThrottle]
     throttle_scope = "login"
 
     def post(self, request):
@@ -55,3 +58,10 @@ class LogoutView(APIView):
     def post(self, request):
         logout(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ThrottledTokenView(TokenObtainPairView):
+    """JWT sign-in for scripts, with the same limits as the browser sign-in."""
+
+    throttle_classes = [ScopedRateThrottle, LoginUsernameThrottle]
+    throttle_scope = "login"

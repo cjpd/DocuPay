@@ -7,7 +7,7 @@ import { AppShell, PageHeader } from "@/components/AppShell";
 import { Badge, Button, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { ago, maskAccount } from "@/lib/format";
 import { session, useSession } from "@/lib/api";
-import { useDeleteVendor, useOrganizations, useSaveVendor, useVendors } from "@/lib/hooks";
+import { useDecideBankAccount, useDeleteVendor, useOrganizations, useSaveVendor, useVendors } from "@/lib/hooks";
 import type { Vendor } from "@/lib/types";
 
 export default function VendorsPage() {
@@ -82,10 +82,40 @@ function Row({ vendor, canEdit }: { vendor: Vendor; canEdit: boolean }) {
   const [confirming, setConfirming] = useState(false);
   const save = useSaveVendor();
   const remove = useDeleteVendor();
+  const decide = useDecideBankAccount();
+  const [checked, setChecked] = useState(false);
   if (editing) return <li><VendorForm vendor={vendor} onDone={() => setEditing(false)} /></li>;
 
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3.5">
+      {vendor.proposed_bank_account && (
+        <div role="status" className="order-last w-full rounded-[var(--radius-control)] border border-warn/30 bg-warn-soft px-3 py-2.5 text-xs">
+          <p className="font-medium text-ink">
+            Proposed bank account <span className="font-mono">{vendor.proposed_bank_account}</span>
+            {vendor.proposed_bank_code && <> · <span className="font-mono">{vendor.proposed_bank_code}</span></>}
+          </p>
+          <p className="mt-0.5 text-ink-2">
+            Seen on an approved invoice{vendor.proposed_bank_document ? ` (document #${vendor.proposed_bank_document})` : ""}.
+            Invoices asking for payment to it go to a person until it is confirmed.
+          </p>
+          {canEdit && (
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-1.5 text-ink">
+                <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} />
+                I confirmed it with the vendor by phone, on a number I already had
+              </label>
+              <Button size="sm" variant="primary" disabled={!checked || decide.isPending}
+                onClick={() => decide.mutate({ id: vendor.id, decision: "confirm" }, { onSuccess: () => toast.success("Bank account confirmed"), onError: (e) => toast.error(e.message) })}>
+                Confirm
+              </Button>
+              <Button size="sm" variant="ghost" disabled={decide.isPending}
+                onClick={() => decide.mutate({ id: vendor.id, decision: "reject" }, { onSuccess: () => toast.success("Proposed account removed"), onError: (e) => toast.error(e.message) })}>
+                Reject
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-2 text-sm font-medium">
           {vendor.name}

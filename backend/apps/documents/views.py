@@ -156,32 +156,34 @@ class DocumentViewSet(OrgScopedMixin, viewsets.ModelViewSet):
         except ValueError:
             days = 30
         since = timezone.now() - timedelta(days=days)
-        docs = self.scope(Document.objects.filter(created_at__gte=since)).select_related("extracted_data")
+        # Only the columns the numbers need (no OCR text, no extraction JSON).
+        rows = self.scope(Document.objects.filter(created_at__gte=since)).values_list(
+            "status", "created_at", "processing_meta__decision", "processing_meta__total_cost_usd",
+            "extracted_data__total_amount", "extracted_data__currency",
+        )
         by_status = defaultdict(int)
         auto, by_person = 0, 0
         approved_value = defaultdict(Decimal)
         cost = Decimal("0")
         per_day = defaultdict(lambda: {"received": 0, "auto_approved": 0})
-        for doc in docs:
-            by_status[doc.status] += 1
-            meta = doc.processing_meta or {}
-            day = doc.created_at.date().isoformat()
+        for doc_status, created_at, decision, doc_cost, total, currency in rows.iterator(chunk_size=2000):
+            by_status[doc_status] += 1
+            day = timezone.localtime(created_at).date().isoformat()
             per_day[day]["received"] += 1
-            if doc.status == Document.Status.APPROVED:
-                if meta.get("decision") == "auto_approve":
+            if doc_status == Document.Status.APPROVED:
+                if decision == "auto_approve":
                     auto += 1
                     per_day[day]["auto_approved"] += 1
                 else:
                     by_person += 1
-                data = getattr(doc, "extracted_data", None)
-                if data and data.total_amount is not None:
-                    approved_value[data.currency or "?"] += data.total_amount
+                if total is not None:
+                    approved_value[currency or "?"] += total
             try:
-                cost += Decimal(meta.get("total_cost_usd") or "0")
+                cost += Decimal(str(doc_cost or "0"))
             except InvalidOperation:
                 pass
         processed = auto + by_person + by_status[Document.Status.REQUIRES_REVIEW]
-        today = timezone.now().date()
+        today = timezone.localdate()
         series = [
             {"date": (today - timedelta(days=i)).isoformat(),
              **per_day.get((today - timedelta(days=i)).isoformat(), {"received": 0, "auto_approved": 0})}
@@ -282,70 +284,83 @@ class ReviewTaskViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="approve")
     def approve(self, request, pk=None):
-        task = self.get_object()
-        if task.status != ReviewTask.STATUS_PENDING:
-            return Response({"detail": "Task is not pending"}, status=status.HTTP_400_BAD_REQUEST)
+        """
+        Approve with optional corrections. The invoice is checked again on the corrected data.
+        If money could go to the wrong place (bank account not on file, blocked vendor, possible
+        duplicate), only an owner or admin can approve, and only with confirm_fraud_checks=true.
+        """
+        from apps.organizations.scoping import has_role
+        from apps.processing.tasks import _emit, _validation_options, dedupe_key, extraction_from_data
+        from apps.processing.validation import CRITICAL, FRAUD_CHECKS, validate
+        from .vendors import learn_from_approval
+
+        task = self.get_object()  # access check
         corrections = request.data.get("corrections", {})
         if not isinstance(corrections, dict):
             return Response({"detail": "corrections must be an object"}, status=status.HTTP_400_BAD_REQUEST)
-
         unknown = sorted(set(corrections) - set(ExtractedData.EDITABLE_FIELDS))
         if unknown:
             return Response({"detail": f"These fields cannot be corrected: {', '.join(unknown)}"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        extracted = getattr(task.document, "extracted_data", None)
-        if not extracted:
-            extracted = ExtractedData.objects.create(document=task.document, raw_extraction={})
+        with transaction.atomic():
+            # One decision per task: a double click or a second reviewer waits here and then sees it is done.
+            task = ReviewTask.objects.select_for_update().select_related("document__organization").get(pk=task.pk)
+            if task.status != ReviewTask.STATUS_PENDING:
+                return Response({"detail": "This invoice was already decided."}, status=status.HTTP_409_CONFLICT)
+            doc = task.document
+            extracted = getattr(doc, "extracted_data", None) or ExtractedData.objects.create(document=doc, raw_extraction={})
+            corrected = ExtractedDataSerializer(extracted, data=corrections, partial=True)
+            if not corrected.is_valid():
+                return Response(corrected.errors, status=status.HTTP_400_BAD_REQUEST)
+            for field, value in corrected.validated_data.items():
+                setattr(extracted, field, value)  # in memory: nothing is saved before every check passed
 
-        # Validate types (dates, decimals) through the serializer before saving.
-        corrected = ExtractedDataSerializer(extracted, data=corrections, partial=True)
-        if not corrected.is_valid():
-            return Response(corrected.errors, status=status.HTTP_400_BAD_REQUEST)
-        # Approved data goes to exports and accounting: the essentials must be there.
-        merged = {f: corrected.validated_data.get(f, getattr(extracted, f))
-                  for f in ("vendor_name", "invoice_number", "invoice_date", "total_amount")}
-        labels = {"vendor_name": "vendor", "invoice_number": "invoice number", "invoice_date": "invoice date",
-                  "total_amount": "total"}
-        empty = [labels[f] for f, v in merged.items() if v in (None, "")]
-        if empty:
-            return Response({"detail": f"Fill in the {', '.join(empty)} before approving."},
-                            status=status.HTTP_400_BAD_REQUEST)
-        corrected.save()
-        extracted.refresh_from_db()
-        # Corrections can change the vendor or the number: keep duplicate detection right.
-        from apps.processing.tasks import dedupe_key
-        from .vendors import learn_from_approval
+            # Approved data goes to exports and accounting: the essentials must be there.
+            labels = {"vendor_name": "vendor", "invoice_number": "invoice number", "invoice_date": "invoice date",
+                      "total_amount": "total"}
+            empty = [label for f, label in labels.items() if getattr(extracted, f) in (None, "")]
+            if empty:
+                return Response({"detail": f"Fill in the {', '.join(empty)} before approving."},
+                                status=status.HTTP_400_BAD_REQUEST)
 
-        extracted.dedupe_key = dedupe_key(task.document.organization_id, extracted.vendor_name, extracted.invoice_number)
-        extracted.save(update_fields=["dedupe_key"])
-        learn_from_approval(extracted)
+            ex = extraction_from_data(extracted)
+            report = validate(ex, **_validation_options(doc))
+            fraud = [c for c in report.failures if c.name in FRAUD_CHECKS and c.severity == CRITICAL]
+            if fraud:
+                summary = [{"name": c.name, "message": c.message} for c in fraud]
+                if not has_role(request.user, doc.organization_id):
+                    return Response({"detail": "Only an owner or admin can approve this invoice: "
+                                               + " ".join(c.message for c in fraud), "checks": summary},
+                                    status=status.HTTP_403_FORBIDDEN)
+                if request.data.get("confirm_fraud_checks") is not True:
+                    return Response({"detail": "Confirm that you checked this before approving.", "checks": summary,
+                                     "requires_confirmation": True}, status=status.HTTP_409_CONFLICT)
 
-        # store correction example
-        CorrectionExample.objects.create(
-            document=task.document,
-            corrected_fields=corrections,
-            raw_extraction=extracted.raw_extraction,
-        )
-
-        task.status = ReviewTask.STATUS_APPROVED
-        task.reviewed_by = request.user
-        task.reviewed_at = timezone.now()
-        task.save(update_fields=["status", "reviewed_by", "reviewed_at"])
-
-        task.document.status = Document.Status.APPROVED
-        task.document.approved_at = timezone.now()
-        task.document.save(update_fields=["status", "approved_at"])
-        from apps.processing.tasks import _emit
-
-        _emit(task.document_id, "invoice.approved")
+            extracted.validation = report.to_json()
+            extracted.field_confidences = report.field_confidences(ex)
+            extracted.overall_confidence = report.score
+            # Corrections can change the vendor or the number: keep duplicate detection right.
+            extracted.dedupe_key = dedupe_key(doc.organization_id, extracted.vendor_name, extracted.invoice_number)
+            extracted.save()
+            learn_from_approval(extracted)
+            CorrectionExample.objects.create(document=doc, corrected_fields=corrected.data if corrections else {},
+                                             raw_extraction=extracted.raw_extraction)
+            now = timezone.now()
+            task.status, task.reviewed_by, task.reviewed_at = ReviewTask.STATUS_APPROVED, request.user, now
+            task.save(update_fields=["status", "reviewed_by", "reviewed_at"])
+            doc.status, doc.approved_at = Document.Status.APPROVED, now
+            doc.save(update_fields=["status", "approved_at"])
+            _emit(doc.id, "invoice.approved")
         return Response(ReviewTaskSerializer(task).data)
 
     @action(detail=True, methods=["post"], url_path="reject")
     def reject(self, request, pk=None):
         task = self.get_object()
-        if task.status != ReviewTask.STATUS_PENDING:
-            return Response({"detail": "Task is not pending"}, status=status.HTTP_400_BAD_REQUEST)
+        if not ReviewTask.objects.filter(pk=task.pk, status=ReviewTask.STATUS_PENDING).update(
+            status=ReviewTask.STATUS_REJECTED
+        ):
+            return Response({"detail": "This invoice was already decided."}, status=status.HTTP_409_CONFLICT)
         task.status = ReviewTask.STATUS_REJECTED
         task.reviewed_by = request.user
         task.reviewed_at = timezone.now()
@@ -407,6 +422,26 @@ class VendorViewSet(OrgScopedMixin, viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         self._require_admin(instance.organization_id)
         instance.delete()
+
+    @action(detail=True, methods=["post"], url_path="bank-account")
+    def bank_account(self, request, *args, **kwargs):
+        """Confirm (decision=confirm) or reject (decision=reject) the proposed bank account."""
+        from .vendors import confirm_proposed_bank
+
+        vendor = self.get_object()
+        self._require_admin(vendor.organization_id)
+        if not vendor.proposed_bank_account:
+            return Response({"detail": "There is no proposed bank account."}, status=status.HTTP_409_CONFLICT)
+        decision = request.data.get("decision")
+        if decision == "confirm":
+            confirm_proposed_bank(vendor)
+        elif decision == "reject":
+            vendor.proposed_bank_account, vendor.proposed_bank_code, vendor.proposed_bank_document = "", "", None
+            vendor.save()
+        else:
+            return Response({"detail": "decision must be 'confirm' or 'reject'."}, status=status.HTTP_400_BAD_REQUEST)
+        vendor = self.get_queryset().get(id=vendor.id)
+        return Response(self.get_serializer(vendor).data)
 
 
 def _require_org_admin(request, org_id):

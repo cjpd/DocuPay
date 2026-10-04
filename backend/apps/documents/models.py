@@ -57,6 +57,12 @@ class Vendor(TimeStampedModel):
     # owner or admin on the Vendors page (after confirming the change with the vendor).
     bank_account = models.CharField(max_length=64, blank=True, default="")
     bank_code = models.CharField(max_length=32, blank=True, default="")
+    # An account seen on an approved invoice, waiting for an owner or admin to confirm it.
+    # Approvals never change bank_account directly.
+    proposed_bank_account = models.CharField(max_length=64, blank=True, default="")
+    proposed_bank_code = models.CharField(max_length=32, blank=True, default="")
+    proposed_bank_document = models.ForeignKey("Document", on_delete=models.SET_NULL, null=True, blank=True,
+                                               related_name="+")
     # A blocked vendor's invoices always go to a person (fraud, disputes, closed accounts).
     is_blocked = models.BooleanField(default=False)
     notes = models.TextField(blank=True, default="")
