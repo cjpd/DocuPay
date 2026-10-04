@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { Pipeline } from "@/components/Pipeline";
 import { StatusBadge } from "@/components/StatusBadge";
+import { ExportPanel } from "@/components/ExportPanel";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { Button, Card, EmptyState, ErrorState, Skeleton, cx } from "@/components/ui";
 import { ago, date, money } from "@/lib/format";
@@ -38,7 +39,7 @@ function Documents() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <PageHeader title="Documents" hint="Everything you uploaded, newest first." />
+      <PageHeader title="Documents" hint="Everything you uploaded, newest first." action={<ExportPanel />} />
       <UploadDropzone compact />
 
       <div className="mt-6 flex flex-wrap items-center gap-3">

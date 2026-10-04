@@ -96,6 +96,57 @@ class DocumentViewSet(OrgScopedMixin, viewsets.ModelViewSet):
         response["X-Content-Type-Options"] = "nosniff"
         return response
 
+    @action(detail=False, methods=["get"], url_path="export")
+    def export(self, request, *args, **kwargs):
+        """
+        CSV of extracted invoices for the active organization.
+
+        ?level=invoice (default, one row per invoice) or level=line (one row per line item)
+        ?status=approved (default: only final data), a comma list of statuses, or "all"
+        ?from=YYYY-MM-DD&to=YYYY-MM-DD: approval date for approved invoices, else upload date
+        """
+        from datetime import date as date_type
+
+        from django.http import StreamingHttpResponse
+        from django.db.models import Prefetch
+
+        from .export import stream_csv
+
+        params = request.query_params
+        level = params.get("level", "invoice")
+        if level not in ("invoice", "line"):
+            return Response({"detail": "level must be 'invoice' or 'line'."}, status=status.HTTP_400_BAD_REQUEST)
+        statuses = params.get("status", Document.Status.APPROVED)
+        valid = set(Document.Status.values)
+        wanted = list(valid) if statuses == "all" else statuses.split(",")
+        if not set(wanted) <= valid:
+            return Response({"detail": f"Unknown status. Use one of: {', '.join(sorted(valid))}, or all."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            start = date_type.fromisoformat(params["from"]) if params.get("from") else None
+            end = date_type.fromisoformat(params["to"]) if params.get("to") else None
+        except ValueError:
+            return Response({"detail": "Dates must be YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+        docs = (
+            self.scope(Document.objects.filter(status__in=wanted))
+            .select_related("extracted_data")
+            .prefetch_related(Prefetch("review_tasks", queryset=ReviewTask.objects.select_related("reviewed_by")))
+        )
+        date_field = "approved_at" if wanted == [Document.Status.APPROVED] else "created_at"
+        if start:
+            docs = docs.filter(**{f"{date_field}__date__gte": start})
+        if end:
+            docs = docs.filter(**{f"{date_field}__date__lte": end})
+        docs = docs.order_by(date_field, "id")
+
+        name = f"docupay-{'line-items' if level == 'line' else 'invoices'}-{timezone.now().date().isoformat()}.csv"
+        response = StreamingHttpResponse(stream_csv(docs.iterator(chunk_size=500), level),
+                                         content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="{name}"'
+        response["Cache-Control"] = "no-store"
+        return response
+
     @action(detail=False, methods=["get"], url_path="stats")
     def stats(self, request, *args, **kwargs):
         """Dashboard numbers, computed from real documents (last `days` days, default 30)."""

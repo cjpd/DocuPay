@@ -55,8 +55,11 @@ def extract_from_text(text: str) -> InvoiceExtraction:
     lines = [ln for ln in text.splitlines() if ln.strip() and not _PAGE_MARKER.match(ln.strip())]
     text = "\n".join(lines)
     # The first line is usually the vendor, sometimes followed by the title on the same line.
+    title = re.compile(r"^(tax\s+)?(invoice|bill|rechnung|facture|factura|quotation|purchase order|credit note)$", re.IGNORECASE)
+    # Skip a title line ("INVOICE") above the vendor name.
+    first = next((ln.strip() for ln in lines if not title.match(ln.strip())), "")
     vendor = re.sub(r"\s+(tax\s+)?(invoice|bill|rechnung|facture|factura|quotation|purchase order|credit note)\s*$",
-                    "", lines[0].strip(), flags=re.IGNORECASE) if lines else None
+                    "", first, flags=re.IGNORECASE) or None
     currency = _find(r"\b(USD|EUR|GBP|CAD|AUD|JPY|CHF|MXN|BRL)\b", text)
     if not currency:
         currency = next((code for sym, code in _SYMBOLS.items() if sym in text), None)

@@ -1,3 +1,4 @@
+import pytest
 from datetime import date
 from decimal import Decimal
 
@@ -253,3 +254,15 @@ def test_review_always_has_a_reason():
         report = validate(ex, today=TODAY)
         assert not report.can_auto_approve(0.92)
         assert report.failures, ex
+
+
+@pytest.mark.parametrize("name", ["INVOICE", "Tax Invoice", "Rechnung", "page"])
+def test_document_title_is_not_a_vendor(name):
+    report = validate(_ex(vendor_name=name), today=TODAY)
+    assert _status(report, "required_fields") == FAIL
+    assert not report.can_auto_approve(0.0)
+
+
+def test_real_vendor_names_pass():
+    for name in ("Invoice Ninja Ltd", "Billy's Bakery", "Acme"):
+        assert _status(validate(_ex(vendor_name=name), today=TODAY), "required_fields") == PASS

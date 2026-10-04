@@ -12,7 +12,7 @@ CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if os.ge
 from corsheaders.defaults import default_headers  # noqa: E402
 
 CORS_ALLOW_HEADERS = (*default_headers, "x-organization-id")
-CORS_EXPOSE_HEADERS = ["X-Page-Count"]
+CORS_EXPOSE_HEADERS = ["X-Page-Count", "Content-Disposition"]
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if os.getenv("CSRF_TRUSTED_ORIGINS") else []
 
 INSTALLED_APPS = [

@@ -32,7 +32,7 @@ Code: `backend/apps/processing/`.
 `frontend/` is a Next.js 16 / React 19 / Tailwind 4 app exported as static files (`npm run build` writes `out/`), so it can be served from a CDN or S3 with no Node server.
 - **Overview:** real numbers from `/api/documents/stats/`: the share handled without a person, invoices waiting for you, approved value and processing cost.
 - **Review:** the document page next to the fields, the reasons it needs you in plain words, inline corrections, and keyboard shortcuts (A approve, R reject, J/K next/previous).
-- **Documents:** upload by drag and drop, live progress, filters and search, retry failed documents.
+- **Documents:** upload by drag and drop, live progress, filters and search, retry failed documents, **Export CSV** (approved invoices by default; one row per invoice or per line item; by approval date). API: `GET /api/documents/export/?level=invoice|line&status=approved|all&from=YYYY-MM-DD&to=YYYY-MM-DD`.
 - **Settings:** an amount limit and the "review new vendors" rule.
 
 Set `NEXT_PUBLIC_API_BASE` to the API URL at build time. Users in several companies pick one in the sidebar (sent as `X-Organization-ID`).

@@ -115,10 +115,26 @@ def _close(a: Decimal, b: Decimal) -> bool:
     return abs(a - b) <= tolerance
 
 
+# A document title read as the vendor name is not a vendor.
+NOT_A_VENDOR = frozenset({
+    "invoice", "taxinvoice", "bill", "receipt", "statement", "creditnote", "proforma", "proformainvoice",
+    "factura", "facture", "rechnung", "fattura", "nota", "quotation", "quote", "purchaseorder", "page",
+})
+
+
+def _is_placeholder_vendor(name) -> bool:
+    import re as _re
+
+    return bool(name) and _re.sub(r"[^a-z]", "", name.lower()) in NOT_A_VENDOR
+
+
 def check_required(ex: InvoiceExtraction) -> Check:
     missing = [f for f in REQUIRED_FIELDS if getattr(ex, f) in (None, "")]
+    if _is_placeholder_vendor(ex.vendor_name):
+        missing.insert(0, "vendor_name (found only the word \"" + ex.vendor_name + "\")")
     if missing:
-        return Check("required_fields", FAIL, CRITICAL, "Missing: " + ", ".join(missing), tuple(missing))
+        return Check("required_fields", FAIL, CRITICAL, "Missing: " + ", ".join(missing),
+                     tuple(m.split(" ", 1)[0] for m in missing))
     return Check("required_fields", PASS, CRITICAL, fields=REQUIRED_FIELDS)
 
 
