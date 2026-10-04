@@ -139,7 +139,7 @@ Still open: real LLM accuracy (DP-21), vendor master and PO matching (DP-22), le
 
 ## Real LLM run (OpenAI)
 
-Command: `run.py --provider openai`. Output: `results_openai.json`. Models: the repo defaults, `gpt-5-mini` (fast) with `gpt-5` (strong) as escalation. The run used the repo defaults for `OPENAI_FAST_MODEL` and `OPENAI_STRONG_MODEL`; the models were not logged per call. Threshold 0.92.
+Command: `run.py --provider openai`. Output: `results_openai.json`. Models: the repo defaults, `gpt-5-mini` (fast) with `gpt-5` (strong) as escalation. These are the settings defaults; the run did not override them, and the model per call was not logged. Threshold 0.92.
 
 | Metric | OpenAI | Offline heuristic |
 |---|---|---|
@@ -164,7 +164,7 @@ Fraud-style and error checks (the gate fed wrong values, 429 cases). Two views:
 | `wrong_vendor_tax_id` | 100% approved | **0%** (caught by `vendor_master`) |
 | `changed_bank_account` | **0%** (caught by `bank_account`) | 0% |
 | `vendor_is_customer`, `wrong_currency`, `consistent_x100_scale` | 100% approved | 0% |
-| `consistent_x10_scale` | 100% approved | caught (not in the history list; see JSON) |
+| `consistent_x10_scale` | 100% approved | **0%** (caught by `vendor_history`) |
 | `wrong_invoice_number` | 100% approved | 100% approved |
 | `swapped_day_month` | 47% approved | 47% approved |
 | `missed_tax`, wrong total, dropped line, misread line, no line items | 0 to 4% | 0 to 4% |
@@ -179,6 +179,7 @@ Reading this:
 Caveats:
 - The test set is synthetic: 40 labeled documents (28 clean, 12 negative) from `generate.py`, not real customer invoices. Layouts are clean and few in number. Real accuracy will be lower.
 - 28 clean documents is a small sample. 89.3% STP has a wide margin of error (roughly 72% to 98% at 95% confidence).
-- Cost was reported as $0. The script had no OpenAI price table (`OPENAI_PRICING` unset), so no cost was calculated. Token counts were not saved. Cost is unknown. Set the price JSON in settings and run again to measure it.
-- The 4 real sample files could not be run through OpenAI by this harness (images need local Tesseract in this path; text samples are not invoices). They are not part of the scores.
+- Cost was reported as $0. The script had no OpenAI price table (`OPENAI_PRICING` is unset), so no cost was calculated. Token counts were not saved. Cost is unknown. Set the price JSON in settings and run again to measure it.
+- The corruption tables test the validation gate with injected errors on ground-truth data. They do not call OpenAI. Only the extractor rows (accuracy, STP, negatives) come from real OpenAI calls.
+- The 4 real sample files are in the ingest list only; the two real images failed in the offline ingest step (no local Tesseract) and the two real text files are not invoices. They are not part of the scores.
 - This was one run. There was no repeat to measure run-to-run variation.
