@@ -336,6 +336,9 @@ class ReviewTaskViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
         task.document.status = Document.Status.APPROVED
         task.document.approved_at = timezone.now()
         task.document.save(update_fields=["status", "approved_at"])
+        from apps.processing.tasks import _emit
+
+        _emit(task.document_id, "invoice.approved")
         return Response(ReviewTaskSerializer(task).data)
 
     @action(detail=True, methods=["post"], url_path="reject")
@@ -349,6 +352,9 @@ class ReviewTaskViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
         task.save(update_fields=["status", "reviewed_by", "reviewed_at"])
         task.document.status = Document.Status.REQUIRES_REVIEW
         task.document.save(update_fields=["status"])
+        from apps.processing.tasks import _emit
+
+        _emit(task.document_id, "invoice.rejected")
         return Response(ReviewTaskSerializer(task).data)
 
 
@@ -403,7 +409,18 @@ class VendorViewSet(OrgScopedMixin, viewsets.ModelViewSet):
         instance.delete()
 
 
+def _require_org_admin(request, org_id):
+    from rest_framework.exceptions import PermissionDenied
+
+    from apps.organizations.scoping import has_role
+
+    if not has_role(request.user, org_id):
+        raise PermissionDenied("Only an owner or admin can change webhooks.")
+
+
 class WebhookConfigViewSet(OrgScopedMixin, viewsets.ModelViewSet):
+    """Endpoints that receive invoice events. Members can see them; owners and admins change them."""
+
     serializer_class = WebhookConfigSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
 
@@ -411,15 +428,67 @@ class WebhookConfigViewSet(OrgScopedMixin, viewsets.ModelViewSet):
         return self.scope(WebhookConfig.objects.all()).order_by("-created_at")
 
     def perform_create(self, serializer):
+        from .webhooks import new_secret
+
         # The organization always comes from the request, never from the body: a webhook
         # created for another organization would send that organization's data to this URL.
-        serializer.save(organization_id=active_organization_id(self.request, require=True))
+        org_id = active_organization_id(self.request, require=True)
+        _require_org_admin(self.request, org_id)
+        secret = new_secret()
+        instance = serializer.save(organization_id=org_id, secret=secret)
+        instance._new_secret = secret
+
+    def perform_update(self, serializer):
+        _require_org_admin(self.request, serializer.instance.organization_id)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        _require_org_admin(self.request, instance.organization_id)
+        instance.delete()
+
+    @action(detail=True, methods=["post"], url_path="rotate-secret")
+    def rotate_secret(self, request, *args, **kwargs):
+        from .webhooks import new_secret
+
+        config = self.get_object()
+        _require_org_admin(request, config.organization_id)
+        config.secret = new_secret()
+        config.save(update_fields=["secret", "updated_at"])
+        config._new_secret = config.secret
+        return Response(self.get_serializer(config).data)
+
+    @action(detail=True, methods=["post"], url_path="test")
+    def test(self, request, *args, **kwargs):
+        """Send a "ping" event now, to check the endpoint and its signature check."""
+        from .webhooks import send_test
+
+        config = self.get_object()
+        _require_org_admin(request, config.organization_id)
+        log = send_test(config)
+        return Response(WebhookDeliveryLogSerializer(log).data, status=status.HTTP_202_ACCEPTED)
 
 
 class WebhookDeliveryLogViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = WebhookDeliveryLogSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrgMember]
-    org_field = "document__organization"
+    org_field = "webhook_config__organization"
 
     def get_queryset(self):
-        return self.scope(WebhookDeliveryLog.objects.all()).order_by("-created_at")
+        queryset = self.scope(WebhookDeliveryLog.objects.all())
+        if self.request.query_params.get("webhook"):
+            queryset = queryset.filter(webhook_config_id=self.request.query_params["webhook"])
+        return queryset.order_by("-created_at")
+
+    @action(detail=True, methods=["post"], url_path="retry")
+    def retry(self, request, *args, **kwargs):
+        """Deliver a failed event again (same event id, so the receiver still sees one event)."""
+        from apps.processing.tasks import deliver_webhook
+
+        log = self.get_object()
+        _require_org_admin(request, log.webhook_config.organization_id)
+        if log.status == WebhookDeliveryLog.Status.DELIVERED:
+            return Response({"detail": "This event was already delivered."}, status=status.HTTP_409_CONFLICT)
+        WebhookDeliveryLog.objects.filter(id=log.id).update(status=WebhookDeliveryLog.Status.PENDING, next_attempt_at=None)
+        transaction.on_commit(lambda: deliver_webhook.delay(log.id))
+        log.refresh_from_db()
+        return Response(self.get_serializer(log).data, status=status.HTTP_202_ACCEPTED)

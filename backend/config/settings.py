@@ -136,6 +136,12 @@ CELERY_BEAT_SCHEDULE = {
     "fail-stale-documents": {"task": "apps.processing.tasks.fail_stale_documents", "schedule": 300.0},
 }
 
+# Webhooks. HTTP (not HTTPS) endpoints only in development; private addresses never in production.
+WEBHOOK_ALLOW_HTTP = os.getenv("WEBHOOK_ALLOW_HTTP", "1" if DEBUG else "0") == "1"
+WEBHOOK_ALLOW_PRIVATE = os.getenv("WEBHOOK_ALLOW_PRIVATE", "0") == "1"
+# Base URL of the web app, used for links in webhook messages.
+FRONTEND_URL = os.getenv("FRONTEND_URL", "")
+
 # Extraction pipeline
 EXTRACTION_PROVIDER = os.getenv("EXTRACTION_PROVIDER", "heuristic")  # anthropic | openai | heuristic
 EXTRACTION_ESCALATE = os.getenv("EXTRACTION_ESCALATE", "1") == "1"

@@ -15,7 +15,9 @@ def clear_throttle():
 
 @pytest.fixture
 def user():
-    return make_org()[1]
+    user = make_org()[1]
+    user.memberships.update(role="owner")  # webhooks are an owner/admin write
+    return user
 
 
 def browser():

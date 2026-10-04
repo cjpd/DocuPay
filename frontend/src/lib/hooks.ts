@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
-import type { Doc, Organization, Page, ReviewTask, Stats, User, Vendor } from "./types";
+import type { Doc, Organization, Page, ReviewTask, Stats, User, Vendor, Webhook, WebhookDelivery } from "./types";
 
 const ACTIVE: Doc["status"][] = ["pending", "processing"];
 const hasActive = (docs?: Doc[]) => !!docs?.some((d) => ACTIVE.includes(d.status));
@@ -166,3 +166,39 @@ export function useDeleteVendor() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["vendors"] }),
   });
 }
+
+export function useWebhooks() {
+  return useQuery({
+    queryKey: ["webhooks"],
+    queryFn: () => api<Page<Webhook>>("/api/documents/webhooks/").then((p) => p.results),
+  });
+}
+
+export function useDeliveries() {
+  return useQuery({
+    queryKey: ["deliveries"],
+    queryFn: () => api<Page<WebhookDelivery>>("/api/documents/webhook-deliveries/").then((p) => p.results),
+    refetchInterval: (q) => (q.state.data?.some((d) => d.status === "pending") ? 3000 : 30000),
+  });
+}
+
+function useWebhookMutation<TArgs>(fn: (args: TArgs) => Promise<unknown>) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["webhooks"] });
+      qc.invalidateQueries({ queryKey: ["deliveries"] });
+    },
+  });
+}
+
+export const useSaveWebhook = () =>
+  useWebhookMutation(({ id, ...body }: Partial<Webhook> & { id?: number }) =>
+    api<Webhook>(id ? `/api/documents/webhooks/${id}/` : "/api/documents/webhooks/", { method: id ? "PATCH" : "POST", body }));
+export const useDeleteWebhook = () => useWebhookMutation((id: number) => api(`/api/documents/webhooks/${id}/`, { method: "DELETE" }));
+export const useTestWebhook = () => useWebhookMutation((id: number) => api(`/api/documents/webhooks/${id}/test/`, { method: "POST" }));
+export const useRotateSecret = () =>
+  useWebhookMutation((id: number) => api<Webhook>(`/api/documents/webhooks/${id}/rotate-secret/`, { method: "POST" }));
+export const useRetryDelivery = () =>
+  useWebhookMutation((id: number) => api(`/api/documents/webhook-deliveries/${id}/retry/`, { method: "POST" }));

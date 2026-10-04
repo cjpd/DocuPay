@@ -5,6 +5,7 @@ import { Check, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { Button, Card, CardHeader, ErrorState, Skeleton } from "@/components/ui";
+import { WebhooksCard } from "@/components/WebhooksCard";
 import { CHECK_LABELS } from "@/lib/format";
 import { session, useSession } from "@/lib/api";
 import { useOrganizations, useUpdateOrganization } from "@/lib/hooks";
@@ -29,6 +30,7 @@ function Settings() {
       {orgs.isError && <ErrorState message={(orgs.error as Error).message} onRetry={() => orgs.refetch()} />}
       {orgs.isLoading && <Skeleton className="h-64" />}
       {org && <Rules key={org.id} org={org} />}
+      {org && <WebhooksCard canEdit={org.my_role === "owner" || org.my_role === "admin"} />}
       <HowItWorks />
     </div>
   );

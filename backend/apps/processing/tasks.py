@@ -42,9 +42,10 @@ def _storable(amount):
 
 
 def _mark_failed(document_id: int, task_id: str, message: str) -> None:
-    Document.objects.filter(id=document_id, processing_task_id=task_id).update(
+    if Document.objects.filter(id=document_id, processing_task_id=task_id).update(
         status=Document.Status.FAILED, error_message=message[:2000], updated_at=timezone.now()
-    )
+    ):
+        _emit(document_id, "invoice.failed")
 
 
 def _duplicate_checker(doc: Document):
@@ -244,6 +245,7 @@ def _save_result(doc: Document, task_id: str, doc_input, result) -> bool:
             if not ReviewTask.objects.filter(document=doc, status=ReviewTask.STATUS_PENDING).exists():
                 ReviewTask.objects.create(document=doc)
         locked.save()
+        _emit(doc.id, "invoice.approved" if decision == AUTO_APPROVE else "invoice.needs_review")
     return True
 
 
@@ -259,9 +261,35 @@ def fail_stale_documents():
     return f"{count} stale documents marked failed"
 
 
-@shared_task
-def send_webhook(document_id: int):
-    """
-    Deliver extraction results to configured webhook (placeholder, see DP-16).
-    """
-    return f"sent webhook for {document_id}"
+@shared_task(bind=True, max_retries=None, acks_late=True)
+def deliver_webhook(self, log_id: int):
+    """Deliver one webhook event; retry on the RETRY_SCHEDULE (about 21 hours), then mark it failed."""
+    from apps.documents.models import WebhookDeliveryLog
+    from apps.documents.webhooks import RETRY_SCHEDULE, attempt
+
+    log = WebhookDeliveryLog.objects.select_related("webhook_config").filter(id=log_id).first()
+    if log is None or log.status != WebhookDeliveryLog.Status.PENDING:
+        return f"webhook {log_id} skipped"
+    if not log.webhook_config.is_active:
+        WebhookDeliveryLog.objects.filter(id=log_id).update(status=WebhookDeliveryLog.Status.FAILED,
+                                                            last_error="The endpoint was turned off")
+        return f"webhook {log_id} endpoint off"
+    if attempt(log):
+        return f"webhook {log_id} delivered"
+    retry = log.attempts - 1
+    if retry >= len(RETRY_SCHEDULE):
+        WebhookDeliveryLog.objects.filter(id=log_id).update(status=WebhookDeliveryLog.Status.FAILED, next_attempt_at=None)
+        return f"webhook {log_id} failed after {log.attempts} attempts"
+    countdown = RETRY_SCHEDULE[retry]
+    WebhookDeliveryLog.objects.filter(id=log_id).update(next_attempt_at=timezone.now() + timedelta(seconds=countdown))
+    raise self.retry(countdown=countdown)
+
+
+def _emit(document_id: int, event_type: str) -> None:
+    """Webhook events never break processing: a failure here is logged, not raised."""
+    from apps.documents.webhooks import emit
+
+    try:
+        emit(Document.objects.select_related("extracted_data").get(id=document_id), event_type)
+    except Exception:  # noqa: BLE001
+        logger.exception("could not record webhook event %s for document %s", event_type, document_id)

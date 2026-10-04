@@ -71,6 +71,7 @@ def test_lists_exclude_other_tenant(world, url):
 
 
 def test_webhook_cannot_be_created_for_another_tenant(world):
+    world["user_b"].memberships.update(role="owner")
     resp = world["attacker"].post("/api/documents/webhooks/", {
         "organization": world["org_a"].id, "target_url": "https://evil.example.com", "secret": "x"}, format="json")
     assert resp.status_code == 201

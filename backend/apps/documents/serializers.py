@@ -163,29 +163,50 @@ class CorrectionExampleSerializer(serializers.ModelSerializer):
 
 
 class WebhookConfigSerializer(serializers.ModelSerializer):
+    last_delivery = serializers.SerializerMethodField()
+    # Shown once: in the response that creates the endpoint or rotates the secret.
+    signing_secret = serializers.SerializerMethodField()
+
     class Meta:
         model = WebhookConfig
-        fields = ["id", "organization", "target_url", "secret", "is_active", "created_at", "updated_at"]
-        read_only_fields = ["organization", "created_at", "updated_at"]
-        # The signing secret is set by the customer and never sent back.
-        extra_kwargs = {"secret": {"write_only": True}}
+        fields = ["id", "target_url", "description", "events", "is_active", "last_delivery", "signing_secret",
+                  "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_signing_secret(self, obj):
+        return getattr(obj, "_new_secret", None)
+
+    def get_last_delivery(self, obj):
+        log = obj.delivery_logs.order_by("-created_at").first()
+        if not log:
+            return None
+        return {"status": log.status, "status_code": log.status_code, "at": log.updated_at, "event_type": log.event_type}
+
+    def validate_target_url(self, value):
+        from .webhooks import UnsafeURL, check_url_format
+
+        try:
+            check_url_format(value)
+        except UnsafeURL as exc:
+            raise serializers.ValidationError(str(exc))
+        return value
+
+    def validate_events(self, value):
+        from .webhooks import EVENTS
+
+        if not isinstance(value, list) or not value or not set(value) <= set(EVENTS):
+            raise serializers.ValidationError(f"Choose one or more of: {', '.join(EVENTS)}.")
+        return sorted(set(value), key=EVENTS.index)
 
 
 class WebhookDeliveryLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebhookDeliveryLog
         fields = [
-            "id",
-            "webhook_config",
-            "document",
-            "status_code",
-            "success",
-            "attempts",
-            "last_error",
-            "created_at",
-            "updated_at",
+            "id", "webhook_config", "document", "event_id", "event_type", "status", "status_code", "success",
+            "attempts", "last_error", "response_ms", "next_attempt_at", "delivered_at", "created_at", "updated_at",
         ]
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = fields
 
 
 class VendorSerializer(serializers.ModelSerializer):

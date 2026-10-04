@@ -113,3 +113,32 @@ export type Organization = {
 };
 
 export type User = { id: number; username: string; email: string; first_name: string; last_name: string };
+
+export type WebhookEvent = "invoice.approved" | "invoice.needs_review" | "invoice.rejected" | "invoice.failed";
+
+export type Webhook = {
+  id: number;
+  target_url: string;
+  description: string;
+  events: WebhookEvent[];
+  is_active: boolean;
+  signing_secret: string | null;
+  last_delivery: { status: string; status_code: number | null; at: string; event_type: string } | null;
+  created_at: string;
+};
+
+export type WebhookDelivery = {
+  id: number;
+  webhook_config: number;
+  document: number | null;
+  event_id: string;
+  event_type: string;
+  status: "pending" | "delivered" | "failed";
+  status_code: number | null;
+  attempts: number;
+  last_error: string;
+  response_ms: number | null;
+  next_attempt_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
