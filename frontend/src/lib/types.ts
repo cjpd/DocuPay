@@ -15,9 +15,22 @@ export type LineItem = {
   amount: string | null;
 };
 
+export type VendorSummary = { id: number; name: string; tax_id: string; default_currency: string; is_blocked: boolean };
+
+export type Vendor = VendorSummary & {
+  aliases: string[];
+  notes: string;
+  invoice_count: number;
+  last_invoice_at: string | null;
+  created_at: string;
+};
+
 export type ExtractedData = {
   id: number;
   invoice_number: string;
+  vendor_tax_id: string;
+  vendor: number | null;
+  vendor_detail: VendorSummary | null;
   invoice_date: string | null;
   due_date: string | null;
   vendor_name: string;
@@ -90,6 +103,7 @@ export type Organization = {
   auto_approve_threshold: number;
   auto_approve_max_amount: string | null;
   review_new_vendors: boolean;
+  my_role: string | null;
 };
 
 export type User = { id: number; username: string; email: string; first_name: string; last_name: string };

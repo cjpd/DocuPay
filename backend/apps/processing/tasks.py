@@ -61,12 +61,25 @@ def _duplicate_checker(doc: Document):
     return is_duplicate
 
 
+def _vendor_lookup(doc: Document):
+    from apps.documents.vendors import match_vendor, vendor_record
+
+    def lookup(ex):
+        return vendor_record(match_vendor(doc.organization_id, ex.vendor_name, ex.vendor_tax_id), ex.vendor_tax_id)
+
+    return lookup
+
+
 def _new_vendor_checker(doc: Document):
     """None when the organization has not enabled the rule."""
     if not doc.organization.review_new_vendors:
         return None
 
     def is_new_vendor(ex) -> bool:
+        from apps.documents.vendors import match_vendor
+
+        if match_vendor(doc.organization_id, ex.vendor_name, ex.vendor_tax_id):
+            return False
         key = dedupe_key(doc.organization_id, ex.vendor_name, "x")
         prefix = key[: key.rfind(":") + 1]
         return not (
@@ -102,6 +115,7 @@ def _validation_options(doc: Document) -> dict:
         "is_new_vendor": _new_vendor_checker(doc),
         "vendor_history": _vendor_history(doc),
         "own_names": (org.name, *org.other_names),
+        "vendor_lookup": _vendor_lookup(doc),
     }
 
 
@@ -195,6 +209,8 @@ def _save_result(doc: Document, task_id: str, doc_input, result) -> bool:
                 "invoice_date": ex.invoice_date,
                 "due_date": ex.due_date,
                 "vendor_name": ex.vendor_name or "",
+                "vendor_tax_id": ex.vendor_tax_id or "",
+                "vendor_id": getattr(_vendor_lookup(doc)(ex), "id", None),
                 "customer_name": ex.customer_name or "",
                 "purchase_order": ex.purchase_order or "",
                 "subtotal": _storable(ex.subtotal),

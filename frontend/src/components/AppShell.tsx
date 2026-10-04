@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { FileStack, Inbox, LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { Building2, FileStack, Inbox, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { session, signOut, useSession } from "@/lib/api";
 import { useMe, useOrganizations, useReviewQueue } from "@/lib/hooks";
 import { cx } from "./ui";
@@ -13,6 +13,7 @@ const NAV = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/review/", label: "Review", icon: Inbox, badge: true },
   { href: "/documents/", label: "Documents", icon: FileStack },
+  { href: "/vendors/", label: "Vendors", icon: Building2 },
   { href: "/settings/", label: "Settings", icon: Settings },
 ];
 

@@ -66,7 +66,8 @@ def test_approve_applies_corrections(setup):
     org, user, client = setup
     task = _task(org)
     resp = client.post(f"/api/documents/reviews/{task.id}/approve/",
-                       {"corrections": {"total_amount": "99.50", "invoice_number": "INV-9"}}, format="json")
+                       {"corrections": {"total_amount": "99.50", "invoice_number": "INV-9", "vendor_name": "Acme",
+                                        "invoice_date": "2026-09-01"}}, format="json")
     assert resp.status_code == 200
     task.document.refresh_from_db()
     assert task.document.status == Document.Status.APPROVED

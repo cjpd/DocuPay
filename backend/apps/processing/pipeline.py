@@ -72,6 +72,7 @@ def run_pipeline(
     is_new_vendor: Optional[Callable[[InvoiceExtraction], bool]] = None,
     vendor_history: Optional[Callable] = None,
     own_names: tuple = (),
+    vendor_lookup: Optional[Callable] = None,
     escalation_errors: tuple = (ProcessingError,),
 ) -> PipelineResult:
     """
@@ -86,7 +87,7 @@ def run_pipeline(
     def check(result: ProviderResult) -> Attempt:
         return Attempt(result, validate(result.extraction, is_duplicate=is_duplicate, max_amount=max_amount,
                                        is_new_vendor=is_new_vendor, vendor_history=vendor_history,
-                                       own_names=own_names))
+                                       own_names=own_names, vendor_lookup=vendor_lookup))
 
     attempts = []
     escalation_error = None

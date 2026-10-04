@@ -51,6 +51,7 @@ export const CHECK_LABELS: Record<string, string> = {
   vendor_history: "Matches this vendor's usual invoices",
   vendor_not_self: "Vendor is not your own company",
   amounts_verified: "The total can be verified",
+  vendor_master: "Matches your vendor list",
 };
 
 /** The same checks, worded for when they fail. */
@@ -70,6 +71,7 @@ export const FAIL_LABELS: Record<string, string> = {
   vendor_history: "Unusual for this vendor",
   vendor_not_self: "The vendor looks like your own company",
   amounts_verified: "The total could not be verified",
+  vendor_master: "Does not match your vendor list",
 };
 
 export const checkLabel = (c: Check) =>
@@ -77,6 +79,7 @@ export const checkLabel = (c: Check) =>
 
 export const FIELD_LABELS: Record<string, string> = {
   vendor_name: "Vendor",
+  vendor_tax_id: "Vendor tax ID",
   invoice_number: "Invoice number",
   invoice_date: "Invoice date",
   due_date: "Due date",

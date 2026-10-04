@@ -28,11 +28,22 @@ AMOUNT_FIELDS = ("subtotal", "discount_amount", "tax_amount", "shipping_amount",
 # second model call would only cost money.
 EXTRACTION_QUALITY_CHECKS = frozenset({
     "required_fields", "totals_math", "line_items_sum", "line_item_math", "date_order", "currency", "model_uncertain",
-    "vendor_history", "vendor_not_self", "amounts_verified",
+    "vendor_history", "vendor_not_self", "amounts_verified", "vendor_master",
 })
 # The line items must add up to auto-approve. "Subtotal + tax = total" alone is not enough:
 # a model that misses the line items (or a document whose lines do not add up) would pass it.
 AMOUNT_PROOFS = ("line_items_sum",)
+
+
+@dataclass
+class VendorRecord:
+    """The matching entry in the organization's vendor list."""
+    id: int
+    name: str
+    tax_id: str = ""
+    default_currency: str = ""
+    is_blocked: bool = False
+    matched_by: str = "name"  # "tax_id" or "name"
 
 
 @dataclass
@@ -128,12 +139,21 @@ def _is_placeholder_vendor(name) -> bool:
     return bool(name) and _re.sub(r"[^a-z]", "", name.lower()) in NOT_A_VENDOR
 
 
+FIELD_NAMES = {"vendor_name": "vendor", "invoice_number": "invoice number", "invoice_date": "invoice date",
+               "total_amount": "total"}
+
+
 def check_required(ex: InvoiceExtraction) -> Check:
     missing = [f for f in REQUIRED_FIELDS if getattr(ex, f) in (None, "")]
     if _is_placeholder_vendor(ex.vendor_name):
-        missing.insert(0, "vendor_name (found only the word \"" + ex.vendor_name + "\")")
+        missing.insert(0, "vendor_name")
+        FIELD_NAMES_LOCAL = f'vendor (found only the word "{ex.vendor_name}")'
+        return Check("required_fields", FAIL, CRITICAL,
+                     "Missing: " + ", ".join([FIELD_NAMES_LOCAL] + [FIELD_NAMES.get(m, m) for m in missing[1:]]),
+                     tuple(missing))
     if missing:
-        return Check("required_fields", FAIL, CRITICAL, "Missing: " + ", ".join(missing),
+        return Check("required_fields", FAIL, CRITICAL,
+                     "Missing: " + ", ".join(FIELD_NAMES.get(m, m) for m in missing),
                      tuple(m.split(" ", 1)[0] for m in missing))
     return Check("required_fields", PASS, CRITICAL, fields=REQUIRED_FIELDS)
 
@@ -273,6 +293,25 @@ def check_vendor_history(ex: InvoiceExtraction, history: Optional[VendorHistory]
     return Check("vendor_history", PASS, MAJOR)
 
 
+def check_vendor_master(ex: InvoiceExtraction, vendor: Optional[VendorRecord]) -> Check:
+    """Compare the invoice with the vendor list: blocked vendors, a different tax ID, a different currency."""
+    from .normalize import normalize_tax_id
+
+    if vendor is None:
+        return Check("vendor_master", SKIP, CRITICAL, "Vendor is not in your vendor list yet")
+    if vendor.is_blocked:
+        return Check("vendor_master", FAIL, CRITICAL, f"{vendor.name} is blocked in your vendor list", ("vendor_name",))
+    invoice_tax_id = normalize_tax_id(ex.vendor_tax_id)
+    if vendor.tax_id and invoice_tax_id and invoice_tax_id != vendor.tax_id:
+        return Check("vendor_master", FAIL, CRITICAL,
+                     f"The tax ID on the invoice ({invoice_tax_id}) is not the one on file for {vendor.name} "
+                     f"({vendor.tax_id})", ("vendor_tax_id",))
+    if vendor.default_currency and ex.currency and ex.currency != vendor.default_currency:
+        return Check("vendor_master", FAIL, MAJOR,
+                     f"{vendor.name} bills in {vendor.default_currency}, this invoice is in {ex.currency}", ("currency",))
+    return Check("vendor_master", PASS, CRITICAL, fields=("vendor_name",))
+
+
 def check_vendor_not_self(ex: InvoiceExtraction, own_names) -> Check:
     """The vendor must not be the organization itself: that means the model read the bill-to block.
     Names are compared without legal suffixes, so "Globex" matches "Globex Corporation"."""
@@ -303,7 +342,8 @@ def validate(ex: InvoiceExtraction, today: Optional[date] = None,
              max_amount: Optional[Decimal] = None,
              is_new_vendor: Optional[Callable[[InvoiceExtraction], bool]] = None,
              vendor_history: Optional[Callable[[InvoiceExtraction], Optional[VendorHistory]]] = None,
-             own_names: tuple = ()) -> ValidationReport:
+             own_names: tuple = (),
+             vendor_lookup: Optional[Callable[[InvoiceExtraction], Optional[VendorRecord]]] = None) -> ValidationReport:
     today = today or date.today()
     checks = [
         check_is_invoice(ex),
@@ -320,6 +360,7 @@ def validate(ex: InvoiceExtraction, today: Optional[date] = None,
         check_new_vendor(ex, is_new_vendor),
         check_vendor_history(ex, vendor_history(ex) if vendor_history and ex.vendor_name else None),
         check_vendor_not_self(ex, own_names),
+        check_vendor_master(ex, vendor_lookup(ex) if vendor_lookup else None),
     ]
     # Always give the reviewer a reason: when nothing proved the total, that is the reason.
     proved = any(c.name in AMOUNT_PROOFS and c.status == PASS for c in checks)

@@ -36,6 +36,42 @@ class Document(TimeStampedModel):
         return f"{self.doc_type or 'document'} #{self.pk}"
 
 
+class Vendor(TimeStampedModel):
+    """
+    A company that sends invoices to the organization (accounts payable master data).
+
+    Vendors are learned when a person approves an invoice, and can be edited on the Vendors page.
+    """
+
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="vendors")
+    name = models.CharField(max_length=255)
+    # normalize_vendor(name): "ACME Supplies, LLC" -> "acmesupplies". Unique per organization.
+    name_key = models.CharField(max_length=255)
+    # Other names the vendor uses on invoices, matched the same way as the name.
+    aliases = models.JSONField(default=list, blank=True)
+    tax_id = models.CharField(max_length=64, blank=True, default="")
+    default_currency = models.CharField(max_length=3, blank=True, default="")
+    # A blocked vendor's invoices always go to a person (fraud, disputes, closed accounts).
+    is_blocked = models.BooleanField(default=False)
+    notes = models.TextField(blank=True, default="")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["organization", "name_key"], name="vendor_unique_name_per_org")]
+        indexes = [models.Index(fields=["organization", "tax_id"])]
+        ordering = ["name"]
+
+    def save(self, *args, **kwargs):
+        from apps.processing.normalize import normalize_tax_id, normalize_vendor
+
+        self.name_key = normalize_vendor(self.name)
+        self.tax_id = normalize_tax_id(self.tax_id)
+        self.default_currency = (self.default_currency or "").upper()[:3]
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class ExtractedData(TimeStampedModel):
     document = models.OneToOneField(Document, on_delete=models.CASCADE, related_name="extracted_data")
     raw_extraction = models.JSONField(default=dict)
@@ -43,6 +79,9 @@ class ExtractedData(TimeStampedModel):
     invoice_date = models.DateField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
     vendor_name = models.CharField(max_length=255, blank=True, default="")
+    vendor_tax_id = models.CharField(max_length=64, blank=True, default="")
+    # The matched vendor from the vendor list, if any.
+    vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True, blank=True, related_name="invoices")
     customer_name = models.CharField(max_length=255, blank=True, default="")
     purchase_order = models.CharField(max_length=128, blank=True, default="")
     subtotal = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
@@ -59,7 +98,7 @@ class ExtractedData(TimeStampedModel):
 
     # Fields a reviewer may correct. Anything else in a correction is rejected.
     EDITABLE_FIELDS = (
-        "invoice_number", "invoice_date", "due_date", "vendor_name", "customer_name", "purchase_order",
+        "invoice_number", "invoice_date", "due_date", "vendor_name", "vendor_tax_id", "customer_name", "purchase_order",
         "subtotal", "tax_amount", "total_amount", "currency", "line_items",
     )
 

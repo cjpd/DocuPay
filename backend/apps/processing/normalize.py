@@ -19,3 +19,8 @@ def normalize_invoice_number(number: str) -> str:
     text = _INVOICE_PREFIX.sub("", text) or text
     text = text.replace("o", "0") if re.fullmatch(r"[0-9o]+", text) else text
     return text.lstrip("0") or "0"
+
+
+def normalize_tax_id(tax_id: str) -> str:
+    """"DE 811 234 567" and "de811234567" give the same key."""
+    return re.sub(r"[^0-9A-Z]", "", (tax_id or "").upper())

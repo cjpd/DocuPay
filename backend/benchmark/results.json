@@ -13,7 +13,8 @@
       "own_names",
       "provider",
       "threshold",
-      "vendor_history"
+      "vendor_history",
+      "vendor_lookup"
     ]
   },
   "ingest": {
@@ -30,7 +31,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 12.9
+        "ms": 13.1
       },
       {
         "id": "clean_us_modern_usdate",
@@ -44,7 +45,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 2.1
       },
       {
         "id": "clean_us_mon_date",
@@ -58,7 +59,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 1.9
       },
       {
         "id": "clean_us_long_date_discount",
@@ -72,7 +73,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.0
       },
       {
         "id": "clean_us_shipping",
@@ -86,7 +87,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 1.9
       },
       {
         "id": "clean_us_code_currency",
@@ -100,7 +101,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.0
       },
       {
         "id": "clean_us_amount_only",
@@ -114,7 +115,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 1.8
       },
       {
         "id": "clean_eu_decimal_comma",
@@ -128,7 +129,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.0
       },
       {
         "id": "clean_eu_german_labels",
@@ -142,7 +143,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.0
       },
       {
         "id": "clean_eu_slash_date",
@@ -156,7 +157,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 1.9
       },
       {
         "id": "clean_eu_slash_date_unambiguous",
@@ -170,7 +171,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 1.9
       },
       {
         "id": "clean_eu_discount_shipping_tax",
@@ -198,7 +199,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.2
       },
       {
         "id": "clean_gb_dmy_mon",
@@ -212,7 +213,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.2
       },
       {
         "id": "clean_minimal_layout",
@@ -226,7 +227,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 2.1
       },
       {
         "id": "clean_multipage_2",
@@ -254,7 +255,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 4.5
+        "ms": 4.2
       },
       {
         "id": "clean_many_lines_single_page",
@@ -268,7 +269,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.5
+        "ms": 2.3
       },
       {
         "id": "clean_eu_vat_inclusive",
@@ -296,7 +297,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 0.4
+        "ms": 0.3
       },
       {
         "id": "clean_text_gbp",
@@ -310,7 +311,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 0.2
+        "ms": 0.1
       },
       {
         "id": "scan_png_us",
@@ -338,7 +339,7 @@
         "image_bytes": 81889,
         "error": null,
         "content_loss": null,
-        "ms": 4.1
+        "ms": 4.0
       },
       {
         "id": "scan_pdf_1page",
@@ -352,7 +353,7 @@
         "image_bytes": 152963,
         "error": null,
         "content_loss": null,
-        "ms": 26.7
+        "ms": 26.8
       },
       {
         "id": "scan_pdf_2page",
@@ -366,7 +367,7 @@
         "image_bytes": 325951,
         "error": null,
         "content_loss": null,
-        "ms": 43.5
+        "ms": 44.5
       },
       {
         "id": "scan_pdf_with_scanner_stamp",
@@ -380,7 +381,7 @@
         "image_bytes": 143230,
         "error": null,
         "content_loss": null,
-        "ms": 20.0
+        "ms": 22.7
       },
       {
         "id": "scan_tiff_2page",
@@ -394,7 +395,7 @@
         "image_bytes": 198071,
         "error": null,
         "content_loss": null,
-        "ms": 24.7
+        "ms": 24.4
       },
       {
         "id": "mixed_text_then_scan",
@@ -408,7 +409,7 @@
         "image_bytes": 155019,
         "error": null,
         "content_loss": null,
-        "ms": 24.4
+        "ms": 20.9
       },
       {
         "id": "neg_total_mismatch",
@@ -422,7 +423,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.0
       },
       {
         "id": "neg_total_mismatch_no_subtotal",
@@ -450,7 +451,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 2.0
       },
       {
         "id": "neg_line_qty_price_mismatch",
@@ -506,7 +507,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 1.9
       },
       {
         "id": "neg_credit_note",
@@ -534,7 +535,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 1.7
+        "ms": 1.6
       },
       {
         "id": "neg_not_invoice_quote",
@@ -548,7 +549,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 2.1
       },
       {
         "id": "neg_not_invoice_purchase_order",
@@ -562,7 +563,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 1.9
+        "ms": 2.0
       },
       {
         "id": "neg_duplicate_resubmission",
@@ -576,7 +577,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 2.0
       },
       {
         "id": "ingest_21_pages",
@@ -586,7 +587,7 @@
         "route": "error",
         "error": "PermanentProcessingError: The PDF has 21 pages. The limit is 20.",
         "content_loss": null,
-        "ms": 0.3
+        "ms": 0.2
       },
       {
         "id": "ingest_empty_file",
@@ -596,7 +597,7 @@
         "route": "error",
         "error": "PermanentProcessingError: File is empty",
         "content_loss": null,
-        "ms": 0.0
+        "ms": 0.1
       },
       {
         "id": "ingest_truncated_pdf",
@@ -616,7 +617,7 @@
         "route": "error",
         "error": "PermanentProcessingError: Unsupported file type. Upload a PDF, an image or a text file.",
         "content_loss": null,
-        "ms": 0.1
+        "ms": 0.0
       },
       {
         "id": "ingest_latin1_text",
@@ -644,7 +645,7 @@
         "image_bytes": 24757,
         "error": null,
         "content_loss": null,
-        "ms": 5.1
+        "ms": 4.8
       },
       {
         "id": "ingest_exif_rotated_photo",
@@ -658,7 +659,7 @@
         "image_bytes": 33239,
         "error": null,
         "content_loss": null,
-        "ms": 4.6
+        "ms": 4.5
       },
       {
         "id": "real_invoice_1.jpg",
@@ -3216,6 +3217,43 @@
           "mixed_text_then_scan"
         ]
       },
+      "wrong_vendor_tax_id": {
+        "n": 28,
+        "false_approved": 28,
+        "false_approve_rate": 1.0,
+        "arithmetic_detectable": false,
+        "caught_by": {},
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_modern_usdate",
+          "clean_us_mon_date",
+          "clean_us_long_date_discount",
+          "clean_us_shipping",
+          "clean_us_code_currency",
+          "clean_us_amount_only",
+          "clean_eu_decimal_comma",
+          "clean_eu_german_labels",
+          "clean_eu_slash_date",
+          "clean_eu_slash_date_unambiguous",
+          "clean_eu_discount_shipping_tax",
+          "clean_gb_vat_mon",
+          "clean_gb_dmy_mon",
+          "clean_minimal_layout",
+          "clean_multipage_2",
+          "clean_multipage_3_eur",
+          "clean_many_lines_single_page",
+          "clean_eu_vat_inclusive",
+          "clean_text_usd",
+          "clean_text_gbp",
+          "scan_png_us",
+          "scan_jpg_eu",
+          "scan_pdf_1page",
+          "scan_pdf_2page",
+          "scan_pdf_with_scanner_stamp",
+          "scan_tiff_2page",
+          "mixed_text_then_scan"
+        ]
+      },
       "net_reported_as_total": {
         "n": 24,
         "false_approved": 0,
@@ -3249,9 +3287,9 @@
       }
     },
     "overall_false_approve": {
-      "k": 149,
-      "n": 373,
-      "rate": 0.399
+      "k": 177,
+      "n": 401,
+      "rate": 0.441
     },
     "arithmetic_detectable_false_approve": {
       "k": 1,
@@ -3259,15 +3297,15 @@
       "rate": 0.005
     },
     "not_arithmetic_detectable_false_approve": {
-      "k": 148,
-      "n": 185,
-      "rate": 0.8
+      "k": 176,
+      "n": 213,
+      "rate": 0.826
     },
     "escalation": {
-      "cases": 373,
+      "cases": 401,
       "escalated": 224,
       "recovered_auto_approved_correct": 224,
-      "approved_wrong_value": 149
+      "approved_wrong_value": 177
     }
   },
   "corruption_steady_state": {
@@ -3352,7 +3390,8 @@
         "false_approve_rate": 0.0,
         "arithmetic_detectable": false,
         "caught_by": {
-          "vendor_history": 28
+          "vendor_history": 28,
+          "vendor_master": 28
         },
         "approved_cases": []
       },
@@ -3435,6 +3474,16 @@
         },
         "approved_cases": []
       },
+      "wrong_vendor_tax_id": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "vendor_master": 28
+        },
+        "approved_cases": []
+      },
       "net_reported_as_total": {
         "n": 24,
         "false_approved": 0,
@@ -3469,8 +3518,8 @@
     },
     "overall_false_approve": {
       "k": 37,
-      "n": 373,
-      "rate": 0.099
+      "n": 401,
+      "rate": 0.092
     },
     "arithmetic_detectable_false_approve": {
       "k": 1,
@@ -3479,13 +3528,13 @@
     },
     "not_arithmetic_detectable_false_approve": {
       "k": 36,
-      "n": 185,
-      "rate": 0.195
+      "n": 213,
+      "rate": 0.169
     },
     "escalation": {
-      "cases": 373,
-      "escalated": 336,
-      "recovered_auto_approved_correct": 336,
+      "cases": 401,
+      "escalated": 364,
+      "recovered_auto_approved_correct": 364,
       "approved_wrong_value": 37
     }
   },
@@ -3548,56 +3597,56 @@
       "threshold": 0.8,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.399,
+      "corruption_false_approve": 0.441,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.85,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.399,
+      "corruption_false_approve": 0.441,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.9,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.399,
+      "corruption_false_approve": 0.441,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.91,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.399,
+      "corruption_false_approve": 0.441,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.92,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.399,
+      "corruption_false_approve": 0.441,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.95,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.399,
+      "corruption_false_approve": 0.441,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.99,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.399,
+      "corruption_false_approve": 0.441,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 1.0,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.399,
+      "corruption_false_approve": 0.441,
       "detectable_corruption_false_approve": 0.005
     }
   ]

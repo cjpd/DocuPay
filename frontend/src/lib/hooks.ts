@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
-import type { Doc, Organization, Page, ReviewTask, Stats, User } from "./types";
+import type { Doc, Organization, Page, ReviewTask, Stats, User, Vendor } from "./types";
 
 const ACTIVE: Doc["status"][] = ["pending", "processing"];
 const hasActive = (docs?: Doc[]) => !!docs?.some((d) => ACTIVE.includes(d.status));
@@ -128,5 +128,32 @@ export function useUpdateOrganization() {
     mutationFn: ({ id, ...patch }: Partial<Organization> & { id: number }) =>
       api<Organization>(`/api/organizations/${id}/`, { method: "PATCH", body: patch }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["orgs"] }),
+  });
+}
+
+export function useVendors(q: string, page: number) {
+  const params = new URLSearchParams({ page: String(page) });
+  if (q) params.set("q", q);
+  return useQuery({
+    queryKey: ["vendors", q, page],
+    queryFn: () => api<Page<Vendor>>(`/api/documents/vendors/?${params}`),
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useSaveVendor() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: Partial<Vendor> & { id?: number }) =>
+      api<Vendor>(id ? `/api/documents/vendors/${id}/` : "/api/documents/vendors/", { method: id ? "PATCH" : "POST", body }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["vendors"] }),
+  });
+}
+
+export function useDeleteVendor() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api(`/api/documents/vendors/${id}/`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["vendors"] }),
   });
 }

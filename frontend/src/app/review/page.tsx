@@ -105,7 +105,7 @@ function QueueList({ tasks, current, onPick }: { tasks: ReviewTask[]; current: n
 }
 
 const EDITABLE: (keyof ExtractedData)[] = [
-  "vendor_name", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax_amount", "total_amount", "purchase_order",
+  "vendor_name", "vendor_tax_id", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax_amount", "total_amount", "purchase_order",
 ];
 const DATE_FIELDS = new Set(["invoice_date", "due_date"]);
 const MONEY_FIELDS = new Set(["subtotal", "tax_amount", "total_amount"]);
@@ -169,6 +169,7 @@ function Decision({ task, position, onDone, onNext, onPrev }: {
           <span>{position}</span><span>Received {ago(doc.created_at)}</span>
         </div>
         <h2 className="mt-1 truncate text-lg font-semibold">{data?.vendor_name || doc.file_name}</h2>
+        <VendorBadge data={data} />
         <p className="font-mono text-2xl font-semibold tabular">{money(values.total_amount, values.currency || undefined)}</p>
       </div>
 
@@ -228,6 +229,18 @@ function Decision({ task, position, onDone, onNext, onPrev }: {
         </Button>
       </div>
     </Card>
+  );
+}
+
+function VendorBadge({ data }: { data: ExtractedData | null }) {
+  if (!data?.vendor_name) return null;
+  const v = data.vendor_detail;
+  if (!v) return <p className="mt-0.5 text-xs text-muted">New vendor: not in your vendor list yet. Approving adds it.</p>;
+  return (
+    <p className="mt-0.5 flex items-center gap-1.5 text-xs">
+      {v.is_blocked ? <Badge tone="bad">Blocked vendor</Badge> : <Badge tone="ok">Known vendor</Badge>}
+      <a href="/vendors/" className="text-muted hover:underline">{v.name}{v.tax_id ? ` · ${v.tax_id}` : ""}</a>
+    </p>
   );
 }
 

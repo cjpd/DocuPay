@@ -33,6 +33,7 @@ Code: `backend/apps/processing/`.
 - **Overview:** real numbers from `/api/documents/stats/`: the share handled without a person, invoices waiting for you, approved value and processing cost.
 - **Review:** the document page next to the fields, the reasons it needs you in plain words, inline corrections, and keyboard shortcuts (A approve, R reject, J/K next/previous).
 - **Documents:** upload by drag and drop, live progress, filters and search, retry failed documents, **Export CSV** (approved invoices by default; one row per invoice or per line item; by approval date). API: `GET /api/documents/export/?level=invoice|line&status=approved|all&from=YYYY-MM-DD&to=YYYY-MM-DD`.
+- **Vendors:** the vendor list, learned from approved invoices (name, other names, tax ID, usual currency). Invoices are checked against it: a different tax ID or a blocked vendor always goes to a person, and a different currency is flagged. Only owners and admins can edit or block vendors.
 - **Settings:** an amount limit and the "review new vendors" rule.
 
 Set `NEXT_PUBLIC_API_BASE` to the API URL at build time. Users in several companies pick one in the sidebar (sent as `X-Organization-ID`).

@@ -520,6 +520,13 @@ def corruptions(gt):
                     li[k] = str(Decimal(li[k]) * 10)
     mk("consistent_x10_scale", scale10, False)
 
+    def wrong_tax_id(d):  # one digit misread, or a fraudster's own tax ID on a known vendor's invoice
+        if not d.get("vendor_tax_id"):
+            return False
+        t = d["vendor_tax_id"]
+        d["vendor_tax_id"] = t[:-1] + ("0" if t[-1] != "0" else "1")
+    mk("wrong_vendor_tax_id", wrong_tax_id, False)
+
     def net_as_total(d):  # subtotal dropped and the net amount reported as the total
         if not d.get("subtotal") or not d.get("tax_amount") or Decimal(d["tax_amount"]) == 0:
             return False
@@ -551,6 +558,13 @@ def steady_state_context(gt: dict) -> dict:
     ctx = {}
     if "vendor_history" in _PIPELINE_PARAMS and total > 0:
         ctx["vendor_history"] = lambda ex: history
+    if "vendor_lookup" in _PIPELINE_PARAMS and gt.get("vendor_name"):
+        from apps.processing.normalize import normalize_tax_id
+        from apps.processing.validation import VendorRecord
+
+        record = VendorRecord(id=1, name=gt["vendor_name"], tax_id=normalize_tax_id(gt.get("vendor_tax_id") or ""),
+                              default_currency=gt.get("currency") or "")
+        ctx["vendor_lookup"] = lambda ex: record
     if "own_names" in _PIPELINE_PARAMS and gt.get("customer_name"):
         short = _re.sub(r"[,.]?\s+(Inc|LLC|Ltd|Corporation|Corp|GmbH|SA|BV|AG|Co)\.?$", "", gt["customer_name"])
         ctx["own_names"] = (short,)
@@ -659,7 +673,7 @@ def summary(res):
         lines.append(f"CORRUPTIONS, STEADY STATE (3 approved invoices per vendor, median 0.5-2x off; org name without suffix)  overall false-approve "
                      f"{pct(c['overall_false_approve'])}; not detectable by arithmetic {pct(c['not_arithmetic_detectable_false_approve'])}")
         for name, t in sorted(c["types"].items(), key=lambda kv: -kv[1]["false_approve_rate"]):
-            if t["false_approve_rate"] or name in ("wrong_currency", "vendor_is_customer", "consistent_x100_scale"):
+            if t["false_approve_rate"] or name in ("wrong_currency", "vendor_is_customer", "consistent_x100_scale", "wrong_vendor_tax_id"):
                 lines.append(f"  {name:<26} n={t['n']:<3} false-approve={t['false_approve_rate']:<5} caught_by={t['caught_by']}")
     d = res["duplicates"]
     lines.append(f"DUPLICATE VARIANTS ({d['key_source']}): caught {d['caught']}: " + ", ".join(

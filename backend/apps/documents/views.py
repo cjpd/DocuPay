@@ -12,12 +12,13 @@ from rest_framework.response import Response
 
 from apps.organizations.permissions import IsOrgMember
 from apps.organizations.scoping import OrgScopedMixin, active_organization_id
-from .models import CorrectionExample, Document, ExtractedData, ReviewTask, WebhookConfig, WebhookDeliveryLog
+from .models import CorrectionExample, Document, ExtractedData, ReviewTask, Vendor, WebhookConfig, WebhookDeliveryLog
 from .serializers import (
     CorrectionExampleSerializer,
     DocumentSerializer,
     ExtractedDataSerializer,
     ReviewTaskSerializer,
+    VendorSerializer,
     WebhookConfigSerializer,
     WebhookDeliveryLogSerializer,
 )
@@ -301,7 +302,24 @@ class ReviewTaskViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
         corrected = ExtractedDataSerializer(extracted, data=corrections, partial=True)
         if not corrected.is_valid():
             return Response(corrected.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Approved data goes to exports and accounting: the essentials must be there.
+        merged = {f: corrected.validated_data.get(f, getattr(extracted, f))
+                  for f in ("vendor_name", "invoice_number", "invoice_date", "total_amount")}
+        labels = {"vendor_name": "vendor", "invoice_number": "invoice number", "invoice_date": "invoice date",
+                  "total_amount": "total"}
+        empty = [labels[f] for f, v in merged.items() if v in (None, "")]
+        if empty:
+            return Response({"detail": f"Fill in the {', '.join(empty)} before approving."},
+                            status=status.HTTP_400_BAD_REQUEST)
         corrected.save()
+        extracted.refresh_from_db()
+        # Corrections can change the vendor or the number: keep duplicate detection right.
+        from apps.processing.tasks import dedupe_key
+        from .vendors import learn_from_approval
+
+        extracted.dedupe_key = dedupe_key(task.document.organization_id, extracted.vendor_name, extracted.invoice_number)
+        extracted.save(update_fields=["dedupe_key"])
+        learn_from_approval(extracted)
 
         # store correction example
         CorrectionExample.objects.create(
@@ -332,6 +350,57 @@ class ReviewTaskViewSet(OrgScopedMixin, viewsets.ReadOnlyModelViewSet):
         task.document.status = Document.Status.REQUIRES_REVIEW
         task.document.save(update_fields=["status"])
         return Response(ReviewTaskSerializer(task).data)
+
+
+class VendorViewSet(OrgScopedMixin, viewsets.ModelViewSet):
+    """The vendor list. Every member reads it; only owners and admins change it (fraud control)."""
+
+    serializer_class = VendorSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOrgMember]
+
+    def get_queryset(self):
+        from django.db.models import Count, Max
+
+        queryset = self.scope(Vendor.objects.all()).annotate(
+            invoice_count=Count("invoices"), last_invoice_at=Max("invoices__document__created_at"),
+        )
+        q = self.request.query_params.get("q", "").strip()
+        if q:
+            queryset = queryset.filter(Q(name__icontains=q) | Q(tax_id__icontains=q.replace(" ", "").upper()))
+        if self.request.query_params.get("blocked") == "1":
+            queryset = queryset.filter(is_blocked=True)
+        return queryset.order_by("name")
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        obj_org = getattr(getattr(self, "_object", None), "organization_id", None)
+        context["organization_id"] = obj_org or active_organization_id(self.request)
+        return context
+
+    def get_object(self):
+        self._object = super().get_object()
+        return self._object
+
+    def _require_admin(self, org_id):
+        from rest_framework.exceptions import PermissionDenied
+
+        from apps.organizations.scoping import has_role
+
+        if not has_role(self.request.user, org_id):
+            raise PermissionDenied("Only an owner or admin can change the vendor list.")
+
+    def perform_create(self, serializer):
+        org_id = active_organization_id(self.request, require=True)
+        self._require_admin(org_id)
+        serializer.save(organization_id=org_id)
+
+    def perform_update(self, serializer):
+        self._require_admin(serializer.instance.organization_id)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        self._require_admin(instance.organization_id)
+        instance.delete()
 
 
 class WebhookConfigViewSet(OrgScopedMixin, viewsets.ModelViewSet):
