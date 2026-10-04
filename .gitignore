@@ -22,3 +22,9 @@ backend/media/
 
 # Keep the env template
 !.env.example
+
+# Frontend build output
+frontend/out/
+frontend/tsconfig.tsbuildinfo
+frontend/next-env.d.ts
+dump.rdb

@@ -28,6 +28,18 @@ Code: `backend/apps/processing/`.
 4. **Escalate** (`pipeline.py`): if the fast result cannot auto-approve, the strong model runs once. If it still fails, the document goes to human review with the failed checks.
 5. **Task** (`tasks.py`): retries transient provider errors with backoff, sets `FAILED` with a message on permanent errors, is idempotent, and runs on its own `extraction` queue. The model, tokens and estimated cost of each attempt are saved in `Document.processing_meta`.
 
+## Frontend
+`frontend/` is a Next.js 16 / React 19 / Tailwind 4 app exported as static files (`npm run build` writes `out/`), so it can be served from a CDN or S3 with no Node server.
+- **Overview:** real numbers from `/api/documents/stats/`: the share handled without a person, invoices waiting for you, approved value and processing cost.
+- **Review:** the document page next to the fields, the reasons it needs you in plain words, inline corrections, and keyboard shortcuts (A approve, R reject, J/K next/previous).
+- **Documents:** upload by drag and drop, live progress, filters and search, retry failed documents.
+- **Settings:** an amount limit and the "review new vendors" rule.
+
+Set `NEXT_PUBLIC_API_BASE` to the API URL at build time. Users in several companies pick one in the sidebar (sent as `X-Organization-ID`).
+
+## Benchmark
+`backend/benchmark/` holds an offline benchmark (40 labeled invoices, 373 injected extraction errors) and the evaluator's report (`REPORT.md`). Run `backend/.venv/bin/python backend/benchmark/run.py`; add `--provider anthropic` with an API key to measure real model accuracy.
+
 ## Tests
 ```
 cd backend

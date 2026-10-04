@@ -30,7 +30,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 13.7
+        "ms": 13.0
       },
       {
         "id": "clean_us_modern_usdate",
@@ -44,7 +44,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 1.9
       },
       {
         "id": "clean_us_mon_date",
@@ -58,7 +58,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 2.1
       },
       {
         "id": "clean_us_long_date_discount",
@@ -72,7 +72,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 2.1
       },
       {
         "id": "clean_us_shipping",
@@ -86,7 +86,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 1.9
+        "ms": 2.1
       },
       {
         "id": "clean_us_code_currency",
@@ -100,7 +100,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.0
       },
       {
         "id": "clean_us_amount_only",
@@ -114,7 +114,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 1.9
       },
       {
         "id": "clean_eu_decimal_comma",
@@ -128,7 +128,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.3
+        "ms": 2.0
       },
       {
         "id": "clean_eu_german_labels",
@@ -142,7 +142,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.5
+        "ms": 2.0
       },
       {
         "id": "clean_eu_slash_date",
@@ -156,7 +156,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 1.9
       },
       {
         "id": "clean_eu_slash_date_unambiguous",
@@ -170,7 +170,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 1.9
       },
       {
         "id": "clean_eu_discount_shipping_tax",
@@ -184,7 +184,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 2.0
       },
       {
         "id": "clean_gb_vat_mon",
@@ -198,7 +198,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 1.9
       },
       {
         "id": "clean_gb_dmy_mon",
@@ -212,7 +212,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.1
+        "ms": 2.0
       },
       {
         "id": "clean_minimal_layout",
@@ -226,7 +226,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.2
+        "ms": 2.0
       },
       {
         "id": "clean_multipage_2",
@@ -240,7 +240,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 3.5
+        "ms": 3.1
       },
       {
         "id": "clean_multipage_3_eur",
@@ -254,7 +254,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 4.8
+        "ms": 4.4
       },
       {
         "id": "clean_many_lines_single_page",
@@ -268,7 +268,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.9
+        "ms": 2.5
       },
       {
         "id": "clean_eu_vat_inclusive",
@@ -282,7 +282,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.3
+        "ms": 2.0
       },
       {
         "id": "clean_text_usd",
@@ -296,7 +296,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 0.4
+        "ms": 0.3
       },
       {
         "id": "clean_text_gbp",
@@ -324,7 +324,7 @@
         "image_bytes": 41421,
         "error": null,
         "content_loss": null,
-        "ms": 13.8
+        "ms": 12.0
       },
       {
         "id": "scan_jpg_eu",
@@ -338,7 +338,7 @@
         "image_bytes": 81889,
         "error": null,
         "content_loss": null,
-        "ms": 4.6
+        "ms": 4.0
       },
       {
         "id": "scan_pdf_1page",
@@ -352,7 +352,7 @@
         "image_bytes": 152963,
         "error": null,
         "content_loss": null,
-        "ms": 25.9
+        "ms": 26.2
       },
       {
         "id": "scan_pdf_2page",
@@ -366,7 +366,7 @@
         "image_bytes": 325951,
         "error": null,
         "content_loss": null,
-        "ms": 42.9
+        "ms": 42.8
       },
       {
         "id": "scan_pdf_with_scanner_stamp",
@@ -380,7 +380,7 @@
         "image_bytes": 143230,
         "error": null,
         "content_loss": null,
-        "ms": 19.5
+        "ms": 19.3
       },
       {
         "id": "scan_tiff_2page",
@@ -394,7 +394,7 @@
         "image_bytes": 198071,
         "error": null,
         "content_loss": null,
-        "ms": 25.6
+        "ms": 25.5
       },
       {
         "id": "mixed_text_then_scan",
@@ -408,7 +408,7 @@
         "image_bytes": 155019,
         "error": null,
         "content_loss": null,
-        "ms": 24.8
+        "ms": 26.0
       },
       {
         "id": "neg_total_mismatch",
@@ -450,7 +450,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 2.2
       },
       {
         "id": "neg_line_qty_price_mismatch",
@@ -478,7 +478,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 2.1
       },
       {
         "id": "neg_due_before_invoice",
@@ -492,7 +492,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 1.9
       },
       {
         "id": "neg_future_invoice_date",
@@ -506,7 +506,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.0
+        "ms": 1.9
       },
       {
         "id": "neg_credit_note",
@@ -520,7 +520,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 1.8
+        "ms": 1.9
       },
       {
         "id": "neg_not_invoice_letter",
@@ -576,7 +576,7 @@
         "image_bytes": 0,
         "error": null,
         "content_loss": null,
-        "ms": 2.3
+        "ms": 2.1
       },
       {
         "id": "ingest_21_pages",
@@ -586,7 +586,7 @@
         "route": "error",
         "error": "PermanentProcessingError: The PDF has 21 pages. The limit is 20.",
         "content_loss": null,
-        "ms": 0.2
+        "ms": 0.1
       },
       {
         "id": "ingest_empty_file",
@@ -644,7 +644,7 @@
         "image_bytes": 24757,
         "error": null,
         "content_loss": null,
-        "ms": 5.1
+        "ms": 4.8
       },
       {
         "id": "ingest_exif_rotated_photo",
@@ -658,7 +658,7 @@
         "image_bytes": 33239,
         "error": null,
         "content_loss": null,
-        "ms": 5.5
+        "ms": 4.4
       },
       {
         "id": "real_invoice_1.jpg",
@@ -708,14 +708,15 @@
         "content_loss": null,
         "heuristic": {
           "decision": "review",
-          "score": 0.3846,
+          "score": 0.3125,
           "vendor": "asdfadfasdadfasdf",
           "number": null,
           "total": null,
           "failed": [
             "is_invoice",
             "required_fields",
-            "currency"
+            "currency",
+            "amounts_verified"
           ]
         }
       },
@@ -733,14 +734,15 @@
         "content_loss": null,
         "heuristic": {
           "decision": "review",
-          "score": 0.3846,
+          "score": 0.3125,
           "vendor": "asdfadfasdadfasdf",
           "number": null,
           "total": null,
           "failed": [
             "is_invoice",
             "required_fields",
-            "currency"
+            "currency",
+            "amounts_verified"
           ]
         }
       }
@@ -777,7 +779,7 @@
           "failed": [],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -796,7 +798,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_us_modern_usdate",
@@ -809,7 +811,7 @@
             "title_first"
           ],
           "decision": "review",
-          "score": 0.9286,
+          "score": 0.9355,
           "amounts_proved": true,
           "failed": [
             "model_uncertain"
@@ -853,7 +855,7 @@
           "failed": [],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -872,7 +874,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_us_long_date_discount",
@@ -891,7 +893,7 @@
           "failed": [],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -910,7 +912,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_us_shipping",
@@ -924,7 +926,7 @@
             "title_first"
           ],
           "decision": "review",
-          "score": 0.9286,
+          "score": 0.9355,
           "amounts_proved": true,
           "failed": [
             "model_uncertain"
@@ -962,14 +964,14 @@
             "no_symbol"
           ],
           "decision": "review",
-          "score": 0.8636,
+          "score": 0.88,
           "amounts_proved": true,
           "failed": [
             "required_fields"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -999,13 +1001,15 @@
             "usd",
             "no_qty_columns"
           ],
-          "decision": "auto_approve",
-          "score": 1.0,
-          "amounts_proved": true,
-          "failed": [],
+          "decision": "review",
+          "score": 0.8889,
+          "amounts_proved": false,
+          "failed": [
+            "amounts_verified"
+          ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1024,7 +1028,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_eu_decimal_comma",
@@ -1038,12 +1042,14 @@
             "vat"
           ],
           "decision": "review",
-          "score": 1.0,
+          "score": 0.8889,
           "amounts_proved": false,
-          "failed": [],
+          "failed": [
+            "amounts_verified"
+          ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1051,9 +1057,9 @@
             "invoice_date": "correct",
             "due_date": "correct",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "na",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "missed",
@@ -1062,7 +1068,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_eu_german_labels",
@@ -1075,14 +1081,15 @@
             "german"
           ],
           "decision": "review",
-          "score": 0.8125,
+          "score": 0.6842,
           "amounts_proved": false,
           "failed": [
-            "required_fields"
+            "required_fields",
+            "amounts_verified"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1114,15 +1121,14 @@
             "eu_slash_date_ambiguous"
           ],
           "decision": "review",
-          "score": 0.84,
-          "amounts_proved": false,
+          "score": 0.9355,
+          "amounts_proved": true,
           "failed": [
-            "line_items_sum",
             "model_uncertain"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1130,9 +1136,9 @@
             "invoice_date": "wrong",
             "due_date": "wrong",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "na",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "correct",
@@ -1154,12 +1160,14 @@
             "eu_slash_date"
           ],
           "decision": "review",
-          "score": 1.0,
+          "score": 0.8889,
           "amounts_proved": false,
-          "failed": [],
+          "failed": [
+            "amounts_verified"
+          ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1167,9 +1175,9 @@
             "invoice_date": "correct",
             "due_date": "correct",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "na",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "missed",
@@ -1178,7 +1186,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_eu_discount_shipping_tax",
@@ -1193,12 +1201,14 @@
             "vat"
           ],
           "decision": "review",
-          "score": 1.0,
+          "score": 0.8889,
           "amounts_proved": false,
-          "failed": [],
+          "failed": [
+            "amounts_verified"
+          ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1206,9 +1216,9 @@
             "invoice_date": "correct",
             "due_date": "correct",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "correct",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "correct",
             "total_amount": "correct",
             "line_item_count": "missed",
@@ -1217,7 +1227,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_gb_vat_mon",
@@ -1229,15 +1239,13 @@
             "vat",
             "mon_date"
           ],
-          "decision": "review",
-          "score": 0.92,
-          "amounts_proved": false,
-          "failed": [
-            "line_items_sum"
-          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1245,9 +1253,9 @@
             "invoice_date": "correct",
             "due_date": "correct",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "na",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "correct",
@@ -1256,7 +1264,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_gb_dmy_mon",
@@ -1269,14 +1277,14 @@
             "shipping"
           ],
           "decision": "review",
-          "score": 0.8846,
+          "score": 0.8966,
           "amounts_proved": true,
           "failed": [
             "required_fields"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1308,7 +1316,7 @@
             "terse_labels"
           ],
           "decision": "review",
-          "score": 0.8846,
+          "score": 0.8966,
           "amounts_proved": true,
           "failed": [
             "required_fields"
@@ -1351,7 +1359,7 @@
           "failed": [],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1370,7 +1378,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_multipage_3_eur",
@@ -1384,12 +1392,14 @@
             "discount"
           ],
           "decision": "review",
-          "score": 1.0,
+          "score": 0.8889,
           "amounts_proved": false,
-          "failed": [],
+          "failed": [
+            "amounts_verified"
+          ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1397,9 +1407,9 @@
             "invoice_date": "correct",
             "due_date": "correct",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "correct",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "missed",
@@ -1408,7 +1418,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_many_lines_single_page",
@@ -1458,12 +1468,14 @@
             "no_subtotal"
           ],
           "decision": "review",
-          "score": 1.0,
+          "score": 0.875,
           "amounts_proved": false,
-          "failed": [],
+          "failed": [
+            "amounts_verified"
+          ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1473,7 +1485,7 @@
             "currency": "correct",
             "subtotal": "na",
             "discount_amount": "na",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "missed",
@@ -1482,7 +1494,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "clean_text_usd",
@@ -1774,14 +1786,14 @@
             "totals_dont_add_up"
           ],
           "decision": "review",
-          "score": 0.8929,
+          "score": 0.9032,
           "amounts_proved": true,
           "failed": [
             "totals_math"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1800,7 +1812,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "neg_total_mismatch_no_subtotal",
@@ -1812,14 +1824,15 @@
             "no_subtotal"
           ],
           "decision": "review",
-          "score": 0.92,
+          "score": 0.8214,
           "amounts_proved": false,
           "failed": [
-            "line_items_sum"
+            "line_items_sum",
+            "amounts_verified"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1838,7 +1851,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "neg_lines_dont_sum",
@@ -1849,12 +1862,14 @@
             "line_items_dont_sum"
           ],
           "decision": "review",
-          "score": 1.0,
+          "score": 0.8889,
           "amounts_proved": false,
-          "failed": [],
+          "failed": [
+            "amounts_verified"
+          ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1862,9 +1877,9 @@
             "invoice_date": "correct",
             "due_date": "correct",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "na",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "missed",
@@ -1873,7 +1888,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "neg_line_qty_price_mismatch",
@@ -1884,14 +1899,14 @@
             "line_math_wrong"
           ],
           "decision": "review",
-          "score": 0.9286,
+          "score": 0.9355,
           "amounts_proved": true,
           "failed": [
             "line_item_math"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1910,7 +1925,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "neg_missing_invoice_number",
@@ -1921,14 +1936,14 @@
             "missing_invoice_number"
           ],
           "decision": "review",
-          "score": 0.88,
+          "score": 0.8929,
           "amounts_proved": true,
           "failed": [
             "required_fields"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "na",
@@ -1947,7 +1962,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "neg_due_before_invoice",
@@ -1958,14 +1973,15 @@
             "due_before_invoice_date"
           ],
           "decision": "review",
-          "score": 0.9048,
+          "score": 0.8148,
           "amounts_proved": false,
           "failed": [
-            "date_order"
+            "date_order",
+            "amounts_verified"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -1973,9 +1989,9 @@
             "invoice_date": "correct",
             "due_date": "correct",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "na",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "missed",
@@ -1984,7 +2000,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "neg_future_invoice_date",
@@ -1995,14 +2011,14 @@
             "future_date"
           ],
           "decision": "review",
-          "score": 0.9286,
+          "score": 0.9355,
           "amounts_proved": true,
           "failed": [
             "date_order"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "correct",
@@ -2021,7 +2037,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "neg_credit_note",
@@ -2033,15 +2049,16 @@
             "negative_amounts"
           ],
           "decision": "review",
-          "score": 0.8,
-          "amounts_proved": true,
+          "score": 0.7143,
+          "amounts_proved": false,
           "failed": [
             "required_fields",
-            "line_items_sum"
+            "line_items_sum",
+            "amounts_verified"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "missed",
@@ -2071,15 +2088,16 @@
             "mentions_invoice"
           ],
           "decision": "review",
-          "score": 0.6154,
+          "score": 0.5,
           "amounts_proved": false,
           "failed": [
             "required_fields",
-            "currency"
+            "currency",
+            "amounts_verified"
           ],
           "fields": {
             "is_invoice": "wrong",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "na",
             "customer_name": "na",
             "invoice_number": "na",
@@ -2098,7 +2116,7 @@
           "error": null,
           "cost_usd": "0.00",
           "escalated": false,
-          "core_correct": false
+          "core_correct": true
         },
         {
           "id": "neg_not_invoice_quote",
@@ -2109,15 +2127,16 @@
             "quotation"
           ],
           "decision": "review",
-          "score": 0.625,
+          "score": 0.5909,
           "amounts_proved": false,
           "failed": [
             "is_invoice",
-            "required_fields"
+            "required_fields",
+            "amounts_verified"
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "missed",
@@ -2125,9 +2144,9 @@
             "invoice_date": "missed",
             "due_date": "missed",
             "currency": "correct",
-            "subtotal": "missed",
+            "subtotal": "correct",
             "discount_amount": "na",
-            "tax_amount": "wrong",
+            "tax_amount": "correct",
             "shipping_amount": "na",
             "total_amount": "correct",
             "line_item_count": "missed",
@@ -2147,7 +2166,7 @@
             "purchase_order"
           ],
           "decision": "review",
-          "score": 0.7391,
+          "score": 0.7692,
           "amounts_proved": true,
           "failed": [
             "is_invoice",
@@ -2155,7 +2174,7 @@
           ],
           "fields": {
             "is_invoice": "correct",
-            "vendor_name": "wrong",
+            "vendor_name": "correct",
             "vendor_tax_id": "missed",
             "customer_name": "missed",
             "invoice_number": "missed",
@@ -2184,11 +2203,10 @@
             "duplicate"
           ],
           "decision": "review",
-          "score": 0.8214,
+          "score": 0.9355,
           "amounts_proved": true,
           "failed": [
-            "model_uncertain",
-            "duplicate"
+            "model_uncertain"
           ],
           "fields": {
             "is_invoice": "correct",
@@ -2223,9 +2241,9 @@
           "spurious": 0
         },
         "vendor_name": {
-          "accuracy": 0.054,
+          "accuracy": 0.676,
           "n": 37,
-          "wrong": 28,
+          "wrong": 5,
           "missed": 7,
           "spurious": 0
         },
@@ -2279,10 +2297,10 @@
           "spurious": 0
         },
         "subtotal": {
-          "accuracy": 0.514,
+          "accuracy": 0.743,
           "n": 35,
           "wrong": 1,
-          "missed": 16,
+          "missed": 8,
           "spurious": 0
         },
         "discount_amount": {
@@ -2293,9 +2311,9 @@
           "spurious": 0
         },
         "tax_amount": {
-          "accuracy": 0.5,
+          "accuracy": 0.765,
           "n": 34,
-          "wrong": 10,
+          "wrong": 1,
           "missed": 7,
           "spurious": 0
         },
@@ -2328,7 +2346,7 @@
           "spurious": 0
         }
       },
-      "micro_accuracy_all_invoices": 0.536,
+      "micro_accuracy_all_invoices": 0.613,
       "field_accuracy_digital": {
         "is_invoice": {
           "accuracy": 1.0,
@@ -2338,9 +2356,9 @@
           "spurious": 0
         },
         "vendor_name": {
-          "accuracy": 0.067,
+          "accuracy": 0.833,
           "n": 30,
-          "wrong": 28,
+          "wrong": 5,
           "missed": 0,
           "spurious": 0
         },
@@ -2394,10 +2412,10 @@
           "spurious": 0
         },
         "subtotal": {
-          "accuracy": 0.643,
+          "accuracy": 0.929,
           "n": 28,
           "wrong": 1,
-          "missed": 9,
+          "missed": 1,
           "spurious": 0
         },
         "discount_amount": {
@@ -2408,9 +2426,9 @@
           "spurious": 0
         },
         "tax_amount": {
-          "accuracy": 0.607,
+          "accuracy": 0.929,
           "n": 28,
-          "wrong": 10,
+          "wrong": 1,
           "missed": 1,
           "spurious": 0
         },
@@ -2443,17 +2461,17 @@
           "spurious": 0
         }
       },
-      "micro_accuracy_digital": 0.66,
+      "micro_accuracy_digital": 0.755,
       "micro_accuracy_scans": 0.0,
       "core_field_accuracy_digital": {
-        "vendor_name": 0.067,
+        "vendor_name": 0.833,
         "invoice_number": 0.933,
         "invoice_date": 0.867,
         "due_date": 0.833,
         "currency": 1.0,
         "total_amount": 0.9
       },
-      "docs_all_core_fields_correct": "2/37",
+      "docs_all_core_fields_correct": "20/37",
       "stp_rate_clean": {
         "k": 8,
         "n": 28,
@@ -2465,21 +2483,6 @@
         "rate": 0.0
       },
       "wrong_but_approved": {
-        "clean_us_classic_iso": [
-          "vendor_name"
-        ],
-        "clean_us_mon_date": [
-          "vendor_name"
-        ],
-        "clean_us_long_date_discount": [
-          "vendor_name"
-        ],
-        "clean_us_amount_only": [
-          "vendor_name"
-        ],
-        "clean_multipage_2": [
-          "vendor_name"
-        ],
         "clean_many_lines_single_page": [
           "vendor_name"
         ]
@@ -2785,7 +2788,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.8929,
+        "score": 0.9032,
         "amounts_proved": true,
         "failed": [
           "totals_math"
@@ -2797,10 +2800,11 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.92,
+        "score": 0.8214,
         "amounts_proved": false,
         "failed": [
-          "line_items_sum"
+          "line_items_sum",
+          "amounts_verified"
         ],
         "correct": true
       },
@@ -2809,10 +2813,11 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.9286,
-        "amounts_proved": true,
+        "score": 0.8387,
+        "amounts_proved": false,
         "failed": [
-          "line_items_sum"
+          "line_items_sum",
+          "amounts_verified"
         ],
         "correct": true
       },
@@ -2821,7 +2826,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.9286,
+        "score": 0.9355,
         "amounts_proved": true,
         "failed": [
           "line_item_math"
@@ -2833,7 +2838,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.88,
+        "score": 0.8929,
         "amounts_proved": true,
         "failed": [
           "required_fields"
@@ -2845,7 +2850,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.9286,
+        "score": 0.9355,
         "amounts_proved": true,
         "failed": [
           "date_order"
@@ -2857,7 +2862,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.9286,
+        "score": 0.9355,
         "amounts_proved": true,
         "failed": [
           "date_order"
@@ -2869,7 +2874,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.8929,
+        "score": 0.9032,
         "amounts_proved": true,
         "failed": [
           "positive_total"
@@ -2881,12 +2886,13 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.3846,
+        "score": 0.3125,
         "amounts_proved": false,
         "failed": [
           "is_invoice",
           "required_fields",
-          "currency"
+          "currency",
+          "amounts_verified"
         ],
         "correct": true
       },
@@ -2895,7 +2901,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.8929,
+        "score": 0.9032,
         "amounts_proved": true,
         "failed": [
           "is_invoice"
@@ -2907,7 +2913,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.8929,
+        "score": 0.9032,
         "amounts_proved": true,
         "failed": [
           "is_invoice"
@@ -2919,7 +2925,7 @@
         "category": "negative",
         "expected": "review",
         "decision": "review",
-        "score": 0.8929,
+        "score": 0.9032,
         "amounts_proved": true,
         "failed": [
           "duplicate"
@@ -2949,7 +2955,8 @@
         "arithmetic_detectable": true,
         "caught_by": {
           "totals_math": 27,
-          "line_items_sum": 1
+          "line_items_sum": 1,
+          "amounts_verified": 1
         },
         "approved_cases": []
       },
@@ -2969,45 +2976,20 @@
         "false_approve_rate": 0.0,
         "arithmetic_detectable": true,
         "caught_by": {
-          "line_items_sum": 28
+          "line_items_sum": 28,
+          "amounts_verified": 28
         },
         "approved_cases": []
       },
       "no_line_items_extracted": {
         "n": 28,
-        "false_approved": 27,
-        "false_approve_rate": 0.964,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
         "arithmetic_detectable": false,
-        "caught_by": {},
-        "approved_cases": [
-          "clean_us_classic_iso",
-          "clean_us_modern_usdate",
-          "clean_us_mon_date",
-          "clean_us_long_date_discount",
-          "clean_us_shipping",
-          "clean_us_code_currency",
-          "clean_us_amount_only",
-          "clean_eu_decimal_comma",
-          "clean_eu_german_labels",
-          "clean_eu_slash_date",
-          "clean_eu_slash_date_unambiguous",
-          "clean_eu_discount_shipping_tax",
-          "clean_gb_vat_mon",
-          "clean_gb_dmy_mon",
-          "clean_minimal_layout",
-          "clean_multipage_2",
-          "clean_multipage_3_eur",
-          "clean_many_lines_single_page",
-          "clean_text_usd",
-          "clean_text_gbp",
-          "scan_png_us",
-          "scan_jpg_eu",
-          "scan_pdf_1page",
-          "scan_pdf_2page",
-          "scan_pdf_with_scanner_stamp",
-          "scan_tiff_2page",
-          "mixed_text_then_scan"
-        ]
+        "caught_by": {
+          "amounts_verified": 28
+        },
+        "approved_cases": []
       },
       "line_amount_misread": {
         "n": 28,
@@ -3016,7 +2998,8 @@
         "arithmetic_detectable": true,
         "caught_by": {
           "line_items_sum": 28,
-          "line_item_math": 28
+          "line_item_math": 28,
+          "amounts_verified": 28
         },
         "approved_cases": []
       },
@@ -3242,7 +3225,8 @@
         "false_approve_rate": 0.0,
         "arithmetic_detectable": true,
         "caught_by": {
-          "line_items_sum": 24
+          "line_items_sum": 24,
+          "amounts_verified": 24
         },
         "approved_cases": []
       },
@@ -3268,9 +3252,9 @@
       }
     },
     "overall_false_approve": {
-      "k": 176,
+      "k": 149,
       "n": 373,
-      "rate": 0.472
+      "rate": 0.399
     },
     "arithmetic_detectable_false_approve": {
       "k": 1,
@@ -3278,15 +3262,15 @@
       "rate": 0.005
     },
     "not_arithmetic_detectable_false_approve": {
-      "k": 175,
+      "k": 148,
       "n": 185,
-      "rate": 0.946
+      "rate": 0.8
     },
     "escalation": {
       "cases": 373,
-      "escalated": 196,
-      "recovered_auto_approved_correct": 196,
-      "approved_wrong_value": 176
+      "escalated": 224,
+      "recovered_auto_approved_correct": 224,
+      "approved_wrong_value": 149
     }
   },
   "corruption_steady_state": {
@@ -3298,7 +3282,8 @@
         "arithmetic_detectable": true,
         "caught_by": {
           "totals_math": 27,
-          "line_items_sum": 1
+          "line_items_sum": 1,
+          "amounts_verified": 1
         },
         "approved_cases": []
       },
@@ -3318,45 +3303,20 @@
         "false_approve_rate": 0.0,
         "arithmetic_detectable": true,
         "caught_by": {
-          "line_items_sum": 28
+          "line_items_sum": 28,
+          "amounts_verified": 28
         },
         "approved_cases": []
       },
       "no_line_items_extracted": {
         "n": 28,
-        "false_approved": 27,
-        "false_approve_rate": 0.964,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
         "arithmetic_detectable": false,
-        "caught_by": {},
-        "approved_cases": [
-          "clean_us_classic_iso",
-          "clean_us_modern_usdate",
-          "clean_us_mon_date",
-          "clean_us_long_date_discount",
-          "clean_us_shipping",
-          "clean_us_code_currency",
-          "clean_us_amount_only",
-          "clean_eu_decimal_comma",
-          "clean_eu_german_labels",
-          "clean_eu_slash_date",
-          "clean_eu_slash_date_unambiguous",
-          "clean_eu_discount_shipping_tax",
-          "clean_gb_vat_mon",
-          "clean_gb_dmy_mon",
-          "clean_minimal_layout",
-          "clean_multipage_2",
-          "clean_multipage_3_eur",
-          "clean_many_lines_single_page",
-          "clean_text_usd",
-          "clean_text_gbp",
-          "scan_png_us",
-          "scan_jpg_eu",
-          "scan_pdf_1page",
-          "scan_pdf_2page",
-          "scan_pdf_with_scanner_stamp",
-          "scan_tiff_2page",
-          "mixed_text_then_scan"
-        ]
+        "caught_by": {
+          "amounts_verified": 28
+        },
+        "approved_cases": []
       },
       "line_amount_misread": {
         "n": 28,
@@ -3365,7 +3325,8 @@
         "arithmetic_detectable": true,
         "caught_by": {
           "line_items_sum": 28,
-          "line_item_math": 28
+          "line_item_math": 28,
+          "amounts_verified": 28
         },
         "approved_cases": []
       },
@@ -3483,7 +3444,8 @@
         "false_approve_rate": 0.0,
         "arithmetic_detectable": true,
         "caught_by": {
-          "line_items_sum": 24
+          "line_items_sum": 24,
+          "amounts_verified": 24
         },
         "approved_cases": []
       },
@@ -3509,9 +3471,9 @@
       }
     },
     "overall_false_approve": {
-      "k": 64,
+      "k": 37,
       "n": 373,
-      "rate": 0.172
+      "rate": 0.099
     },
     "arithmetic_detectable_false_approve": {
       "k": 1,
@@ -3519,15 +3481,15 @@
       "rate": 0.005
     },
     "not_arithmetic_detectable_false_approve": {
-      "k": 63,
+      "k": 36,
       "n": 185,
-      "rate": 0.341
+      "rate": 0.195
     },
     "escalation": {
       "cases": 373,
-      "escalated": 308,
-      "recovered_auto_approved_correct": 308,
-      "approved_wrong_value": 64
+      "escalated": 336,
+      "recovered_auto_approved_correct": 336,
+      "approved_wrong_value": 37
     }
   },
   "duplicates": {
@@ -3589,56 +3551,56 @@
       "threshold": 0.8,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.472,
+      "corruption_false_approve": 0.399,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.85,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.472,
+      "corruption_false_approve": 0.399,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.9,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.472,
+      "corruption_false_approve": 0.399,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.91,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.472,
+      "corruption_false_approve": 0.399,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.92,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.472,
+      "corruption_false_approve": 0.399,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.95,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.472,
+      "corruption_false_approve": 0.399,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 0.99,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.472,
+      "corruption_false_approve": 0.399,
       "detectable_corruption_false_approve": 0.005
     },
     {
       "threshold": 1.0,
       "oracle_stp": 1.0,
       "oracle_false_approve_negatives": 0.0,
-      "corruption_false_approve": 0.472,
+      "corruption_false_approve": 0.399,
       "detectable_corruption_false_approve": 0.005
     }
   ]

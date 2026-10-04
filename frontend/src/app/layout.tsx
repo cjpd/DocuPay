@@ -1,23 +1,20 @@
-import "./globals.css";
+import type { Metadata } from "next";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import type { ReactNode } from "react";
-import Navbar from "@/components/Navbar";
+import "./globals.css";
 import Providers from "./providers";
 
-export const metadata = {
-  title: "IDP Platform",
-  description: "AI-powered Intelligent Document Processing",
+export const metadata: Metadata = {
+  title: "DocuPay",
+  description: "Invoices read, checked and approved, with a person only where it matters.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="bg-gray-50 text-gray-900 min-h-screen">
-        <Providers>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <div className="flex-1">{children}</div>
-          </div>
-        </Providers>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

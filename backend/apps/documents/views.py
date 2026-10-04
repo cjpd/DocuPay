@@ -3,6 +3,7 @@ from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
+from django.db.models import Q
 from django.http import FileResponse
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
@@ -30,12 +31,23 @@ class DocumentViewSet(OrgScopedMixin, viewsets.ModelViewSet):
     http_method_names = ["get", "post", "delete", "head", "options"]
 
     def get_queryset(self):
-        return (
+        queryset = (
             self.scope(Document.objects.all())
             .select_related("extracted_data")
             .prefetch_related("review_tasks")
             .order_by("-created_at")
         )
+        params = self.request.query_params
+        if params.get("status"):
+            queryset = queryset.filter(status__in=params["status"].split(","))
+        if params.get("q"):
+            q = params["q"].strip()
+            queryset = queryset.filter(
+                Q(extracted_data__vendor_name__icontains=q)
+                | Q(extracted_data__invoice_number__icontains=q)
+                | Q(file__icontains=q)
+            )
+        return queryset
 
     @action(detail=True, methods=["get"], url_path="file")
     def file(self, request, *args, **kwargs):
@@ -59,6 +71,29 @@ class DocumentViewSet(OrgScopedMixin, viewsets.ModelViewSet):
         response["Content-Disposition"] = "inline"
         response["X-Content-Type-Options"] = "nosniff"
         response["Content-Security-Policy"] = "sandbox"  # uploaded files never run scripts
+        return response
+
+    @action(detail=True, methods=["get"], url_path="preview")
+    def preview(self, request, *args, **kwargs):
+        """Page N of the document as a JPEG (text files as text). X-Page-Count gives the total."""
+        from django.http import HttpResponse
+
+        from apps.processing.errors import PermanentProcessingError
+        from apps.processing.ingest import preview_page, read_file_bytes
+
+        document = self.get_object()
+        try:
+            page = max(1, int(request.query_params.get("page", 1)))
+        except ValueError:
+            page = 1
+        try:
+            body, content_type, count = preview_page(read_file_bytes(document.file), page)
+        except PermanentProcessingError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_404_NOT_FOUND)
+        response = HttpResponse(body, content_type=content_type)
+        response["X-Page-Count"] = str(count)
+        response["Cache-Control"] = "private, max-age=3600"
+        response["X-Content-Type-Options"] = "nosniff"
         return response
 
     @action(detail=False, methods=["get"], url_path="stats")

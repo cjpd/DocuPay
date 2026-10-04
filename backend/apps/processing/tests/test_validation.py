@@ -58,6 +58,14 @@ def test_missing_required_field_blocks_approval():
     assert not report.can_auto_approve(0.0)
 
 
+def test_subtotal_plus_tax_alone_does_not_approve():
+    """Without line items, a wrong subtotal and total that agree with each other would pass."""
+    report = validate(_ex(line_items=[]), today=TODAY)
+    assert _status(report, "totals_math") == PASS
+    assert _status(report, "amounts_verified") == FAIL
+    assert not report.can_auto_approve(0.0)
+
+
 def test_amounts_must_be_proved():
     """Without subtotal or line items nothing proves the total, so a person must look."""
     report = validate(_ex(subtotal=None, line_items=[], tax_amount=None), today=TODAY)
@@ -231,3 +239,17 @@ def test_vendor_history_catches_x10():
 def test_vendor_history_needs_three_invoices_for_amounts():
     few = VendorHistory(count=2, currencies=frozenset({"USD"}), median_total=Decimal("30"))
     assert _status(validate(_ex(), today=TODAY, vendor_history=lambda e: few), "vendor_history") == PASS
+
+
+def test_review_always_has_a_reason():
+    """A document that cannot auto-approve always shows at least one failed check to the reviewer."""
+    cases = [
+        _ex(subtotal=None, line_items=[], tax_amount=None),  # nothing proves the total
+        _ex(subtotal=None, tax_amount=24.0, total_amount=300.0),
+        _ex(invoice_number=None),
+        _ex(currency=None),
+    ]
+    for ex in cases:
+        report = validate(ex, today=TODAY)
+        assert not report.can_auto_approve(0.92)
+        assert report.failures, ex

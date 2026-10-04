@@ -28,10 +28,11 @@ AMOUNT_FIELDS = ("subtotal", "discount_amount", "tax_amount", "shipping_amount",
 # second model call would only cost money.
 EXTRACTION_QUALITY_CHECKS = frozenset({
     "required_fields", "totals_math", "line_items_sum", "line_item_math", "date_order", "currency", "model_uncertain",
-    "vendor_history", "vendor_not_self",
+    "vendor_history", "vendor_not_self", "amounts_verified",
 })
-# Checks that prove the amounts. At least one must pass to auto-approve.
-AMOUNT_PROOFS = ("line_items_sum", "totals_math")
+# The line items must add up to auto-approve. "Subtotal + tax = total" alone is not enough:
+# a model that misses the line items (or a document whose lines do not add up) would pass it.
+AMOUNT_PROOFS = ("line_items_sum",)
 
 
 @dataclass
@@ -304,9 +305,15 @@ def validate(ex: InvoiceExtraction, today: Optional[date] = None,
         check_vendor_history(ex, vendor_history(ex) if vendor_history and ex.vendor_name else None),
         check_vendor_not_self(ex, own_names),
     ]
+    # Always give the reviewer a reason: when nothing proved the total, that is the reason.
+    proved = any(c.name in AMOUNT_PROOFS and c.status == PASS for c in checks)
+    if proved:
+        checks.append(Check("amounts_verified", PASS, CRITICAL, fields=("total_amount",)))
+    else:
+        checks.append(Check("amounts_verified", FAIL, CRITICAL,
+                            "No line items were found that add up to the total", ("total_amount", "line_items")))
     evaluated = [c for c in checks if c.status != SKIP]
     total = sum(WEIGHTS[c.severity] for c in evaluated)
     passed = sum(WEIGHTS[c.severity] for c in evaluated if c.status == PASS)
     score = round(passed / total, 4) if total else 0.0
-    proved = any(c.name in AMOUNT_PROOFS and c.status == PASS for c in checks)
     return ValidationReport(checks=checks, score=score, amounts_proved=proved)

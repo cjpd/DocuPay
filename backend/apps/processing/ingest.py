@@ -192,3 +192,36 @@ def _image_part(img: Image.Image) -> ImagePart:
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=JPEG_QUALITY)
     return ImagePart(media_type="image/jpeg", data=buf.getvalue())
+
+
+def preview_page(data: bytes, page: int = 1):
+    """One page of a document as a JPEG for the review screen (works in every browser,
+    including phones that cannot show PDFs inline). Returns (bytes, media_type, page_count).
+    Text files are returned as text."""
+    kind = sniff(data)
+    if kind == "text":
+        return decode_text(data).encode("utf-8"), "text/plain; charset=utf-8", 1
+    if kind == "pdf":
+        import pypdfium2 as pdfium
+
+        try:
+            pdf = pdfium.PdfDocument(data)
+        except pdfium.PdfiumError as exc:
+            raise PermanentProcessingError("The PDF file is damaged or encrypted") from exc
+        try:
+            count = len(pdf)
+            if not 1 <= page <= count:
+                raise PermanentProcessingError(f"Page {page} does not exist")
+            p = pdf[page - 1]
+            scale = min(MAX_RENDER_SCALE, MAX_IMAGE_EDGE / max(p.get_size()))
+            return _image_part(p.render(scale=scale).to_pil()).data, "image/jpeg", count
+        finally:
+            pdf.close()
+    if kind == "image":
+        from PIL import ImageOps, ImageSequence
+
+        frames = list(ImageSequence.Iterator(_open_image(data)))[: max_pages()]
+        if not 1 <= page <= len(frames):
+            raise PermanentProcessingError(f"Page {page} does not exist")
+        return _image_part(ImageOps.exif_transpose(frames[page - 1].copy())).data, "image/jpeg", len(frames)
+    raise PermanentProcessingError("Unsupported file type")

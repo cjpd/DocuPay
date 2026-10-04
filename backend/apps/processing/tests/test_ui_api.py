@@ -101,3 +101,34 @@ def test_review_queue_includes_document_and_filters(setup):
     assert row["id"] == task.id
     assert row["document_detail"]["extracted_data"]["validation"][0]["name"] == "totals_math"
     assert row["document_detail"]["review_task_id"] == task.id
+
+
+def test_document_filters(setup):
+    org, client = setup
+    a = make_document(org, b"x", "acme.txt", status=Document.Status.APPROVED)
+    ExtractedData.objects.create(document=a, vendor_name="Acme Supplies", invoice_number="INV-9")
+    make_document(org, b"x", "other.txt", status=Document.Status.FAILED)
+    assert client.get("/api/documents/?status=failed").data["count"] == 1
+    assert client.get("/api/documents/?status=failed,approved").data["count"] == 2
+    assert client.get("/api/documents/?q=acme").data["results"][0]["id"] == a.id
+    assert client.get("/api/documents/?q=inv-9").data["count"] == 1
+
+
+def test_preview_pages(setup):
+    org, client = setup
+    doc = make_document(org, text_pdf(pages=2), "two.pdf")
+    resp = client.get(f"/api/documents/{doc.id}/preview/?page=2")
+    assert resp.status_code == 200
+    assert resp["Content-Type"] == "image/jpeg"
+    assert resp["X-Page-Count"] == "2"
+    assert resp.content[:2] == b"\xff\xd8"
+    assert client.get(f"/api/documents/{doc.id}/preview/?page=3").status_code == 404
+    txt = make_document(org, INVOICE_TEXT.encode(), "a.txt")
+    assert b"INV-1001" in client.get(f"/api/documents/{txt.id}/preview/").content
+
+
+def test_preview_is_tenant_scoped(setup):
+    org, client = setup
+    other_org, _ = make_org(slug="other")
+    doc = make_document(other_org, text_pdf(), "a.pdf")
+    assert client.get(f"/api/documents/{doc.id}/preview/").status_code == 404

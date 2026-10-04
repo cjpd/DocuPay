@@ -120,13 +120,17 @@ Changes since `416ddfd`, addressing gaps 1, 3 (partly) and 4:
 - **Gap 4 fixed.** `vendor_not_self` compares names without legal suffixes and also checks `Organization.other_names` (trade names).
 - **Fairer steady-state simulation.** History median is 0.5x to 2x off the true total (deterministic per vendor), and the org name is stored without the printed legal suffix.
 
+- **Line items are required to auto-approve.** "Subtotal + tax = total" alone no longer approves: a model that misses the line items (or a document whose lines do not add up) passed it. Found while running the UI demo, where the offline extractor approved `neg_lines_dont_sum`. Invoices without line items go to review, with the reason shown.
+
 Numbers from `run.py` after these changes (373 injected errors, 15 types):
 
 | Metric | Value |
 |---|---|
 | Oracle STP / negative false-approve | 100% / 0% |
-| Corruptions false-approve, no history (cold start) | 47.2% (176/373) |
-| Corruptions false-approve, steady state (fair simulation) | 17.2% (64/373) |
-| Still approved in steady state | wrong invoice number 100%, no line items 96%, swapped day/month 47%, missed tax 4% |
+| Corruptions false-approve, no history (cold start) | 39.9% (149/373) |
+| Corruptions false-approve, steady state (fair simulation) | 9.9% (37/373) |
+| No line items extracted | 0% approved (was 96%) |
+| Heuristic extractor: STP / negative false-approve | 28.6% / 0% |
+| Still approved in steady state | wrong invoice number 100%, swapped day/month 47%, missed tax 4% |
 
 Still open: real LLM accuracy (DP-21), vendor master and PO matching (DP-22), learning from corrections (DP-23), webhook and ERP delivery (DP-16).

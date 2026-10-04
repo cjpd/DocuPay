@@ -48,9 +48,15 @@ def _line_items(lines: List[str]) -> List[LineItem]:
     return items
 
 
+_PAGE_MARKER = re.compile(r"^--- page \d+ ---$")
+
+
 def extract_from_text(text: str) -> InvoiceExtraction:
-    lines = [ln for ln in text.splitlines() if ln.strip()]
-    vendor = lines[0].strip() if lines else None
+    lines = [ln for ln in text.splitlines() if ln.strip() and not _PAGE_MARKER.match(ln.strip())]
+    text = "\n".join(lines)
+    # The first line is usually the vendor, sometimes followed by the title on the same line.
+    vendor = re.sub(r"\s+(tax\s+)?(invoice|bill|rechnung|facture|factura|quotation|purchase order|credit note)\s*$",
+                    "", lines[0].strip(), flags=re.IGNORECASE) if lines else None
     currency = _find(r"\b(USD|EUR|GBP|CAD|AUD|JPY|CHF|MXN|BRL)\b", text)
     if not currency:
         currency = next((code for sym, code in _SYMBOLS.items() if sym in text), None)
@@ -63,8 +69,9 @@ def extract_from_text(text: str) -> InvoiceExtraction:
         invoice_date=_find(rf"(?:invoice\s*date|date\s*of\s*issue|^date)[ \t]*[:\-]?[ \t]*{_DATE}", text),
         due_date=_find(rf"(?:due\s*date|payment\s*due|due)[ \t]*[:\-]?[ \t]*{_DATE}", text),
         currency=currency,
-        subtotal=_find(rf"sub\s*-?total[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
-        tax_amount=_find(rf"(?:tax|vat|gst)(?:[ \t]*\([^)]*\))?[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
+        subtotal=_find(rf"(?:sub\s*-?total|net\s+(?:amount|total))[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
+        # "VAT 19%: 1,615.78": skip the rate, take the amount.
+        tax_amount=_find(rf"(?:tax|vat|gst)(?:[ \t]*\([^)]*\))?(?:[ \t]*\d+(?:[.,]\d+)?[ \t]*%)?[ \t]*[:\-]?[ \t]*({_AMOUNT})(?![\d.,]*[ \t]*%)", text),
         discount_amount=_find(rf"discount(?:[ \t]*\([^)]*\))?[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
         shipping_amount=_find(rf"(?:shipping|freight|delivery)[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
         total_amount=_find(rf"(?:grand\s*total|total\s*due|amount\s*due|^total)[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
