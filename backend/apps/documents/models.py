@@ -51,6 +51,10 @@ class Vendor(TimeStampedModel):
     aliases = models.JSONField(default=list, blank=True)
     tax_id = models.CharField(max_length=64, blank=True, default="")
     default_currency = models.CharField(max_length=3, blank=True, default="")
+    # Where this vendor is paid. Set from the first approved invoice, then changed only by an
+    # owner or admin on the Vendors page (after confirming the change with the vendor).
+    bank_account = models.CharField(max_length=64, blank=True, default="")
+    bank_code = models.CharField(max_length=32, blank=True, default="")
     # A blocked vendor's invoices always go to a person (fraud, disputes, closed accounts).
     is_blocked = models.BooleanField(default=False)
     notes = models.TextField(blank=True, default="")
@@ -64,7 +68,11 @@ class Vendor(TimeStampedModel):
         from apps.processing.normalize import normalize_tax_id, normalize_vendor
 
         self.name_key = normalize_vendor(self.name)
+        from apps.processing.normalize import normalize_bank
+
         self.tax_id = normalize_tax_id(self.tax_id)
+        self.bank_account = normalize_bank(self.bank_account)
+        self.bank_code = normalize_bank(self.bank_code)
         self.default_currency = (self.default_currency or "").upper()[:3]
         super().save(*args, **kwargs)
 
@@ -87,6 +95,9 @@ class ExtractedData(TimeStampedModel):
     subtotal = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     tax_amount = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    amount_due = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    bank_account = models.CharField(max_length=64, blank=True, default="")
+    bank_code = models.CharField(max_length=32, blank=True, default="")
     currency = models.CharField(max_length=8, blank=True, default="")
     line_items = models.JSONField(default=list, blank=True)
     overall_confidence = models.FloatField(default=0.0)
@@ -99,7 +110,7 @@ class ExtractedData(TimeStampedModel):
     # Fields a reviewer may correct. Anything else in a correction is rejected.
     EDITABLE_FIELDS = (
         "invoice_number", "invoice_date", "due_date", "vendor_name", "vendor_tax_id", "customer_name", "purchase_order",
-        "subtotal", "tax_amount", "total_amount", "currency", "line_items",
+        "subtotal", "tax_amount", "total_amount", "amount_due", "currency", "line_items", "bank_account", "bank_code",
     )
 
 

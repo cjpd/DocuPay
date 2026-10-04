@@ -5,7 +5,7 @@ import { Ban, Building2, Pencil, Plus, Search, ShieldCheck, Trash2 } from "lucid
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { Badge, Button, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
-import { ago } from "@/lib/format";
+import { ago, maskAccount } from "@/lib/format";
 import { session, useSession } from "@/lib/api";
 import { useDeleteVendor, useOrganizations, useSaveVendor, useVendors } from "@/lib/hooks";
 import type { Vendor } from "@/lib/types";
@@ -94,6 +94,7 @@ function Row({ vendor, canEdit }: { vendor: Vendor; canEdit: boolean }) {
         <p className="truncate text-xs text-muted">
           {vendor.tax_id ? <span className="font-mono">{vendor.tax_id}</span> : "No tax ID"}
           {vendor.default_currency && ` · bills in ${vendor.default_currency}`}
+          {vendor.bank_account ? <> · pays to <span className="font-mono">{maskAccount(vendor.bank_account)}</span></> : " · no bank account yet"}
           {vendor.aliases.length > 0 && ` · also "${vendor.aliases.join('", "')}"`}
         </p>
       </div>
@@ -133,12 +134,16 @@ function VendorForm({ vendor, onDone }: { vendor?: Vendor; onDone: () => void })
   const [taxId, setTaxId] = useState(vendor?.tax_id ?? "");
   const [currency, setCurrency] = useState(vendor?.default_currency ?? "");
   const [aliases, setAliases] = useState((vendor?.aliases ?? []).join(", "));
+  const [bank, setBank] = useState(vendor?.bank_account ?? "");
+  const [bankCode, setBankCode] = useState(vendor?.bank_code ?? "");
+  const bankChanged = !!vendor?.bank_account && bank.replace(/\s/g, "").toUpperCase() !== vendor.bank_account;
   const input = "mt-1 h-9 w-full rounded-[var(--radius-control)] border border-line bg-surface px-2.5 text-sm outline-none focus:border-accent";
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     save.mutate(
-      { id: vendor?.id, name, tax_id: taxId, default_currency: currency, aliases: aliases.split(",").map((a) => a.trim()).filter(Boolean) },
+      { id: vendor?.id, name, tax_id: taxId, default_currency: currency, bank_account: bank, bank_code: bankCode,
+        aliases: aliases.split(",").map((a) => a.trim()).filter(Boolean) },
       { onSuccess: () => { toast.success(vendor ? "Vendor saved" : "Vendor added"); onDone(); }, onError: (err) => toast.error(err.message) },
     );
   }
@@ -154,6 +159,18 @@ function VendorForm({ vendor, onDone }: { vendor?: Vendor; onDone: () => void })
       <label className="text-xs font-medium text-ink-2">Usual currency
         <input value={currency} maxLength={3} placeholder="USD" onChange={(e) => setCurrency(e.target.value.toUpperCase())} className={`${input} font-mono`} />
       </label>
+      <label className="text-xs font-medium text-ink-2">Bank account (IBAN or account number)
+        <input value={bank} onChange={(e) => setBank(e.target.value)} spellCheck={false} className={`${input} font-mono`} />
+      </label>
+      <label className="text-xs font-medium text-ink-2">BIC / routing / sort code
+        <input value={bankCode} onChange={(e) => setBankCode(e.target.value)} spellCheck={false} className={`${input} font-mono`} />
+      </label>
+      {bankChanged && (
+        <p role="alert" className="rounded-[var(--radius-control)] bg-bad-soft px-3 py-2 text-xs text-bad sm:col-span-2">
+          You are changing where this vendor is paid. Confirm the new account with the vendor by phone, using a number
+          you already have, not one from the invoice or email.
+        </p>
+      )}
       <label className="text-xs font-medium text-ink-2 sm:col-span-2">Other names on invoices <span className="font-normal text-muted">(comma separated)</span>
         <input value={aliases} onChange={(e) => setAliases(e.target.value)} className={input} />
       </label>

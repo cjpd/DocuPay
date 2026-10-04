@@ -527,6 +527,10 @@ def corruptions(gt):
         d["vendor_tax_id"] = t[:-1] + ("0" if t[-1] != "0" else "1")
     mk("wrong_vendor_tax_id", wrong_tax_id, False)
 
+    def changed_bank(d):  # "our bank details have changed": a valid IBAN of another bank
+        d["bank_account"] = "GB33BUKB20201555555555"
+    mk("changed_bank_account", changed_bank, False)
+
     def net_as_total(d):  # subtotal dropped and the net amount reported as the total
         if not d.get("subtotal") or not d.get("tax_amount") or Decimal(d["tax_amount"]) == 0:
             return False
@@ -538,6 +542,11 @@ def corruptions(gt):
         d["uncertain_fields"] = ["total_amount"]
     mk("model_flags_uncertain", uncertain, True)
     return out
+
+
+# The vendor's account on file in the steady-state simulation (a valid IBAN). The clean
+# extraction carries no bank account, so only the corruption below exercises the check.
+BANK_ON_FILE = "DE89370400440532013000"
 
 
 def steady_state_context(gt: dict) -> dict:
@@ -563,7 +572,7 @@ def steady_state_context(gt: dict) -> dict:
         from apps.processing.validation import VendorRecord
 
         record = VendorRecord(id=1, name=gt["vendor_name"], tax_id=normalize_tax_id(gt.get("vendor_tax_id") or ""),
-                              default_currency=gt.get("currency") or "")
+                              default_currency=gt.get("currency") or "", bank_account=BANK_ON_FILE)
         ctx["vendor_lookup"] = lambda ex: record
     if "own_names" in _PIPELINE_PARAMS and gt.get("customer_name"):
         short = _re.sub(r"[,.]?\s+(Inc|LLC|Ltd|Corporation|Corp|GmbH|SA|BV|AG|Co)\.?$", "", gt["customer_name"])
@@ -673,7 +682,7 @@ def summary(res):
         lines.append(f"CORRUPTIONS, STEADY STATE (3 approved invoices per vendor, median 0.5-2x off; org name without suffix)  overall false-approve "
                      f"{pct(c['overall_false_approve'])}; not detectable by arithmetic {pct(c['not_arithmetic_detectable_false_approve'])}")
         for name, t in sorted(c["types"].items(), key=lambda kv: -kv[1]["false_approve_rate"]):
-            if t["false_approve_rate"] or name in ("wrong_currency", "vendor_is_customer", "consistent_x100_scale", "wrong_vendor_tax_id"):
+            if t["false_approve_rate"] or name in ("wrong_currency", "vendor_is_customer", "consistent_x100_scale", "wrong_vendor_tax_id", "changed_bank_account"):
                 lines.append(f"  {name:<26} n={t['n']:<3} false-approve={t['false_approve_rate']:<5} caught_by={t['caught_by']}")
     d = res["duplicates"]
     lines.append(f"DUPLICATE VARIANTS ({d['key_source']}): caught {d['caught']}: " + ", ".join(

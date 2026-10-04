@@ -14,11 +14,24 @@ from .models import (
 class VendorSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendor
-        fields = ["id", "name", "tax_id", "default_currency", "is_blocked"]
+        fields = ["id", "name", "tax_id", "default_currency", "bank_account", "is_blocked"]
 
 
 class ExtractedDataSerializer(serializers.ModelSerializer):
     vendor_detail = VendorSummarySerializer(source="vendor", read_only=True)
+
+    def validate_bank_account(self, value):
+        from apps.processing.normalize import iban_is_valid, looks_like_iban, normalize_bank
+
+        value = normalize_bank(value)
+        if looks_like_iban(value) and not iban_is_valid(value):
+            raise serializers.ValidationError("This IBAN is not valid. Check it for a mistyped character.")
+        return value
+
+    def validate_bank_code(self, value):
+        from apps.processing.normalize import normalize_bank
+
+        return normalize_bank(value)
 
     class Meta:
         model = ExtractedData
@@ -38,6 +51,9 @@ class ExtractedDataSerializer(serializers.ModelSerializer):
             "subtotal",
             "tax_amount",
             "total_amount",
+            "amount_due",
+            "bank_account",
+            "bank_code",
             "currency",
             "line_items",
             "overall_confidence",
@@ -178,7 +194,7 @@ class VendorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vendor
-        fields = ["id", "name", "aliases", "tax_id", "default_currency", "is_blocked", "notes",
+        fields = ["id", "name", "aliases", "tax_id", "default_currency", "bank_account", "bank_code", "is_blocked", "notes",
                   "invoice_count", "last_invoice_at", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
 
@@ -186,6 +202,14 @@ class VendorSerializer(serializers.ModelSerializer):
         if not isinstance(value, list) or not all(isinstance(a, str) for a in value):
             raise serializers.ValidationError("Aliases must be a list of names.")
         return [a.strip() for a in value if a.strip()][:50]
+
+    def validate_bank_account(self, value):
+        from apps.processing.normalize import iban_is_valid, looks_like_iban, normalize_bank
+
+        value = normalize_bank(value)
+        if looks_like_iban(value) and not iban_is_valid(value):
+            raise serializers.ValidationError("This IBAN is not valid. Check it for a mistyped character.")
+        return value
 
     def validate_default_currency(self, value):
         from apps.processing.schema import ISO_CURRENCIES

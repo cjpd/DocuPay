@@ -24,3 +24,25 @@ def normalize_invoice_number(number: str) -> str:
 def normalize_tax_id(tax_id: str) -> str:
     """"DE 811 234 567" and "de811234567" give the same key."""
     return re.sub(r"[^0-9A-Z]", "", (tax_id or "").upper())
+
+
+def normalize_bank(value) -> str:
+    """"DE89 3704 0044 0532 0130 00" -> "DE89370400440532013000"."""
+    return re.sub(r"[^0-9A-Z]", "", str(value or "").upper())
+
+
+def looks_like_iban(account: str) -> bool:
+    return bool(re.fullmatch(r"[A-Z]{2}\d{2}[A-Z0-9]{10,30}", account or ""))
+
+
+def iban_is_valid(iban: str) -> bool:
+    """ISO 13616 mod-97 checksum: catches almost every misread or mistyped character."""
+    if not looks_like_iban(iban):
+        return False
+    rearranged = iban[4:] + iban[:4]
+    digits = "".join(str(int(ch, 36)) for ch in rearranged)
+    return int(digits) % 97 == 1
+
+
+def mask_account(account: str) -> str:
+    return f"…{account[-4:]}" if account and len(account) > 4 else (account or "")

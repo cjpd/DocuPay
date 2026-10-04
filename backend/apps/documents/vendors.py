@@ -21,7 +21,7 @@ def match_vendor(organization_id: int, name: str, tax_id: str = "") -> Optional[
     by_name = vendors.filter(name_key=name_key).first()
     if by_name:
         return by_name
-    for vendor in vendors.exclude(aliases=[]).only("id", "aliases", "name", "tax_id", "default_currency", "is_blocked"):
+    for vendor in vendors.exclude(aliases=[]):
         if name_key in {normalize_vendor(a) for a in vendor.aliases or []}:
             return vendor
     return None
@@ -32,7 +32,8 @@ def vendor_record(vendor: Optional[Vendor], tax_id: str = "") -> Optional[Vendor
         return None
     matched_by = "tax_id" if tax_id and normalize_tax_id(tax_id) == vendor.tax_id else "name"
     return VendorRecord(id=vendor.id, name=vendor.name, tax_id=vendor.tax_id,
-                        default_currency=vendor.default_currency, is_blocked=vendor.is_blocked, matched_by=matched_by)
+                        default_currency=vendor.default_currency, is_blocked=vendor.is_blocked, matched_by=matched_by,
+                        bank_account=vendor.bank_account)
 
 
 def learn_from_approval(data: ExtractedData) -> Optional[Vendor]:
@@ -48,7 +49,8 @@ def learn_from_approval(data: ExtractedData) -> Optional[Vendor]:
     if vendor is None:
         vendor, _ = Vendor.objects.get_or_create(
             organization_id=org_id, name_key=normalize_vendor(data.vendor_name),
-            defaults={"name": data.vendor_name, "tax_id": data.vendor_tax_id, "default_currency": data.currency},
+            defaults={"name": data.vendor_name, "tax_id": data.vendor_tax_id, "default_currency": data.currency,
+                      "bank_account": data.bank_account, "bank_code": data.bank_code},
         )
     else:
         changed = False
@@ -56,6 +58,10 @@ def learn_from_approval(data: ExtractedData) -> Optional[Vendor]:
             vendor.tax_id, changed = data.vendor_tax_id, True
         if not vendor.default_currency and data.currency:
             vendor.default_currency, changed = data.currency, True
+        # The first account is learned. A different account is never taken from an invoice:
+        # an owner or admin changes it on the Vendors page after confirming with the vendor.
+        if not vendor.bank_account and data.bank_account:
+            vendor.bank_account, vendor.bank_code, changed = data.bank_account, data.bank_code, True
         known = {vendor.name_key, *(normalize_vendor(a) for a in vendor.aliases or [])}
         if normalize_vendor(data.vendor_name) not in known:
             vendor.aliases = [*(vendor.aliases or []), data.vendor_name]

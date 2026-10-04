@@ -28,7 +28,7 @@ AMOUNT_FIELDS = ("subtotal", "discount_amount", "tax_amount", "shipping_amount",
 # second model call would only cost money.
 EXTRACTION_QUALITY_CHECKS = frozenset({
     "required_fields", "totals_math", "line_items_sum", "line_item_math", "date_order", "currency", "model_uncertain",
-    "vendor_history", "vendor_not_self", "amounts_verified", "vendor_master",
+    "vendor_history", "vendor_not_self", "amounts_verified", "vendor_master", "bank_account",
 })
 # The line items must add up to auto-approve. "Subtotal + tax = total" alone is not enough:
 # a model that misses the line items (or a document whose lines do not add up) would pass it.
@@ -44,6 +44,7 @@ class VendorRecord:
     default_currency: str = ""
     is_blocked: bool = False
     matched_by: str = "name"  # "tax_id" or "name"
+    bank_account: str = ""
 
 
 @dataclass
@@ -312,6 +313,28 @@ def check_vendor_master(ex: InvoiceExtraction, vendor: Optional[VendorRecord]) -
     return Check("vendor_master", PASS, CRITICAL, fields=("vendor_name",))
 
 
+def check_bank_account(ex: InvoiceExtraction, vendor: Optional[VendorRecord]) -> Check:
+    """
+    A bank account that differs from the one on file is the most common invoice fraud
+    (a fake "our bank details have changed" invoice). It always goes to a person.
+    """
+    from .normalize import iban_is_valid, looks_like_iban, mask_account
+
+    account = ex.bank_account or ""
+    if not account:
+        return Check("bank_account", SKIP, CRITICAL, "No bank account on the invoice")
+    if looks_like_iban(account) and not iban_is_valid(account):
+        return Check("bank_account", FAIL, MAJOR,
+                     f"The IBAN {mask_account(account)} fails its checksum: a character was probably misread",
+                     ("bank_account",))
+    if vendor and vendor.bank_account and account != vendor.bank_account:
+        return Check("bank_account", FAIL, CRITICAL,
+                     f"The bank account on this invoice ({mask_account(account)}) is not the one on file for "
+                     f"{vendor.name} ({mask_account(vendor.bank_account)}). Confirm the change with the vendor by "
+                     "phone, using a number you already have, before paying.", ("bank_account",))
+    return Check("bank_account", PASS, CRITICAL, fields=("bank_account",))
+
+
 def check_vendor_not_self(ex: InvoiceExtraction, own_names) -> Check:
     """The vendor must not be the organization itself: that means the model read the bill-to block.
     Names are compared without legal suffixes, so "Globex" matches "Globex Corporation"."""
@@ -360,8 +383,9 @@ def validate(ex: InvoiceExtraction, today: Optional[date] = None,
         check_new_vendor(ex, is_new_vendor),
         check_vendor_history(ex, vendor_history(ex) if vendor_history and ex.vendor_name else None),
         check_vendor_not_self(ex, own_names),
-        check_vendor_master(ex, vendor_lookup(ex) if vendor_lookup else None),
     ]
+    vendor = vendor_lookup(ex) if vendor_lookup else None
+    checks += [check_vendor_master(ex, vendor), check_bank_account(ex, vendor)]
     # Always give the reviewer a reason: when nothing proved the total, that is the reason.
     proved = any(c.name in AMOUNT_PROOFS and c.status == PASS for c in checks)
     if proved:

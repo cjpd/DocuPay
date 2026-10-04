@@ -42,7 +42,8 @@ def _line_items(lines: List[str]) -> List[LineItem]:
     row = re.compile(rf"^(?P<desc>[A-Za-z].*?)\s+(?P<qty>\d+(?:\.\d+)?)\s+(?P<unit>{_AMOUNT})\s+(?P<amt>{_AMOUNT})\s*$")
     for line in lines:
         m = row.match(line.strip())
-        if m and not re.match(r"(sub)?total|tax|vat|shipping|discount", m.group("desc"), re.IGNORECASE):
+        skip = r"(sub)?total|tax|vat|shipping|discount|iban|bic|swift|account|sort\s*code|routing|bank"
+        if m and not re.match(skip, m.group("desc"), re.IGNORECASE):
             items.append(LineItem(description=m.group("desc"), quantity=m.group("qty"),
                                   unit_price=m.group("unit"), amount=m.group("amt")))
     return items
@@ -78,6 +79,11 @@ def extract_from_text(text: str) -> InvoiceExtraction:
         discount_amount=_find(rf"discount(?:[ \t]*\([^)]*\))?[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
         shipping_amount=_find(rf"(?:shipping|freight|delivery)[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
         total_amount=_find(rf"(?:grand\s*total|total\s*due|amount\s*due|^total)[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
+        amount_due=_find(rf"(?:balance\s+due|amount\s+due|total\s+due)[ \t]*[:\-]?[ \t]*({_AMOUNT})", text),
+        bank_account=_find(r"\bIBAN[ \t]*[:\-]?[ \t]*([A-Z]{2}\d{2}(?:[ \t]?[A-Z0-9]{2,4}){3,8})", text)
+        or _find(r"\baccount\s*(?:no\.?|number|#)[ \t]*[:\-]?[ \t]*([0-9][0-9\- ]{5,30}[0-9])", text),
+        bank_code=_find(r"\b(?:BIC|SWIFT)[ \t]*[:\-]?[ \t]*([A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3})?)\b", text)
+        or _find(r"\b(?:routing|ABA|sort\s*code)[ \t]*(?:no\.?|number|#)?[ \t]*[:\-]?[ \t]*([0-9][0-9\- ]{4,10}[0-9])", text),
         line_items=_line_items(lines),
     )
 

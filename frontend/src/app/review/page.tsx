@@ -2,13 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Check, CheckCircle2, ChevronDown, PartyPopper, ThumbsDown } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, ChevronDown, PartyPopper, ShieldAlert, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { DocumentPreview } from "@/components/DocumentPreview";
 import { Badge, Button, Card, EmptyState, ErrorState, Kbd, Skeleton, cx } from "@/components/ui";
 import { FIELD_LABELS, ago, checkLabel, money } from "@/lib/format";
-import { useApprove, useReject, useReviewQueue } from "@/lib/hooks";
+import { useApprove, useReject, useReviewQueue, useReviewTask } from "@/lib/hooks";
 import type { Check as CheckT, ExtractedData, ReviewTask } from "@/lib/types";
 
 export default function ReviewPage() {
@@ -25,11 +25,18 @@ function Review() {
   const queue = useReviewQueue();
   const params = useSearchParams();
   const router = useRouter();
-  const tasks = useMemo(() => queue.data?.results ?? [], [queue.data]);
+  const wanted = Number(params.get("id"));
+  const page = useMemo(() => queue.data?.results ?? [], [queue.data]);
+  // A link can point at an invoice beyond the first page of the queue: load it on its own.
+  const inPage = page.some((t) => t.id === wanted);
+  const linked = useReviewTask(wanted && queue.data && !inPage ? wanted : null);
+  const tasks = useMemo(
+    () => (linked.data && linked.data.status === "pending" && !inPage ? [linked.data, ...page] : page),
+    [linked.data, inPage, page],
+  );
   const waiting = queue.data?.count ?? 0;
   const [cleared, setCleared] = useState(0);
 
-  const wanted = Number(params.get("id"));
   const index = Math.max(0, tasks.findIndex((t) => t.id === wanted));
   const task = tasks[index];
 
@@ -41,7 +48,7 @@ function Review() {
     [tasks, router],
   );
 
-  if (queue.isLoading) return <Skeleton className="h-[70vh]" />;
+  if (queue.isLoading || linked.isLoading) return <Skeleton className="h-[70vh]" />;
   if (queue.isError) return <ErrorState message={(queue.error as Error).message} onRetry={() => queue.refetch()} />;
   if (!task) return <AllCaughtUp cleared={cleared} />;
 
@@ -105,10 +112,10 @@ function QueueList({ tasks, current, onPick }: { tasks: ReviewTask[]; current: n
 }
 
 const EDITABLE: (keyof ExtractedData)[] = [
-  "vendor_name", "vendor_tax_id", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax_amount", "total_amount", "purchase_order",
+  "vendor_name", "vendor_tax_id", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax_amount", "total_amount", "amount_due", "purchase_order", "bank_account", "bank_code",
 ];
 const DATE_FIELDS = new Set(["invoice_date", "due_date"]);
-const MONEY_FIELDS = new Set(["subtotal", "tax_amount", "total_amount"]);
+const MONEY_FIELDS = new Set(["subtotal", "tax_amount", "total_amount", "amount_due"]);
 
 function Decision({ task, position, onDone, onNext, onPrev }: {
   task: ReviewTask; position: string; onDone: (verb: "approved" | "rejected") => void; onNext: () => void; onPrev: () => void;
@@ -245,9 +252,14 @@ function VendorBadge({ data }: { data: ExtractedData | null }) {
 }
 
 function FailedCheck({ check }: { check: CheckT }) {
+  // A changed bank account is the classic invoice fraud: it gets the strongest warning.
+  const danger = check.name === "bank_account" && check.severity === "critical";
   return (
-    <li className="flex gap-2.5 rounded-[var(--radius-control)] border border-warn/30 bg-warn-soft px-3 py-2.5">
-      <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0 text-warn" />
+    <li className={cx("flex gap-2.5 rounded-[var(--radius-control)] border px-3 py-2.5",
+      danger ? "border-bad/40 bg-bad-soft" : "border-warn/30 bg-warn-soft")}>
+      {danger
+        ? <ShieldAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-bad" />
+        : <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0 text-warn" />}
       <div className="min-w-0">
         <p className="text-sm font-medium text-ink">{checkLabel(check)}</p>
         <p className="text-xs text-ink-2">{check.message}</p>
@@ -277,7 +289,7 @@ function Field({ name, value, flagged, changed, confidence, onChange }: {
   name: string; value: string; flagged: boolean; changed: boolean; confidence?: number; onChange: (v: string) => void;
 }) {
   const id = `field-${name}`;
-  const wide = name === "vendor_name";
+  const wide = name === "vendor_name" || name === "bank_account";
   return (
     <div className={wide ? "col-span-2" : ""}>
       <label htmlFor={id} className="flex items-center gap-1.5 text-xs font-medium text-ink-2">
@@ -288,6 +300,7 @@ function Field({ name, value, flagged, changed, confidence, onChange }: {
       </label>
       <input
         id={id}
+        spellCheck={false}
         type={DATE_FIELDS.has(name) ? "date" : "text"}
         inputMode={MONEY_FIELDS.has(name) ? "decimal" : undefined}
         value={value}
@@ -295,6 +308,7 @@ function Field({ name, value, flagged, changed, confidence, onChange }: {
         className={cx(
           "mt-1 h-9 w-full rounded-[var(--radius-control)] border bg-surface px-2.5 text-sm outline-none focus:border-accent",
           MONEY_FIELDS.has(name) && "text-right font-mono tabular",
+          (name === "bank_account" || name === "bank_code" || name === "vendor_tax_id") && "font-mono",
           flagged && !changed ? "border-warn/60" : changed ? "border-accent/60" : "border-line",
         )}
       />

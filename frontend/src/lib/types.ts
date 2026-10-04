@@ -15,9 +15,12 @@ export type LineItem = {
   amount: string | null;
 };
 
-export type VendorSummary = { id: number; name: string; tax_id: string; default_currency: string; is_blocked: boolean };
+export type VendorSummary = {
+  id: number; name: string; tax_id: string; default_currency: string; bank_account: string; is_blocked: boolean;
+};
 
 export type Vendor = VendorSummary & {
+  bank_code: string;
   aliases: string[];
   notes: string;
   invoice_count: number;
@@ -39,6 +42,9 @@ export type ExtractedData = {
   subtotal: string | null;
   tax_amount: string | null;
   total_amount: string | null;
+  amount_due: string | null;
+  bank_account: string;
+  bank_code: string;
   currency: string;
   line_items: LineItem[];
   overall_confidence: number;

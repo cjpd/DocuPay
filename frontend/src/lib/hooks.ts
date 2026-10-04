@@ -56,6 +56,15 @@ export function useReviewQueue() {
   });
 }
 
+/** One review task, for links to invoices beyond the first page of the queue. */
+export function useReviewTask(id: number | null) {
+  return useQuery({
+    queryKey: ["reviews", "one", id],
+    enabled: !!id,
+    queryFn: () => api<ReviewTask>(`/api/documents/reviews/${id}/`),
+  });
+}
+
 export function useDocumentPreview(id: number, page: number) {
   return useQuery({
     queryKey: ["preview", id, page],

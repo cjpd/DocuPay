@@ -52,6 +52,7 @@ export const CHECK_LABELS: Record<string, string> = {
   vendor_not_self: "Vendor is not your own company",
   amounts_verified: "The total can be verified",
   vendor_master: "Matches your vendor list",
+  bank_account: "Bank account matches the one on file",
 };
 
 /** The same checks, worded for when they fail. */
@@ -72,6 +73,7 @@ export const FAIL_LABELS: Record<string, string> = {
   vendor_not_self: "The vendor looks like your own company",
   amounts_verified: "The total could not be verified",
   vendor_master: "Does not match your vendor list",
+  bank_account: "Bank account changed: possible fraud",
 };
 
 export const checkLabel = (c: Check) =>
@@ -89,7 +91,12 @@ export const FIELD_LABELS: Record<string, string> = {
   subtotal: "Subtotal",
   tax_amount: "Tax",
   total_amount: "Total",
+  amount_due: "Amount due",
+  bank_account: "Bank account (IBAN)",
+  bank_code: "BIC / routing",
 };
+
+export const maskAccount = (account: string) => (account && account.length > 4 ? `…${account.slice(-4)}` : account);
 
 export const STATUS: Record<Status, { label: string; tone: "ok" | "warn" | "bad" | "info" }> = {
   pending: { label: "Queued", tone: "info" },

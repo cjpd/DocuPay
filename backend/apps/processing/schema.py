@@ -60,6 +60,9 @@ INVOICE_JSON_SCHEMA = {
         "tax_amount": _nullable_num,
         "shipping_amount": _nullable_num,
         "total_amount": _nullable_num,
+        "amount_due": _nullable_num,
+        "bank_account": _nullable_str,
+        "bank_code": _nullable_str,
         "prices_include_tax": {"type": ["boolean", "null"]},
         "line_items": {"type": "array", "items": LINE_ITEM_JSON_SCHEMA},
         "uncertain_fields": {"type": "array", "items": {"type": "string"}},
@@ -68,7 +71,8 @@ INVOICE_JSON_SCHEMA = {
         "is_invoice", "vendor_name", "vendor_tax_id", "vendor_address", "customer_name",
         "invoice_number", "purchase_order", "invoice_date", "due_date", "payment_terms",
         "currency", "subtotal", "discount_amount", "tax_amount", "shipping_amount",
-        "total_amount", "prices_include_tax", "line_items", "uncertain_fields",
+        "total_amount", "amount_due", "bank_account", "bank_code", "prices_include_tax", "line_items",
+        "uncertain_fields",
     ],
     "additionalProperties": False,
 }
@@ -179,6 +183,11 @@ class InvoiceExtraction(BaseModel):
     tax_amount: Optional[Decimal] = None
     shipping_amount: Optional[Decimal] = None
     total_amount: Optional[Decimal] = None
+    # What is left to pay (after deposits or credits); often equal to the total.
+    amount_due: Optional[Decimal] = None
+    # Where to pay: IBAN or account number, and BIC / SWIFT / routing number / sort code.
+    bank_account: Optional[str] = None
+    bank_code: Optional[str] = None
     # True only when the document says the prices already include tax ("incl. VAT").
     prices_include_tax: Optional[bool] = None
     line_items: List[LineItem] = Field(default_factory=list)
@@ -205,6 +214,13 @@ class InvoiceExtraction(BaseModel):
         text = str(v).strip()
         return text or None
 
+    @field_validator("bank_account", "bank_code", mode="before")
+    @classmethod
+    def _bank(cls, v):
+        from .normalize import normalize_bank
+
+        return normalize_bank(v) or None
+
     @field_validator("invoice_date", "due_date", mode="before")
     @classmethod
     def _date(cls, v):
@@ -219,7 +235,7 @@ class InvoiceExtraction(BaseModel):
         return code if re.fullmatch(r"[A-Z]{3}", code) else None
 
     @field_validator(
-        "subtotal", "discount_amount", "tax_amount", "shipping_amount", "total_amount", mode="before",
+        "subtotal", "discount_amount", "tax_amount", "shipping_amount", "total_amount", "amount_due", mode="before",
     )
     @classmethod
     def _amount(cls, v):
