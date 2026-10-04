@@ -6,6 +6,11 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me")
 DEBUG = os.getenv("DEBUG", "0") == "1"
+# Sessions and tokens are signed with SECRET_KEY: a known key lets anyone sign in as anyone.
+if not DEBUG and (SECRET_KEY in ("", "change-me") or len(SECRET_KEY) < 32):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured("Set DJANGO_SECRET_KEY to a random value of at least 32 characters.")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("CORS_ALLOWED_ORIGINS") else []
 # The frontend sends the active organization and reads the page count of previews.
@@ -13,6 +18,17 @@ from corsheaders.defaults import default_headers  # noqa: E402
 
 CORS_ALLOW_HEADERS = (*default_headers, "x-organization-id")
 CORS_EXPOSE_HEADERS = ["X-Page-Count", "Content-Disposition"]
+# Session cookie for the browser app. The frontend and the API must be on the same site
+# (for example app.example.com and api.example.com) so the cookie is sent (SameSite=Lax).
+CORS_ALLOW_CREDENTIALS = True
+COOKIE_SECURE = os.getenv("COOKIE_SECURE", "0" if os.getenv("DEBUG", "0") == "1" else "1") == "1"
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = COOKIE_SECURE
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = int(os.getenv("SESSION_HOURS", "12")) * 3600
+SESSION_SAVE_EVERY_REQUEST = True  # sliding expiry: active users stay signed in
+CSRF_COOKIE_SECURE = COOKIE_SECURE
+CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if os.getenv("CSRF_TRUSTED_ORIGINS") else []
 
 INSTALLED_APPS = [
@@ -79,8 +95,12 @@ AUTH_USER_MODEL = "users.CustomUser"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        # Scripts: JWT bearer tokens. Browser: session cookie, CSRF enforced on writes.
+        # JWT comes first so a signed-out request gets 401 (with WWW-Authenticate), not 403.
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
+    "DEFAULT_THROTTLE_RATES": {"login": os.getenv("LOGIN_RATE_LIMIT", "10/min")},
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),

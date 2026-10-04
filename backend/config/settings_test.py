@@ -1,9 +1,11 @@
 """Settings for the test suite: no Postgres, Redis, S3 or API keys needed."""
 import os
 
-from .settings import *  # noqa: F401,F403
+os.environ.setdefault("DJANGO_SECRET_KEY", "test-secret-key-that-is-long-enough-for-hs256-signing")
 
-SECRET_KEY = "test-secret-key"
+from .settings import *  # noqa: E402,F401,F403
+
+SECRET_KEY = "test-secret-key-that-is-long-enough-for-hs256-signing"
 # SQLite by default. Set TEST_DB=postgres (CI does) to catch Postgres-only errors such
 # as numeric overflow; it uses the POSTGRES_* settings from settings.py.
 if os.getenv("TEST_DB") != "postgres":

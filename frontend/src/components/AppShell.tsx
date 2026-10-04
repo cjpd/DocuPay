@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FileStack, Inbox, LayoutDashboard, LogOut, Settings } from "lucide-react";
-import { session, useSession } from "@/lib/api";
+import { session, signOut, useSession } from "@/lib/api";
 import { useMe, useOrganizations, useReviewQueue } from "@/lib/hooks";
 import { cx } from "./ui";
 
@@ -17,20 +17,17 @@ const NAV = [
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const path = usePathname();
-  const signedIn = useSession(session.isSignedIn);
-
-  useEffect(() => {
-    if (signedIn === false) router.replace(`/login/?next=${encodeURIComponent(path)}`);
-  }, [signedIn, path, router]);
-
-  if (!signedIn) return null;
+  // The session cookie is httpOnly, so ask the API who is signed in. A 401 sends the
+  // visitor to the sign-in page (see api.ts).
+  const me = useMe();
+  if (!me.data) return null;
   return <Shell path={path}>{children}</Shell>;
 }
 
 function Shell({ path, children }: { path: string; children: ReactNode }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const queue = useReviewQueue();
   const pending = queue.data?.count ?? 0;
   const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href.replace(/\/$/, "")));
@@ -66,7 +63,7 @@ function Shell({ path, children }: { path: string; children: ReactNode }) {
         </nav>
         <div className="md:mt-auto md:border-t md:border-line md:pt-3">
           <OrgSwitcher />
-          <Account onSignOut={() => { session.clear(); router.replace("/login/"); }} />
+          <Account onSignOut={async () => { await signOut(); qc.clear(); router.replace("/login/"); }} />
         </div>
       </aside>
       <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">{children}</main>
