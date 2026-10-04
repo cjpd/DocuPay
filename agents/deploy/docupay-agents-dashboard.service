@@ -1,0 +1,19 @@
+[Unit]
+Description=DocuPay agent dashboard (127.0.0.1 only; reach it over SSH or Tailscale)
+After=network-online.target
+
+[Service]
+Type=simple
+User=dpagent
+WorkingDirectory=/srv/docupay
+EnvironmentFile=/etc/docupay-agents.env
+Environment=PYTHONPATH=/srv/docupay/agents
+ExecStart=/srv/docupay/agents/.venv/bin/python -m dp_agents.cli dashboard
+Restart=always
+RestartSec=10
+NoNewPrivileges=yes
+ProtectSystem=full
+ReadWritePaths=/srv/docupay/agents/data
+
+[Install]
+WantedBy=multi-user.target

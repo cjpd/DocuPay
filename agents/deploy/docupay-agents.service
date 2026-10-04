@@ -1,0 +1,30 @@
+[Unit]
+Description=DocuPay agent graph
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=dpagent
+WorkingDirectory=/srv/docupay
+EnvironmentFile=/etc/docupay-agents.env
+Environment=PYTHONPATH=/srv/docupay/agents
+Environment=PYTHONUNBUFFERED=1
+# The final check: the graph refuses to run unattended until every answer is clean.
+ExecStartPre=/srv/docupay/agents/.venv/bin/python -m dp_agents.cli check
+ExecStart=/srv/docupay/agents/.venv/bin/python -m dp_agents.cli run
+# If it fails, the alert goes to Telegram from the unit below.
+OnFailure=docupay-agents-alert@%n.service
+Restart=always
+RestartSec=30
+# Hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/srv/docupay /home/dpagent/.claude /home/dpagent/.config /home/dpagent/.npm /home/dpagent/.cache
+
+[Install]
+WantedBy=multi-user.target

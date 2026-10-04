@@ -1,0 +1,8 @@
+[Unit]
+Description=Telegram alert when %i fails
+
+[Service]
+Type=oneshot
+User=dpagent
+EnvironmentFile=/etc/docupay-agents.env
+ExecStart=/bin/sh -c 'curl -fsS -m 10 "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" -d chat_id="$TELEGRAM_CHAT_ID" --data-urlencode text="⛔ %i stopped on $(hostname). systemd restarts it in 30 s. Logs: journalctl -u %i -n 50" >/dev/null'

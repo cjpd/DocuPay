@@ -28,3 +28,7 @@ frontend/out/
 frontend/tsconfig.tsbuildinfo
 frontend/next-env.d.ts
 dump.rdb
+
+# Agent graph runtime state
+agents/work/
+agents/data/*.sqlite3*
