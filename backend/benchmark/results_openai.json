@@ -1,0 +1,3675 @@
+{
+  "meta": {
+    "n_labeled": 40,
+    "n_files": 47,
+    "threshold": 0.92,
+    "run_pipeline_params": [
+      "doc",
+      "escalate",
+      "escalation_errors",
+      "is_duplicate",
+      "is_new_vendor",
+      "max_amount",
+      "own_names",
+      "provider",
+      "threshold",
+      "vendor_history",
+      "vendor_lookup"
+    ]
+  },
+  "ingest": {
+    "rows": [
+      {
+        "id": "clean_us_classic_iso",
+        "file": "clean_us_classic_iso.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 540,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 73.6
+      },
+      {
+        "id": "clean_us_modern_usdate",
+        "file": "clean_us_modern_usdate.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 475,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 4.1
+      },
+      {
+        "id": "clean_us_mon_date",
+        "file": "clean_us_mon_date.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 455,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 3.1
+      },
+      {
+        "id": "clean_us_long_date_discount",
+        "file": "clean_us_long_date_discount.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 575,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.8
+      },
+      {
+        "id": "clean_us_shipping",
+        "file": "clean_us_shipping.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 503,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.5
+      },
+      {
+        "id": "clean_us_code_currency",
+        "file": "clean_us_code_currency.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 540,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.4
+      },
+      {
+        "id": "clean_us_amount_only",
+        "file": "clean_us_amount_only.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 446,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.7
+      },
+      {
+        "id": "clean_eu_decimal_comma",
+        "file": "clean_eu_decimal_comma.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 561,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 3.5
+      },
+      {
+        "id": "clean_eu_german_labels",
+        "file": "clean_eu_german_labels.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 511,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.6
+      },
+      {
+        "id": "clean_eu_slash_date",
+        "file": "clean_eu_slash_date.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 494,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.4
+      },
+      {
+        "id": "clean_eu_slash_date_unambiguous",
+        "file": "clean_eu_slash_date_unambiguous.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 472,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.7
+      },
+      {
+        "id": "clean_eu_discount_shipping_tax",
+        "file": "clean_eu_discount_shipping_tax.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 629,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.7
+      },
+      {
+        "id": "clean_gb_vat_mon",
+        "file": "clean_gb_vat_mon.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 504,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.4
+      },
+      {
+        "id": "clean_gb_dmy_mon",
+        "file": "clean_gb_dmy_mon.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 559,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 3.2
+      },
+      {
+        "id": "clean_minimal_layout",
+        "file": "clean_minimal_layout.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 469,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.4
+      },
+      {
+        "id": "clean_multipage_2",
+        "file": "clean_multipage_2.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 2,
+        "text_chars": 1763,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 4.0
+      },
+      {
+        "id": "clean_multipage_3_eur",
+        "file": "clean_multipage_3_eur.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 3,
+        "text_chars": 2817,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 5.4
+      },
+      {
+        "id": "clean_many_lines_single_page",
+        "file": "clean_many_lines_single_page.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 1015,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 3.2
+      },
+      {
+        "id": "clean_eu_vat_inclusive",
+        "file": "clean_eu_vat_inclusive.pdf",
+        "category": "clean_digital",
+        "expected_route": "auto_approve",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 480,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.3
+      },
+      {
+        "id": "clean_text_usd",
+        "file": "clean_text_usd.txt",
+        "category": "clean_text",
+        "expected_route": "auto_approve",
+        "route": "text",
+        "pages": 1,
+        "text_chars": 371,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 0.8
+      },
+      {
+        "id": "clean_text_gbp",
+        "file": "clean_text_gbp.txt",
+        "category": "clean_text",
+        "expected_route": "auto_approve",
+        "route": "text",
+        "pages": 1,
+        "text_chars": 337,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 0.1
+      },
+      {
+        "id": "scan_png_us",
+        "file": "scan_png_us.png",
+        "category": "clean_scan",
+        "expected_route": "auto_approve",
+        "route": "image",
+        "pages": 1,
+        "text_chars": 0,
+        "images": 1,
+        "image_bytes": 41421,
+        "error": null,
+        "content_loss": null,
+        "ms": 25.0
+      },
+      {
+        "id": "scan_jpg_eu",
+        "file": "scan_jpg_eu.jpg",
+        "category": "clean_scan",
+        "expected_route": "auto_approve",
+        "route": "image",
+        "pages": 1,
+        "text_chars": 0,
+        "images": 1,
+        "image_bytes": 81889,
+        "error": null,
+        "content_loss": null,
+        "ms": 6.4
+      },
+      {
+        "id": "scan_pdf_1page",
+        "file": "scan_pdf_1page.pdf",
+        "category": "clean_scan",
+        "expected_route": "auto_approve",
+        "route": "pdf_scan",
+        "pages": 1,
+        "text_chars": 0,
+        "images": 1,
+        "image_bytes": 152963,
+        "error": null,
+        "content_loss": null,
+        "ms": 97.7
+      },
+      {
+        "id": "scan_pdf_2page",
+        "file": "scan_pdf_2page.pdf",
+        "category": "clean_scan",
+        "expected_route": "auto_approve",
+        "route": "pdf_scan",
+        "pages": 2,
+        "text_chars": 0,
+        "images": 2,
+        "image_bytes": 325951,
+        "error": null,
+        "content_loss": null,
+        "ms": 76.4
+      },
+      {
+        "id": "scan_pdf_with_scanner_stamp",
+        "file": "scan_pdf_with_scanner_stamp.pdf",
+        "category": "clean_scan",
+        "expected_route": "auto_approve",
+        "route": "pdf_scan",
+        "pages": 1,
+        "text_chars": 0,
+        "images": 1,
+        "image_bytes": 143230,
+        "error": null,
+        "content_loss": null,
+        "ms": 27.9
+      },
+      {
+        "id": "scan_tiff_2page",
+        "file": "scan_tiff_2page.tiff",
+        "category": "clean_scan",
+        "expected_route": "auto_approve",
+        "route": "image",
+        "pages": 2,
+        "text_chars": 0,
+        "images": 2,
+        "image_bytes": 198071,
+        "error": null,
+        "content_loss": null,
+        "ms": 71.9
+      },
+      {
+        "id": "mixed_text_then_scan",
+        "file": "mixed_text_then_scan.pdf",
+        "category": "clean_scan",
+        "expected_route": "auto_approve",
+        "route": "pdf_mixed",
+        "pages": 2,
+        "text_chars": 950,
+        "images": 1,
+        "image_bytes": 155019,
+        "error": null,
+        "content_loss": null,
+        "ms": 32.3
+      },
+      {
+        "id": "neg_total_mismatch",
+        "file": "neg_total_mismatch.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 482,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.6
+      },
+      {
+        "id": "neg_total_mismatch_no_subtotal",
+        "file": "neg_total_mismatch_no_subtotal.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 510,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.4
+      },
+      {
+        "id": "neg_lines_dont_sum",
+        "file": "neg_lines_dont_sum.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 562,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.4
+      },
+      {
+        "id": "neg_line_qty_price_mismatch",
+        "file": "neg_line_qty_price_mismatch.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 500,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.3
+      },
+      {
+        "id": "neg_missing_invoice_number",
+        "file": "neg_missing_invoice_number.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 468,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.3
+      },
+      {
+        "id": "neg_due_before_invoice",
+        "file": "neg_due_before_invoice.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 411,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.4
+      },
+      {
+        "id": "neg_future_invoice_date",
+        "file": "neg_future_invoice_date.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 460,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.5
+      },
+      {
+        "id": "neg_credit_note",
+        "file": "neg_credit_note.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 405,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.6
+      },
+      {
+        "id": "neg_not_invoice_letter",
+        "file": "neg_not_invoice_letter.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 338,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.7
+      },
+      {
+        "id": "neg_not_invoice_quote",
+        "file": "neg_not_invoice_quote.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 469,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.5
+      },
+      {
+        "id": "neg_not_invoice_purchase_order",
+        "file": "neg_not_invoice_purchase_order.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 460,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.4
+      },
+      {
+        "id": "neg_duplicate_resubmission",
+        "file": "neg_duplicate_resubmission.pdf",
+        "category": "negative",
+        "expected_route": "review",
+        "route": "pdf_text",
+        "pages": 1,
+        "text_chars": 532,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 2.9
+      },
+      {
+        "id": "ingest_21_pages",
+        "file": "ingest_21_pages.pdf",
+        "category": "ingest_only",
+        "expected_route": "permanent_error",
+        "route": "error",
+        "error": "PermanentProcessingError: The PDF has 21 pages. The limit is 20.",
+        "content_loss": null,
+        "ms": 0.5
+      },
+      {
+        "id": "ingest_empty_file",
+        "file": "ingest_empty_file.pdf",
+        "category": "ingest_only",
+        "expected_route": "permanent_error",
+        "route": "error",
+        "error": "PermanentProcessingError: File is empty",
+        "content_loss": null,
+        "ms": 0.1
+      },
+      {
+        "id": "ingest_truncated_pdf",
+        "file": "ingest_truncated_pdf.pdf",
+        "category": "ingest_only",
+        "expected_route": "permanent_error",
+        "route": "error",
+        "error": "PermanentProcessingError: The PDF file is damaged or encrypted",
+        "content_loss": null,
+        "ms": 0.2
+      },
+      {
+        "id": "ingest_docx_zip",
+        "file": "ingest_docx_zip.docx",
+        "category": "ingest_only",
+        "expected_route": "permanent_error",
+        "route": "error",
+        "error": "PermanentProcessingError: Unsupported file type. Upload a PDF, an image or a text file.",
+        "content_loss": null,
+        "ms": 0.1
+      },
+      {
+        "id": "ingest_latin1_text",
+        "file": "ingest_latin1_text.txt",
+        "category": "ingest_only",
+        "expected_route": "text",
+        "route": "text",
+        "pages": 1,
+        "text_chars": 57,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "ms": 0.6
+      },
+      {
+        "id": "ingest_webp_image",
+        "file": "ingest_webp_image.webp",
+        "category": "ingest_only",
+        "expected_route": "image",
+        "route": "image",
+        "pages": 1,
+        "text_chars": 0,
+        "images": 1,
+        "image_bytes": 24757,
+        "error": null,
+        "content_loss": null,
+        "ms": 7.4
+      },
+      {
+        "id": "ingest_exif_rotated_photo",
+        "file": "ingest_exif_rotated_photo.jpg",
+        "category": "ingest_only",
+        "expected_route": "image",
+        "route": "image",
+        "pages": 1,
+        "text_chars": 0,
+        "images": 1,
+        "image_bytes": 33239,
+        "error": null,
+        "content_loss": null,
+        "ms": 7.9
+      },
+      {
+        "id": "real_invoice_1.jpg",
+        "file": "git:af53d92/invoice_1.jpg",
+        "category": "real_sample",
+        "expected_route": null,
+        "route": "image",
+        "pages": 1,
+        "text_chars": 0,
+        "images": 1,
+        "image_bytes": 34961,
+        "error": null,
+        "content_loss": null,
+        "heuristic": {
+          "decision": "failed",
+          "error": "PermanentProcessingError: Tesseract is not installed, so images cannot be read offline"
+        }
+      },
+      {
+        "id": "real_invoice_2.jpg",
+        "file": "git:af53d92/invoice_2.jpg",
+        "category": "real_sample",
+        "expected_route": null,
+        "route": "image",
+        "pages": 1,
+        "text_chars": 0,
+        "images": 1,
+        "image_bytes": 72931,
+        "error": null,
+        "content_loss": null,
+        "heuristic": {
+          "decision": "failed",
+          "error": "PermanentProcessingError: Tesseract is not installed, so images cannot be read offline"
+        }
+      },
+      {
+        "id": "real_text1.txt",
+        "file": "git:af53d92/text1.txt",
+        "category": "real_sample",
+        "expected_route": null,
+        "route": "text",
+        "pages": 1,
+        "text_chars": 17,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "heuristic": {
+          "decision": "review",
+          "score": 0.3125,
+          "vendor": "asdfadfasdadfasdf",
+          "number": null,
+          "total": null,
+          "failed": [
+            "is_invoice",
+            "required_fields",
+            "currency",
+            "amounts_verified"
+          ]
+        }
+      },
+      {
+        "id": "real_text2.txt",
+        "file": "git:af53d92/text2.txt",
+        "category": "real_sample",
+        "expected_route": null,
+        "route": "text",
+        "pages": 1,
+        "text_chars": 17,
+        "images": 0,
+        "image_bytes": 0,
+        "error": null,
+        "content_loss": null,
+        "heuristic": {
+          "decision": "review",
+          "score": 0.3125,
+          "vendor": "asdfadfasdadfasdf",
+          "number": null,
+          "total": null,
+          "failed": [
+            "is_invoice",
+            "required_fields",
+            "currency",
+            "amounts_verified"
+          ]
+        }
+      }
+    ],
+    "by_route": {
+      "pdf_text": 31,
+      "text": 5,
+      "image": 7,
+      "pdf_scan": 3,
+      "pdf_mixed": 1,
+      "error": 4
+    },
+    "crashes": [],
+    "content_loss": [],
+    "ingest_only_as_expected": "7/7"
+  },
+  "extractor": {
+    "openai": {
+      "provider": "openai",
+      "rows": [
+        {
+          "id": "clean_us_classic_iso",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "iso_date",
+            "tax"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_us_modern_usdate",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "us_date",
+            "title_first"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_us_mon_date",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "mon_date",
+            "no_tax"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "na",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_us_long_date_discount",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "long_date",
+            "discount",
+            "tax"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "correct",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_us_shipping",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "shipping",
+            "tax",
+            "title_first"
+          ],
+          "decision": "review",
+          "score": 0.9394,
+          "amounts_proved": true,
+          "failed": [
+            "model_uncertain"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "correct",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "clean_us_code_currency",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "no_symbol"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_us_amount_only",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "no_qty_columns"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "na",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "wrong"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_eu_decimal_comma",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "eur",
+            "decimal_comma",
+            "eu_dot_date",
+            "vat"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_eu_german_labels",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "eur",
+            "decimal_comma",
+            "german"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_eu_slash_date",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "eur",
+            "decimal_comma",
+            "eu_slash_date_ambiguous"
+          ],
+          "decision": "review",
+          "score": 0.9394,
+          "amounts_proved": true,
+          "failed": [
+            "model_uncertain"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "clean_eu_slash_date_unambiguous",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "eur",
+            "decimal_comma",
+            "eu_slash_date"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_eu_discount_shipping_tax",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "eur",
+            "decimal_comma",
+            "discount",
+            "shipping",
+            "vat"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "correct",
+            "tax_amount": "correct",
+            "shipping_amount": "correct",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_gb_vat_mon",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "gbp",
+            "vat",
+            "mon_date"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_gb_dmy_mon",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "gbp",
+            "dmy_mon_date",
+            "shipping"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "correct",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_minimal_layout",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "title_first",
+            "terse_labels"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_multipage_2",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "multipage"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_multipage_3_eur",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "eur",
+            "multipage",
+            "decimal_comma",
+            "discount"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "correct",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_many_lines_single_page",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "usd",
+            "many_lines"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_eu_vat_inclusive",
+          "category": "clean_digital",
+          "expected": "auto_approve",
+          "tags": [
+            "digital_pdf",
+            "eur",
+            "decimal_comma",
+            "vat_inclusive",
+            "no_subtotal"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "na",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_text_usd",
+          "category": "clean_text",
+          "expected": "auto_approve",
+          "tags": [
+            "text_file"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "missed",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "missed",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "clean_text_gbp",
+          "category": "clean_text",
+          "expected": "auto_approve",
+          "tags": [
+            "text_file"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "missed",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "missed",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "scan_png_us",
+          "category": "clean_scan",
+          "expected": "auto_approve",
+          "tags": [
+            "image",
+            "png"
+          ],
+          "decision": "review",
+          "score": 0.9355,
+          "amounts_proved": true,
+          "failed": [
+            "model_uncertain"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "scan_jpg_eu",
+          "category": "clean_scan",
+          "expected": "auto_approve",
+          "tags": [
+            "image",
+            "jpg",
+            "noisy",
+            "decimal_comma"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "scan_pdf_1page",
+          "category": "clean_scan",
+          "expected": "auto_approve",
+          "tags": [
+            "scanned_pdf"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "scan_pdf_2page",
+          "category": "clean_scan",
+          "expected": "auto_approve",
+          "tags": [
+            "scanned_pdf",
+            "multipage"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "scan_pdf_with_scanner_stamp",
+          "category": "clean_scan",
+          "expected": "auto_approve",
+          "tags": [
+            "scanned_pdf",
+            "tiny_text_layer"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "na",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "scan_tiff_2page",
+          "category": "clean_scan",
+          "expected": "auto_approve",
+          "tags": [
+            "image",
+            "tiff",
+            "multipage"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "mixed_text_then_scan",
+          "category": "clean_scan",
+          "expected": "auto_approve",
+          "tags": [
+            "mixed_pdf",
+            "multipage",
+            "totals_on_scanned_page"
+          ],
+          "decision": "auto_approve",
+          "score": 1.0,
+          "amounts_proved": true,
+          "failed": [],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "neg_total_mismatch",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "digital_pdf",
+            "totals_dont_add_up"
+          ],
+          "decision": "review",
+          "score": 0.9032,
+          "amounts_proved": true,
+          "failed": [
+            "totals_math"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "neg_total_mismatch_no_subtotal",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "digital_pdf",
+            "totals_dont_add_up",
+            "no_subtotal"
+          ],
+          "decision": "review",
+          "score": 0.8214,
+          "amounts_proved": false,
+          "failed": [
+            "line_items_sum",
+            "amounts_verified"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "na",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "neg_lines_dont_sum",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "digital_pdf",
+            "line_items_dont_sum"
+          ],
+          "decision": "review",
+          "score": 0.8485,
+          "amounts_proved": false,
+          "failed": [
+            "line_items_sum",
+            "amounts_verified"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "neg_line_qty_price_mismatch",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "digital_pdf",
+            "line_math_wrong"
+          ],
+          "decision": "review",
+          "score": 0.9355,
+          "amounts_proved": true,
+          "failed": [
+            "line_item_math"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "neg_missing_invoice_number",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "digital_pdf",
+            "missing_invoice_number"
+          ],
+          "decision": "review",
+          "score": 0.8929,
+          "amounts_proved": true,
+          "failed": [
+            "required_fields"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "na",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "neg_due_before_invoice",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "digital_pdf",
+            "due_before_invoice_date"
+          ],
+          "decision": "review",
+          "score": 0.9394,
+          "amounts_proved": true,
+          "failed": [
+            "date_order"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "neg_future_invoice_date",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "digital_pdf",
+            "future_date"
+          ],
+          "decision": "review",
+          "score": 0.9355,
+          "amounts_proved": true,
+          "failed": [
+            "date_order"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": true
+        },
+        {
+          "id": "neg_credit_note",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "digital_pdf",
+            "credit_note",
+            "negative_amounts"
+          ],
+          "decision": "review",
+          "score": 0.9032,
+          "amounts_proved": true,
+          "failed": [
+            "positive_total"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "na",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "neg_not_invoice_letter",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "non_invoice",
+            "mentions_invoice"
+          ],
+          "decision": "review",
+          "score": 0.3889,
+          "amounts_proved": false,
+          "failed": [
+            "is_invoice",
+            "required_fields",
+            "currency",
+            "amounts_verified"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "na",
+            "customer_name": "spurious",
+            "invoice_number": "na",
+            "purchase_order": "na",
+            "invoice_date": "spurious",
+            "due_date": "na",
+            "currency": "na",
+            "subtotal": "na",
+            "discount_amount": "na",
+            "tax_amount": "na",
+            "shipping_amount": "na",
+            "total_amount": "na",
+            "line_items": "na",
+            "line_item_count": "na"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": false
+        },
+        {
+          "id": "neg_not_invoice_quote",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "non_invoice",
+            "quotation"
+          ],
+          "decision": "review",
+          "score": 0.9091,
+          "amounts_proved": true,
+          "failed": [
+            "is_invoice"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "na",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        },
+        {
+          "id": "neg_not_invoice_purchase_order",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "non_invoice",
+            "purchase_order"
+          ],
+          "decision": "review",
+          "score": 0.7857,
+          "amounts_proved": true,
+          "failed": [
+            "is_invoice",
+            "required_fields"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "missed",
+            "purchase_order": "spurious",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "na",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": true,
+          "core_correct": false
+        },
+        {
+          "id": "neg_duplicate_resubmission",
+          "category": "negative",
+          "expected": "review",
+          "tags": [
+            "duplicate"
+          ],
+          "decision": "review",
+          "score": 0.9091,
+          "amounts_proved": true,
+          "failed": [
+            "duplicate"
+          ],
+          "fields": {
+            "is_invoice": "correct",
+            "vendor_name": "correct",
+            "vendor_tax_id": "correct",
+            "customer_name": "correct",
+            "invoice_number": "correct",
+            "purchase_order": "correct",
+            "invoice_date": "correct",
+            "due_date": "correct",
+            "currency": "correct",
+            "subtotal": "correct",
+            "discount_amount": "na",
+            "tax_amount": "correct",
+            "shipping_amount": "na",
+            "total_amount": "correct",
+            "line_item_count": "correct",
+            "line_items": "correct"
+          },
+          "error": null,
+          "cost_usd": null,
+          "escalated": false,
+          "core_correct": true
+        }
+      ],
+      "field_accuracy_all_invoices": {
+        "is_invoice": {
+          "accuracy": 1.0,
+          "n": 37,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "vendor_name": {
+          "accuracy": 1.0,
+          "n": 37,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "vendor_tax_id": {
+          "accuracy": 0.946,
+          "n": 37,
+          "wrong": 0,
+          "missed": 2,
+          "spurious": 0
+        },
+        "customer_name": {
+          "accuracy": 1.0,
+          "n": 37,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "invoice_number": {
+          "accuracy": 1.0,
+          "n": 36,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "purchase_order": {
+          "accuracy": 0.946,
+          "n": 37,
+          "wrong": 0,
+          "missed": 2,
+          "spurious": 0
+        },
+        "invoice_date": {
+          "accuracy": 1.0,
+          "n": 37,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "due_date": {
+          "accuracy": 1.0,
+          "n": 36,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "currency": {
+          "accuracy": 1.0,
+          "n": 37,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "subtotal": {
+          "accuracy": 1.0,
+          "n": 35,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "discount_amount": {
+          "accuracy": 1.0,
+          "n": 3,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "tax_amount": {
+          "accuracy": 1.0,
+          "n": 34,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "shipping_amount": {
+          "accuracy": 1.0,
+          "n": 3,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "total_amount": {
+          "accuracy": 1.0,
+          "n": 37,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "line_item_count": {
+          "accuracy": 1.0,
+          "n": 37,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "line_items": {
+          "accuracy": 0.973,
+          "n": 37,
+          "wrong": 1,
+          "missed": 0,
+          "spurious": 0
+        }
+      },
+      "micro_accuracy_all_invoices": 0.99,
+      "field_accuracy_digital": {
+        "is_invoice": {
+          "accuracy": 1.0,
+          "n": 30,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "vendor_name": {
+          "accuracy": 1.0,
+          "n": 30,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "vendor_tax_id": {
+          "accuracy": 0.933,
+          "n": 30,
+          "wrong": 0,
+          "missed": 2,
+          "spurious": 0
+        },
+        "customer_name": {
+          "accuracy": 1.0,
+          "n": 30,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "invoice_number": {
+          "accuracy": 1.0,
+          "n": 29,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "purchase_order": {
+          "accuracy": 0.933,
+          "n": 30,
+          "wrong": 0,
+          "missed": 2,
+          "spurious": 0
+        },
+        "invoice_date": {
+          "accuracy": 1.0,
+          "n": 30,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "due_date": {
+          "accuracy": 1.0,
+          "n": 29,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "currency": {
+          "accuracy": 1.0,
+          "n": 30,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "subtotal": {
+          "accuracy": 1.0,
+          "n": 28,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "discount_amount": {
+          "accuracy": 1.0,
+          "n": 3,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "tax_amount": {
+          "accuracy": 1.0,
+          "n": 28,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "shipping_amount": {
+          "accuracy": 1.0,
+          "n": 3,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "total_amount": {
+          "accuracy": 1.0,
+          "n": 30,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "line_item_count": {
+          "accuracy": 1.0,
+          "n": 30,
+          "wrong": 0,
+          "missed": 0,
+          "spurious": 0
+        },
+        "line_items": {
+          "accuracy": 0.967,
+          "n": 30,
+          "wrong": 1,
+          "missed": 0,
+          "spurious": 0
+        }
+      },
+      "micro_accuracy_digital": 0.988,
+      "micro_accuracy_scans": 1.0,
+      "core_field_accuracy_digital": {
+        "vendor_name": 1.0,
+        "invoice_number": 0.967,
+        "invoice_date": 1.0,
+        "due_date": 0.967,
+        "currency": 1.0,
+        "total_amount": 1.0
+      },
+      "docs_all_core_fields_correct": "37/37",
+      "stp_rate_clean": {
+        "k": 25,
+        "n": 28,
+        "rate": 0.893
+      },
+      "false_approve_negatives": {
+        "k": 0,
+        "n": 12,
+        "rate": 0.0
+      },
+      "wrong_but_approved": {},
+      "wrong_but_approved_ignoring_vendor_name": [],
+      "failed_docs": [],
+      "escalated_docs": 12,
+      "total_cost_usd": "0"
+    }
+  },
+  "oracle": {
+    "rows": [
+      {
+        "id": "clean_us_classic_iso",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_us_modern_usdate",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_us_mon_date",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_us_long_date_discount",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_us_shipping",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_us_code_currency",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_us_amount_only",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_eu_decimal_comma",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_eu_german_labels",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_eu_slash_date",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_eu_slash_date_unambiguous",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_eu_discount_shipping_tax",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_gb_vat_mon",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_gb_dmy_mon",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_minimal_layout",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_multipage_2",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_multipage_3_eur",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_many_lines_single_page",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_eu_vat_inclusive",
+        "category": "clean_digital",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_text_usd",
+        "category": "clean_text",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "clean_text_gbp",
+        "category": "clean_text",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "scan_png_us",
+        "category": "clean_scan",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "scan_jpg_eu",
+        "category": "clean_scan",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "scan_pdf_1page",
+        "category": "clean_scan",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "scan_pdf_2page",
+        "category": "clean_scan",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "scan_pdf_with_scanner_stamp",
+        "category": "clean_scan",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "scan_tiff_2page",
+        "category": "clean_scan",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "mixed_text_then_scan",
+        "category": "clean_scan",
+        "expected": "auto_approve",
+        "decision": "auto_approve",
+        "score": 1.0,
+        "amounts_proved": true,
+        "failed": [],
+        "correct": true
+      },
+      {
+        "id": "neg_total_mismatch",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.9032,
+        "amounts_proved": true,
+        "failed": [
+          "totals_math"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_total_mismatch_no_subtotal",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.8214,
+        "amounts_proved": false,
+        "failed": [
+          "line_items_sum",
+          "amounts_verified"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_lines_dont_sum",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.8387,
+        "amounts_proved": false,
+        "failed": [
+          "line_items_sum",
+          "amounts_verified"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_line_qty_price_mismatch",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.9355,
+        "amounts_proved": true,
+        "failed": [
+          "line_item_math"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_missing_invoice_number",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.8929,
+        "amounts_proved": true,
+        "failed": [
+          "required_fields"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_due_before_invoice",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.9355,
+        "amounts_proved": true,
+        "failed": [
+          "date_order"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_future_invoice_date",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.9355,
+        "amounts_proved": true,
+        "failed": [
+          "date_order"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_credit_note",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.9032,
+        "amounts_proved": true,
+        "failed": [
+          "positive_total"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_not_invoice_letter",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.3125,
+        "amounts_proved": false,
+        "failed": [
+          "is_invoice",
+          "required_fields",
+          "currency",
+          "amounts_verified"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_not_invoice_quote",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.9032,
+        "amounts_proved": true,
+        "failed": [
+          "is_invoice"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_not_invoice_purchase_order",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.9032,
+        "amounts_proved": true,
+        "failed": [
+          "is_invoice"
+        ],
+        "correct": true
+      },
+      {
+        "id": "neg_duplicate_resubmission",
+        "category": "negative",
+        "expected": "review",
+        "decision": "review",
+        "score": 0.9032,
+        "amounts_proved": true,
+        "failed": [
+          "duplicate"
+        ],
+        "correct": true
+      }
+    ],
+    "stp_rate_clean": {
+      "k": 28,
+      "n": 28,
+      "rate": 1.0
+    },
+    "false_approve_negatives": {
+      "k": 0,
+      "n": 12,
+      "rate": 0.0
+    },
+    "missed_negatives": [],
+    "blocked_clean": []
+  },
+  "corruption": {
+    "types": {
+      "wrong_total": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "totals_math": 27,
+          "line_items_sum": 1,
+          "amounts_verified": 1
+        },
+        "approved_cases": []
+      },
+      "total_is_subtotal": {
+        "n": 24,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "totals_math": 24
+        },
+        "approved_cases": []
+      },
+      "dropped_line_item": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "line_items_sum": 28,
+          "amounts_verified": 28
+        },
+        "approved_cases": []
+      },
+      "no_line_items_extracted": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "amounts_verified": 28
+        },
+        "approved_cases": []
+      },
+      "line_amount_misread": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "line_items_sum": 28,
+          "line_item_math": 28,
+          "amounts_verified": 28
+        },
+        "approved_cases": []
+      },
+      "swapped_day_month": {
+        "n": 17,
+        "false_approved": 8,
+        "false_approve_rate": 0.471,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "date_order": 9
+        },
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_mon_date",
+          "clean_eu_decimal_comma",
+          "clean_eu_slash_date",
+          "clean_gb_vat_mon",
+          "clean_multipage_3_eur",
+          "clean_text_gbp",
+          "scan_tiff_2page"
+        ]
+      },
+      "wrong_currency": {
+        "n": 28,
+        "false_approved": 28,
+        "false_approve_rate": 1.0,
+        "arithmetic_detectable": false,
+        "caught_by": {},
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_modern_usdate",
+          "clean_us_mon_date",
+          "clean_us_long_date_discount",
+          "clean_us_shipping",
+          "clean_us_code_currency",
+          "clean_us_amount_only",
+          "clean_eu_decimal_comma",
+          "clean_eu_german_labels",
+          "clean_eu_slash_date",
+          "clean_eu_slash_date_unambiguous",
+          "clean_eu_discount_shipping_tax",
+          "clean_gb_vat_mon",
+          "clean_gb_dmy_mon",
+          "clean_minimal_layout",
+          "clean_multipage_2",
+          "clean_multipage_3_eur",
+          "clean_many_lines_single_page",
+          "clean_eu_vat_inclusive",
+          "clean_text_usd",
+          "clean_text_gbp",
+          "scan_png_us",
+          "scan_jpg_eu",
+          "scan_pdf_1page",
+          "scan_pdf_2page",
+          "scan_pdf_with_scanner_stamp",
+          "scan_tiff_2page",
+          "mixed_text_then_scan"
+        ]
+      },
+      "missed_tax": {
+        "n": 25,
+        "false_approved": 1,
+        "false_approve_rate": 0.04,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "totals_math": 24
+        },
+        "approved_cases": [
+          "clean_eu_vat_inclusive"
+        ]
+      },
+      "wrong_invoice_number": {
+        "n": 28,
+        "false_approved": 28,
+        "false_approve_rate": 1.0,
+        "arithmetic_detectable": false,
+        "caught_by": {},
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_modern_usdate",
+          "clean_us_mon_date",
+          "clean_us_long_date_discount",
+          "clean_us_shipping",
+          "clean_us_code_currency",
+          "clean_us_amount_only",
+          "clean_eu_decimal_comma",
+          "clean_eu_german_labels",
+          "clean_eu_slash_date",
+          "clean_eu_slash_date_unambiguous",
+          "clean_eu_discount_shipping_tax",
+          "clean_gb_vat_mon",
+          "clean_gb_dmy_mon",
+          "clean_minimal_layout",
+          "clean_multipage_2",
+          "clean_multipage_3_eur",
+          "clean_many_lines_single_page",
+          "clean_eu_vat_inclusive",
+          "clean_text_usd",
+          "clean_text_gbp",
+          "scan_png_us",
+          "scan_jpg_eu",
+          "scan_pdf_1page",
+          "scan_pdf_2page",
+          "scan_pdf_with_scanner_stamp",
+          "scan_tiff_2page",
+          "mixed_text_then_scan"
+        ]
+      },
+      "vendor_is_customer": {
+        "n": 28,
+        "false_approved": 28,
+        "false_approve_rate": 1.0,
+        "arithmetic_detectable": false,
+        "caught_by": {},
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_modern_usdate",
+          "clean_us_mon_date",
+          "clean_us_long_date_discount",
+          "clean_us_shipping",
+          "clean_us_code_currency",
+          "clean_us_amount_only",
+          "clean_eu_decimal_comma",
+          "clean_eu_german_labels",
+          "clean_eu_slash_date",
+          "clean_eu_slash_date_unambiguous",
+          "clean_eu_discount_shipping_tax",
+          "clean_gb_vat_mon",
+          "clean_gb_dmy_mon",
+          "clean_minimal_layout",
+          "clean_multipage_2",
+          "clean_multipage_3_eur",
+          "clean_many_lines_single_page",
+          "clean_eu_vat_inclusive",
+          "clean_text_usd",
+          "clean_text_gbp",
+          "scan_png_us",
+          "scan_jpg_eu",
+          "scan_pdf_1page",
+          "scan_pdf_2page",
+          "scan_pdf_with_scanner_stamp",
+          "scan_tiff_2page",
+          "mixed_text_then_scan"
+        ]
+      },
+      "consistent_x100_scale": {
+        "n": 28,
+        "false_approved": 28,
+        "false_approve_rate": 1.0,
+        "arithmetic_detectable": false,
+        "caught_by": {},
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_modern_usdate",
+          "clean_us_mon_date",
+          "clean_us_long_date_discount",
+          "clean_us_shipping",
+          "clean_us_code_currency",
+          "clean_us_amount_only",
+          "clean_eu_decimal_comma",
+          "clean_eu_german_labels",
+          "clean_eu_slash_date",
+          "clean_eu_slash_date_unambiguous",
+          "clean_eu_discount_shipping_tax",
+          "clean_gb_vat_mon",
+          "clean_gb_dmy_mon",
+          "clean_minimal_layout",
+          "clean_multipage_2",
+          "clean_multipage_3_eur",
+          "clean_many_lines_single_page",
+          "clean_eu_vat_inclusive",
+          "clean_text_usd",
+          "clean_text_gbp",
+          "scan_png_us",
+          "scan_jpg_eu",
+          "scan_pdf_1page",
+          "scan_pdf_2page",
+          "scan_pdf_with_scanner_stamp",
+          "scan_tiff_2page",
+          "mixed_text_then_scan"
+        ]
+      },
+      "consistent_x10_scale": {
+        "n": 28,
+        "false_approved": 28,
+        "false_approve_rate": 1.0,
+        "arithmetic_detectable": false,
+        "caught_by": {},
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_modern_usdate",
+          "clean_us_mon_date",
+          "clean_us_long_date_discount",
+          "clean_us_shipping",
+          "clean_us_code_currency",
+          "clean_us_amount_only",
+          "clean_eu_decimal_comma",
+          "clean_eu_german_labels",
+          "clean_eu_slash_date",
+          "clean_eu_slash_date_unambiguous",
+          "clean_eu_discount_shipping_tax",
+          "clean_gb_vat_mon",
+          "clean_gb_dmy_mon",
+          "clean_minimal_layout",
+          "clean_multipage_2",
+          "clean_multipage_3_eur",
+          "clean_many_lines_single_page",
+          "clean_eu_vat_inclusive",
+          "clean_text_usd",
+          "clean_text_gbp",
+          "scan_png_us",
+          "scan_jpg_eu",
+          "scan_pdf_1page",
+          "scan_pdf_2page",
+          "scan_pdf_with_scanner_stamp",
+          "scan_tiff_2page",
+          "mixed_text_then_scan"
+        ]
+      },
+      "wrong_vendor_tax_id": {
+        "n": 28,
+        "false_approved": 28,
+        "false_approve_rate": 1.0,
+        "arithmetic_detectable": false,
+        "caught_by": {},
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_modern_usdate",
+          "clean_us_mon_date",
+          "clean_us_long_date_discount",
+          "clean_us_shipping",
+          "clean_us_code_currency",
+          "clean_us_amount_only",
+          "clean_eu_decimal_comma",
+          "clean_eu_german_labels",
+          "clean_eu_slash_date",
+          "clean_eu_slash_date_unambiguous",
+          "clean_eu_discount_shipping_tax",
+          "clean_gb_vat_mon",
+          "clean_gb_dmy_mon",
+          "clean_minimal_layout",
+          "clean_multipage_2",
+          "clean_multipage_3_eur",
+          "clean_many_lines_single_page",
+          "clean_eu_vat_inclusive",
+          "clean_text_usd",
+          "clean_text_gbp",
+          "scan_png_us",
+          "scan_jpg_eu",
+          "scan_pdf_1page",
+          "scan_pdf_2page",
+          "scan_pdf_with_scanner_stamp",
+          "scan_tiff_2page",
+          "mixed_text_then_scan"
+        ]
+      },
+      "changed_bank_account": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "bank_account": 28
+        },
+        "approved_cases": []
+      },
+      "net_reported_as_total": {
+        "n": 24,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "line_items_sum": 24,
+          "amounts_verified": 24
+        },
+        "approved_cases": []
+      },
+      "model_flags_uncertain": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "model_uncertain": 28
+        },
+        "approved_cases": []
+      },
+      "missed_discount": {
+        "n": 3,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "totals_math": 3
+        },
+        "approved_cases": []
+      }
+    },
+    "overall_false_approve": {
+      "k": 177,
+      "n": 429,
+      "rate": 0.413
+    },
+    "arithmetic_detectable_false_approve": {
+      "k": 1,
+      "n": 188,
+      "rate": 0.005
+    },
+    "not_arithmetic_detectable_false_approve": {
+      "k": 176,
+      "n": 241,
+      "rate": 0.73
+    },
+    "escalation": {
+      "cases": 429,
+      "escalated": 252,
+      "recovered_auto_approved_correct": 252,
+      "approved_wrong_value": 177
+    }
+  },
+  "corruption_steady_state": {
+    "types": {
+      "wrong_total": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "totals_math": 27,
+          "line_items_sum": 1,
+          "amounts_verified": 1
+        },
+        "approved_cases": []
+      },
+      "total_is_subtotal": {
+        "n": 24,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "totals_math": 24
+        },
+        "approved_cases": []
+      },
+      "dropped_line_item": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "line_items_sum": 28,
+          "amounts_verified": 28
+        },
+        "approved_cases": []
+      },
+      "no_line_items_extracted": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "amounts_verified": 28
+        },
+        "approved_cases": []
+      },
+      "line_amount_misread": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "line_items_sum": 28,
+          "line_item_math": 28,
+          "amounts_verified": 28
+        },
+        "approved_cases": []
+      },
+      "swapped_day_month": {
+        "n": 17,
+        "false_approved": 8,
+        "false_approve_rate": 0.471,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "date_order": 9
+        },
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_mon_date",
+          "clean_eu_decimal_comma",
+          "clean_eu_slash_date",
+          "clean_gb_vat_mon",
+          "clean_multipage_3_eur",
+          "clean_text_gbp",
+          "scan_tiff_2page"
+        ]
+      },
+      "wrong_currency": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "vendor_history": 28,
+          "vendor_master": 28
+        },
+        "approved_cases": []
+      },
+      "missed_tax": {
+        "n": 25,
+        "false_approved": 1,
+        "false_approve_rate": 0.04,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "totals_math": 24
+        },
+        "approved_cases": [
+          "clean_eu_vat_inclusive"
+        ]
+      },
+      "wrong_invoice_number": {
+        "n": 28,
+        "false_approved": 28,
+        "false_approve_rate": 1.0,
+        "arithmetic_detectable": false,
+        "caught_by": {},
+        "approved_cases": [
+          "clean_us_classic_iso",
+          "clean_us_modern_usdate",
+          "clean_us_mon_date",
+          "clean_us_long_date_discount",
+          "clean_us_shipping",
+          "clean_us_code_currency",
+          "clean_us_amount_only",
+          "clean_eu_decimal_comma",
+          "clean_eu_german_labels",
+          "clean_eu_slash_date",
+          "clean_eu_slash_date_unambiguous",
+          "clean_eu_discount_shipping_tax",
+          "clean_gb_vat_mon",
+          "clean_gb_dmy_mon",
+          "clean_minimal_layout",
+          "clean_multipage_2",
+          "clean_multipage_3_eur",
+          "clean_many_lines_single_page",
+          "clean_eu_vat_inclusive",
+          "clean_text_usd",
+          "clean_text_gbp",
+          "scan_png_us",
+          "scan_jpg_eu",
+          "scan_pdf_1page",
+          "scan_pdf_2page",
+          "scan_pdf_with_scanner_stamp",
+          "scan_tiff_2page",
+          "mixed_text_then_scan"
+        ]
+      },
+      "vendor_is_customer": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "vendor_not_self": 28
+        },
+        "approved_cases": []
+      },
+      "consistent_x100_scale": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "vendor_history": 28
+        },
+        "approved_cases": []
+      },
+      "consistent_x10_scale": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "vendor_history": 28
+        },
+        "approved_cases": []
+      },
+      "wrong_vendor_tax_id": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "vendor_master": 28
+        },
+        "approved_cases": []
+      },
+      "changed_bank_account": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": false,
+        "caught_by": {
+          "bank_account": 28
+        },
+        "approved_cases": []
+      },
+      "net_reported_as_total": {
+        "n": 24,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "line_items_sum": 24,
+          "amounts_verified": 24
+        },
+        "approved_cases": []
+      },
+      "model_flags_uncertain": {
+        "n": 28,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "model_uncertain": 28
+        },
+        "approved_cases": []
+      },
+      "missed_discount": {
+        "n": 3,
+        "false_approved": 0,
+        "false_approve_rate": 0.0,
+        "arithmetic_detectable": true,
+        "caught_by": {
+          "totals_math": 3
+        },
+        "approved_cases": []
+      }
+    },
+    "overall_false_approve": {
+      "k": 37,
+      "n": 429,
+      "rate": 0.086
+    },
+    "arithmetic_detectable_false_approve": {
+      "k": 1,
+      "n": 188,
+      "rate": 0.005
+    },
+    "not_arithmetic_detectable_false_approve": {
+      "k": 36,
+      "n": 241,
+      "rate": 0.149
+    },
+    "escalation": {
+      "cases": 429,
+      "escalated": 392,
+      "recovered_auto_approved_correct": 392,
+      "approved_wrong_value": 37
+    }
+  },
+  "duplicates": {
+    "key_source": "apps.processing.tasks.dedupe_key",
+    "variants": {
+      "exact": {
+        "vendor": "Acme Industrial Supply Inc.",
+        "number": "INV-2026305",
+        "caught": true,
+        "decision": "review"
+      },
+      "upper_case": {
+        "vendor": "ACME INDUSTRIAL SUPPLY INC.",
+        "number": "inv-2026305",
+        "caught": true,
+        "decision": "review"
+      },
+      "number_space_not_dash": {
+        "vendor": "Acme Industrial Supply Inc.",
+        "number": "INV 2026305",
+        "caught": true,
+        "decision": "review"
+      },
+      "vendor_without_legal_suffix": {
+        "vendor": "Acme Industrial Supply",
+        "number": "INV-2026305",
+        "caught": true,
+        "decision": "review"
+      },
+      "number_without_prefix": {
+        "vendor": "Acme Industrial Supply Inc.",
+        "number": "2026305",
+        "caught": true,
+        "decision": "review"
+      },
+      "number_with_hash": {
+        "vendor": "Acme Industrial Supply Inc.",
+        "number": "#INV-2026305",
+        "caught": true,
+        "decision": "review"
+      },
+      "vendor_abbreviated": {
+        "vendor": "Acme Ind. Supply Inc.",
+        "number": "INV-2026305",
+        "caught": false,
+        "decision": "auto_approve"
+      },
+      "ocr_O_for_0": {
+        "vendor": "Acme Industrial Supply Inc.",
+        "number": "INV-2O263O5",
+        "caught": true,
+        "decision": "review"
+      }
+    },
+    "caught": "7/8"
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.8,
+      "oracle_stp": 1.0,
+      "oracle_false_approve_negatives": 0.0,
+      "corruption_false_approve": 0.413,
+      "detectable_corruption_false_approve": 0.005
+    },
+    {
+      "threshold": 0.85,
+      "oracle_stp": 1.0,
+      "oracle_false_approve_negatives": 0.0,
+      "corruption_false_approve": 0.413,
+      "detectable_corruption_false_approve": 0.005
+    },
+    {
+      "threshold": 0.9,
+      "oracle_stp": 1.0,
+      "oracle_false_approve_negatives": 0.0,
+      "corruption_false_approve": 0.413,
+      "detectable_corruption_false_approve": 0.005
+    },
+    {
+      "threshold": 0.91,
+      "oracle_stp": 1.0,
+      "oracle_false_approve_negatives": 0.0,
+      "corruption_false_approve": 0.413,
+      "detectable_corruption_false_approve": 0.005
+    },
+    {
+      "threshold": 0.92,
+      "oracle_stp": 1.0,
+      "oracle_false_approve_negatives": 0.0,
+      "corruption_false_approve": 0.413,
+      "detectable_corruption_false_approve": 0.005
+    },
+    {
+      "threshold": 0.95,
+      "oracle_stp": 1.0,
+      "oracle_false_approve_negatives": 0.0,
+      "corruption_false_approve": 0.413,
+      "detectable_corruption_false_approve": 0.005
+    },
+    {
+      "threshold": 0.99,
+      "oracle_stp": 1.0,
+      "oracle_false_approve_negatives": 0.0,
+      "corruption_false_approve": 0.413,
+      "detectable_corruption_false_approve": 0.005
+    },
+    {
+      "threshold": 1.0,
+      "oracle_stp": 1.0,
+      "oracle_false_approve_negatives": 0.0,
+      "corruption_false_approve": 0.413,
+      "detectable_corruption_false_approve": 0.005
+    }
+  ]
+}

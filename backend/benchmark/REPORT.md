@@ -134,3 +134,51 @@ Numbers from `run.py` after these changes (373 injected errors, 15 types):
 | Still approved in steady state | wrong invoice number 100%, swapped day/month 47%, missed tax 4% |
 
 Still open: real LLM accuracy (DP-21), vendor master and PO matching (DP-22), learning from corrections (DP-23), webhook and ERP delivery (DP-16).
+
+---
+
+## Real LLM run (OpenAI)
+
+Command: `run.py --provider openai`. Output: `results_openai.json`. Models: the repo defaults, `gpt-5-mini` (fast) with `gpt-5` (strong) as escalation. The run used the repo defaults for `OPENAI_FAST_MODEL` and `OPENAI_STRONG_MODEL`; the models were not logged per call. Threshold 0.92.
+
+| Metric | OpenAI | Offline heuristic |
+|---|---|---|
+| Micro field accuracy, all invoices | **99.0%** | 62.3% |
+| Micro field accuracy, digital / scans | 98.8% / 100% | 76.7% / 0% |
+| Docs with all core fields right | **37/37** | 24/37 |
+| Straight-through (auto-approval) rate, clean invoices | **89.3%** (25/28) | 28.6% |
+| False auto-approvals on negatives (12 bad documents) | **0%** (0/12) | 0% |
+| Wrong-but-approved (a core field wrong, still approved) | **none** | n/a |
+| Escalated to the strong model | 12 of 40 | 0 |
+| Failed documents | 0 | |
+| API cost | **not measured** (see caveats) | $0 |
+
+Weakest fields (digital docs, 30 docs): `vendor_tax_id` 93.3%, `purchase_order` 93.3%, `invoice_number` 96.7% (core view), `due_date` 96.7% (core view), `line_items` 96.7%. All other fields were 100%. Each miss is one or two documents.
+
+The 3 clean documents that did not auto-approve (`clean_us_shipping`, `clean_eu_slash_date`, `scan_png_us`) had correct fields. The model flagged itself as uncertain (`model_uncertain`, score about 0.94), so they went to a person. That is a safe failure.
+
+Fraud-style and error checks (the gate fed wrong values, 429 cases). Two views:
+
+| Corruption | No vendor history (first invoice) | With vendor history |
+|---|---|---|
+| `wrong_vendor_tax_id` | 100% approved | **0%** (caught by `vendor_master`) |
+| `changed_bank_account` | **0%** (caught by `bank_account`) | 0% |
+| `vendor_is_customer`, `wrong_currency`, `consistent_x100_scale` | 100% approved | 0% |
+| `consistent_x10_scale` | 100% approved | caught (not in the history list; see JSON) |
+| `wrong_invoice_number` | 100% approved | 100% approved |
+| `swapped_day_month` | 47% approved | 47% approved |
+| `missed_tax`, wrong total, dropped line, misread line, no line items | 0 to 4% | 0 to 4% |
+| **Overall** | **41.3%** (177/429) | **8.6%** (37/429) |
+
+Reading this:
+- No bad document in the 12 negatives was auto-approved. No wrong extraction was approved.
+- A vendor with no history is the weak point. A new vendor with a wrong tax ID, currency or scale is auto-approved. Vendor master data (DP-22) and the pilot settings `review_new_vendors` and `auto_approve_max_amount` close this gap.
+- A wrong invoice number and a swapped day/month are never caught by any rule. Only a person or the PO/ERP match can find them.
+- The OpenAI extraction itself was not wrong on the invoice number in the clean set (`invoice_number` 100% in the all-field view), so these corruptions are the gate test, not model errors.
+
+Caveats:
+- The test set is synthetic: 40 labeled documents (28 clean, 12 negative) from `generate.py`, not real customer invoices. Layouts are clean and few in number. Real accuracy will be lower.
+- 28 clean documents is a small sample. 89.3% STP has a wide margin of error (roughly 72% to 98% at 95% confidence).
+- Cost was reported as $0. The script had no OpenAI price table (`OPENAI_PRICING` unset), so no cost was calculated. Token counts were not saved. Cost is unknown. Set the price JSON in settings and run again to measure it.
+- The 4 real sample files could not be run through OpenAI by this harness (images need local Tesseract in this path; text samples are not invoices). They are not part of the scores.
+- This was one run. There was no repeat to measure run-to-run variation.
