@@ -1,22 +1,19 @@
 """
-Live dashboard: every fork, its probabilities, the route taken and the result.
+Live dashboard: every decision, who took it (a code rule or Opus), the edges and the gates.
 
 Bind it to 127.0.0.1 and reach it over an SSH tunnel or Tailscale. Every API call needs the
-DASHBOARD_TOKEN (cookie after /login?token=..., or a Bearer header). An open, visible tab sends
-a heartbeat, which counts as owner activity for the N9 work window.
+DASHBOARD_TOKEN (cookie after /login?token=..., or a Bearer header).
 """
 import asyncio
 import hmac
 import json
 import os
-import time
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 
-from .. import graph as graph_mod
-from .. import report, windows
+from .. import report
 from ..store import Store
 
 HERE = Path(__file__).parent
@@ -47,13 +44,11 @@ def create_app(store: Store, token: str) -> FastAPI:
                         max_age=30 * 86400)
         return resp
 
-    def forks_since(after_id: int, limit: int = 200):
-        rows = store.rows("SELECT id, ts, ticket, node, fork, probs, answer, route, latency_ms, label FROM forks "
+    def decisions_since(after_id: int, limit: int = 200):
+        rows = store.rows("SELECT id, ts, ticket, node, name, decision, source, detail FROM decisions "
                           "WHERE id > ? ORDER BY id DESC LIMIT ?", (after_id, limit))
         for r in rows:
-            r["probs"] = json.loads(r["probs"]) if r["probs"] else None
-            r["answer"] = json.loads(r["answer"]) if r["answer"] else None
-            r["label"] = json.loads(r["label"]) if r["label"] else None
+            r["decision"] = json.loads(r["decision"])
         return rows
 
     def events_since(after_id: int, limit: int = 100):
@@ -62,42 +57,33 @@ def create_app(store: Store, token: str) -> FastAPI:
 
     @app.get("/api/state", dependencies=[Depends(auth)])
     def state():
-        g = graph_mod.load()
         return {
             "report": report.build(store),
-            "window": windows.current(store, g.window).__dict__,
-            "thresholds": g.thresholds.__dict__,
-            "forks": forks_since(0),
+            "decisions": decisions_since(0),
             "events": events_since(0),
             "tickets": store.rows("SELECT number, title, state, node, build_rounds, review_rounds, opus_calls, usd, "
                                   "result FROM tickets ORDER BY COALESCE(closed_at, 9e12) DESC, number DESC LIMIT 30"),
             "gates": store.rows("SELECT id, ts, gate, ticket, summary, status FROM gates ORDER BY id DESC LIMIT 20"),
-            "improve": store.rows("SELECT * FROM improve_runs ORDER BY id DESC LIMIT 10"),
         }
 
     @app.get("/api/stream", dependencies=[Depends(auth)])
     async def stream(request: Request):
         async def gen():
-            last_f = (store.one("SELECT MAX(id) AS v FROM forks")["v"] or 0)
+            last_f = (store.one("SELECT MAX(id) AS v FROM decisions")["v"] or 0)
             last_e = (store.one("SELECT MAX(id) AS v FROM events")["v"] or 0)
             last_g = (store.one("SELECT COUNT(*) || ':' || COALESCE(MAX(decided_at),0) AS v FROM gates")["v"])
             while not await request.is_disconnected():
-                f, e = forks_since(last_f), events_since(last_e)
+                f, e = decisions_since(last_f), events_since(last_e)
                 g = store.one("SELECT COUNT(*) || ':' || COALESCE(MAX(decided_at),0) AS v FROM gates")["v"]
                 if f or e or g != last_g:
                     last_f = max([last_f] + [r["id"] for r in f])
                     last_e = max([last_e] + [r["id"] for r in e])
                     last_g = g
-                    yield f"data: {json.dumps({'forks': f, 'events': e, 'gates_changed': True})}\n\n"
+                    yield f"data: {json.dumps({'decisions': f, 'events': e, 'gates_changed': True})}\n\n"
                 else:
                     yield ": keep-alive\n\n"
                 await asyncio.sleep(1)
         return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})
-
-    @app.post("/api/heartbeat", dependencies=[Depends(auth)])
-    def heartbeat():
-        store.touch("dashboard", time.time())
-        return {"ok": True}
 
     @app.post("/api/gates/{gate_id}/{verb}", dependencies=[Depends(auth)])
     def decide(gate_id: int, verb: str, request: Request):
@@ -107,7 +93,6 @@ def create_app(store: Store, token: str) -> FastAPI:
             raise HTTPException(403, "missing header")
         if not store.decide_gate(gate_id, verb == "approve", "dashboard"):
             raise HTTPException(409, "gate is not pending")
-        store.touch("dashboard", time.time())
         return {"ok": True}
 
     return app

@@ -24,7 +24,6 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 syst
 header { display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; z-index: 2; }
 header h1 { font-size: 16px; margin: 0; font-weight: 650; }
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--muted); }
-.pill.active { background: var(--ok-soft); color: var(--ok); } .pill.passive { background: var(--accent-soft); color: var(--accent); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .live .dot { background: var(--ok); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
@@ -48,14 +47,11 @@ tr.new { animation: flash 1.6s ease-out; } @keyframes flash { from { background:
 .mono { font-family: var(--mono); font-size: 12px; }
 .muted { color: var(--muted); }
 .badge { display: inline-block; white-space: nowrap; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 650; }
-.b-jev { background: var(--accent-soft); color: var(--accent); } .b-opus { background: var(--opus-soft); color: var(--opus); }
-.b-fallback { background: var(--warn-soft); color: var(--warn); } .b-ok { background: var(--ok-soft); color: var(--ok); }
+.b-code { background: var(--accent-soft); color: var(--accent); } .b-opus { background: var(--opus-soft); color: var(--opus); }
+.b-ok { background: var(--ok-soft); color: var(--ok); }
 .b-bad { background: var(--bad-soft); color: var(--bad); } .b-wait { background: var(--warn-soft); color: var(--warn); }
 .b-neutral { background: var(--surface-2); color: var(--muted); }
-.bar { position: relative; width: 110px; height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; display: inline-block; vertical-align: middle; }
-.bar i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--accent); }
-.bar.split i { background: var(--opus); }
-.prob { display: flex; align-items: center; gap: 8px; } .prob .mono { min-width: 44px; text-align: right; }
+td.why { color: var(--muted); max-width: 360px; }
 .scroll { max-height: 560px; overflow: auto; }
 .gate { padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
 .gate:last-child { border-bottom: 0; }
@@ -74,7 +70,6 @@ button:disabled { opacity: .5; cursor: default; }
 <body>
 <header>
   <h1>DocuPay agents</h1>
-  <span id="window" class="pill">window …</span>
   <span id="live" class="pill"><span class="dot"></span><span id="live-text">connecting</span></span>
   <span style="flex:1"></span>
   <span class="muted" id="updated"></span>
@@ -84,16 +79,15 @@ button:disabled { opacity: .5; cursor: default; }
   <section class="card"><h2>Graph <span>current node per running ticket</span></h2><div class="pipeline" id="pipeline"></div></section>
   <div class="grid2">
     <section class="card">
-      <h2>Forks <span>every decision: probability, route, result</span></h2>
+      <h2>Decisions <span>what was decided, by whom, and why</span></h2>
       <div class="scroll"><table>
-        <thead><tr><th>Time</th><th>Ticket</th><th>Node · fork</th><th>Probability</th><th>Route</th><th>Decision</th><th>Result</th></tr></thead>
-        <tbody id="forks"></tbody>
+        <thead><tr><th>Time</th><th>Ticket</th><th>Node · decision</th><th>Decided by</th><th>Decision</th><th>Why</th></tr></thead>
+        <tbody id="decisions"></tbody>
       </table></div>
     </section>
     <div style="display:grid;gap:16px;align-content:start">
       <section class="card"><h2>Gates <span>wait for you</span></h2><div id="gates"></div></section>
       <section class="card"><h2>Tickets</h2><div id="tickets"></div></section>
-      <section class="card"><h2>Self-improvement (N9)</h2><div id="improve"></div></section>
     </div>
   </div>
 </main>
@@ -119,64 +113,38 @@ function signIn() {
     <button class="approve">Sign in</button></form></div>`;
 }
 
-function probCell(f) {
-  const p = f.probs; if (!p) return `<span class="muted">Jev failed</span>`;
-  let label, v;
-  if (f.fork.startsWith("risk")) {
-    v = Object.entries(p).reduce((s, [k, x]) => s + Number(k) * x, 0);
-    return `<div class="prob"><span class="bar ${f.route === "jev" ? "" : "split"}"><i style="width:${(v / 4) * 100}%"></i></span><span class="mono">${v.toFixed(2)}/4</span></div>`;
-  }
-  if ("yes" in p) { v = p.yes; label = "yes"; } else { [label, v] = Object.entries(p).sort((a, b) => b[1] - a[1])[0]; }
-  return `<div class="prob"><span class="bar ${f.route === "jev" ? "" : "split"}"><i style="width:${v * 100}%"></i></span><span class="mono">${(v * 100).toFixed(0)}%</span><span class="muted mono">${esc(label.split("/").pop())}</span></div>`;
-}
-
-function routeBadge(r) {
-  return r === "jev" ? `<span class="badge b-jev">Jev · code</span>` : r === "opus" ? `<span class="badge b-opus">split → Opus</span>` : `<span class="badge b-fallback">Jev error → Opus</span>`;
-}
-
-function resultCell(f) {
-  if (f.label === null || f.label === undefined) return `<span class="badge b-neutral">pending</span>`;
-  if (f.fork.startsWith("risk")) return f.label === "approved" ? `<span class="badge b-ok">approved</span>` : `<span class="badge b-bad">rejected</span>`;
-  return JSON.stringify(f.label) === JSON.stringify(f.answer) ? `<span class="badge b-ok">right</span>` : `<span class="badge b-bad">miss</span>`;
-}
-
-function forkRow(f, fresh) {
-  const raw = f.answer === true ? "yes" : f.answer === false ? "no" : String(f.answer ?? "…");
+function decisionRow(f, fresh) {
+  const d = f.decision;
+  const shown = d === true ? "yes" : d === false ? "no" : f.name === "risk" ? `${d}/4` : String(d).split("/").pop();
+  const cls = d === false || (f.name === "risk" && d >= 3) ? "b-bad" : d === true || (f.name === "risk" && d <= 1) ? "b-ok" : "b-neutral";
   return `<tr class="${fresh ? "new" : ""}"><td class="mono muted nowrap">${time(f.ts)}</td><td class="mono">${f.ticket ? "#" + f.ticket : "—"}</td>
-    <td class="nowrap"><b>${esc(f.node)}</b> · <span class="mono">${esc(f.fork)}</span></td><td class="nowrap">${probCell(f)}</td><td>${routeBadge(f.route)}</td>
-    <td class="mono clip" title="${esc(raw)}">${esc(raw.split("/").pop())}</td><td>${resultCell(f)}</td></tr>`;
+    <td class="nowrap"><b>${esc(f.node)}</b> · <span class="mono">${esc(f.name)}</span></td>
+    <td><span class="badge ${f.source === "code" ? "b-code" : "b-opus"}">${f.source === "code" ? "code rule" : "Opus"}</span></td>
+    <td><span class="badge ${cls}" title="${esc(String(d))}">${esc(shown)}</span></td><td class="why">${esc(f.detail || "")}</td></tr>`;
 }
 
 function render() {
-  const r = state.report, w = state.window;
-  $("window").className = "pill " + w.state;
-  $("window").textContent = { active: "you are active", passive: "passive work window", closed: "window closed · N9 paused" }[w.state];
-  const sharpPct = r.forks_answered ? Math.round((r.forks_sharp_by_jev / r.forks_answered) * 100) : 0;
+  const r = state.report;
   const kpis = [
     ["Loops closed", r.loops_closed, `${r.back_edges} back edges · ${r.escalations} escalations`],
-    ["Forks answered", r.forks_answered, `${sharpPct}% sharp by Jev`],
-    ["Jev latency", r.jev_avg_latency_ms === null ? "—" : r.jev_avg_latency_ms + " ms", `${r.jev_calls} calls · ${r.jev_calls_over_1s} over 1 s`],
-    ["Jev cost / decision", r.jev_cost_per_decision_usd === null ? "—" : "$" + r.jev_cost_per_decision_usd, r.jev_cost_per_decision_usd === null ? "set JEV_USD_PER_CALL" : "last 24 h"],
+    ["Decisions", r.decisions, `${r.decisions_by_code} by code rules · ${r.decisions_by_opus} by Opus`],
     ["Opus", r.opus_calls + " calls", "$" + r.opus_usd + " · " + r.opus_failed + " failed"],
+    ["Cost per ticket", r.usd_per_shipped_ticket === null ? "—" : "$" + r.usd_per_shipped_ticket, "shipped tickets, last 24 h"],
     ["Hours saved", r.hours_saved_estimate, "estimate · last 24 h"],
   ];
   $("kpis").innerHTML = kpis.map(([l, v, h]) => `<div class="card kpi"><p>${l}</p><b>${esc(v)}</b><small>${esc(h)}</small></div>`).join("");
   const current = new Set(state.tickets.filter((t) => ["running", "waiting"].includes(t.state)).map((t) => t.node));
   $("pipeline").innerHTML = NODES.map((n) => `<span class="node ${current.has(n.split(" ")[0]) ? "on" : ""}">${n}</span>`).join("<span class='muted'>→</span>");
-  $("forks").innerHTML = state.forks.length ? state.forks.map((f) => forkRow(f, false)).join("") : `<tr><td colspan="7" class="empty">No forks yet. They appear here live.</td></tr>`;
-  state.forks.forEach((f) => seen.add(f.id));
+  $("decisions").innerHTML = state.decisions.length ? state.decisions.map((f) => decisionRow(f, false)).join("") : `<tr><td colspan="6" class="empty">No decisions yet. They appear here live.</td></tr>`;
+  state.decisions.forEach((f) => seen.add(f.id));
   const pending = state.gates.filter((g) => g.status === "pending");
   $("gates").innerHTML = pending.length ? pending.map((g) => `<div class="gate"><div><span class="badge b-wait">${esc(g.gate)} #${g.id}</span> ${esc(g.summary)}</div>
       <div class="actions"><button class="approve" onclick="decide(${g.id},'approve',this)">Approve</button><button class="reject" onclick="decide(${g.id},'reject',this)">Reject</button></div></div>`).join("")
     : `<div class="empty">Nothing is waiting for you.</div>`;
-  const stateBadge = { running: "b-jev", waiting: "b-wait", shipped: "b-ok", parked: "b-bad", rejected: "b-bad", needs_spec: "b-neutral", new: "b-neutral" };
+  const stateBadge = { running: "b-code", waiting: "b-wait", shipped: "b-ok", parked: "b-bad", rejected: "b-bad", needs_spec: "b-neutral", new: "b-neutral" };
   $("tickets").innerHTML = state.tickets.length ? `<table><tbody>${state.tickets.map((t) => `<tr><td class="mono">#${t.number}</td><td>${esc(t.title)}</td>
       <td><span class="badge ${stateBadge[t.state] || "b-neutral"}">${esc(t.state)}${t.node && ["running", "waiting"].includes(t.state) ? " · " + esc(t.node) : ""}</span></td>
       <td class="mono muted">$${Number(t.usd).toFixed(2)}</td></tr>`).join("")}</tbody></table>` : `<div class="empty">Label an issue <span class="mono">agent-ready</span> to start.</div>`;
-  $("improve").innerHTML = state.improve.length ? `<table><tbody>${state.improve.map((i) => `<tr><td class="mono muted">${time(i.ts)}</td>
-      <td><span class="badge ${i.status === "shipped" ? "b-ok" : i.status === "rejected" ? "b-bad" : "b-neutral"}">${esc(i.status)}</span></td>
-      <td class="mono">${i.score_old === null ? "" : Number(i.score_old).toFixed(2) + " → " + Number(i.score_new).toFixed(2)}</td></tr>`).join("")}</tbody></table>`
-    : `<div class="empty">Runs only while you are working.</div>`;
   $("updated").textContent = "updated " + new Date().toLocaleTimeString();
 }
 
@@ -195,20 +163,17 @@ function connect() {
   es.onerror = () => { $("live").classList.remove("live"); $("live-text").textContent = "reconnecting"; };
   es.onmessage = (m) => {
     const d = JSON.parse(m.data);
-    const fresh = d.forks.filter((f) => !seen.has(f.id)).reverse();
+    const fresh = d.decisions.filter((f) => !seen.has(f.id)).reverse();
     if (fresh.length) {
-      const tbody = $("forks");
+      const tbody = $("decisions");
       if (!seen.size) tbody.innerHTML = "";
-      fresh.forEach((f) => { seen.add(f.id); tbody.insertAdjacentHTML("afterbegin", forkRow(f, true)); });
+      fresh.forEach((f) => { seen.add(f.id); tbody.insertAdjacentHTML("afterbegin", decisionRow(f, true)); });
     }
     clearTimeout(reloadTimer); reloadTimer = setTimeout(load, 800);  // refresh KPIs, gates and tickets
   };
 }
 
-function heartbeat() { if (document.visibilityState === "visible") api("/api/heartbeat", { method: "POST" }).catch(() => {}); }
-
-load().then(() => { connect(); heartbeat(); setInterval(heartbeat, 60000); }).catch(() => {});
-document.addEventListener("visibilitychange", heartbeat);
+load().then(connect).catch(() => {});
 </script>
 </body>
 </html>

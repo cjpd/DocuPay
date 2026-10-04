@@ -8,9 +8,9 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from . import forks, limits
+from . import decisions, limits
 from . import opus as opus_mod
-from .edges import (Commit, Escalation, Evaluated, Failure, Finding, Findings, Plan, Regression,
+from .edges import (Commit, Escalation, Evaluated, Failure, Finding, Findings, Plan, Regression, Review,
                     Reviewed, ShipRequest, Ticket, Unplannable, Verified)
 from .workspace import check_diff, git
 
@@ -27,7 +27,7 @@ def _schema(model) -> dict:
 # -- N1 intake ---------------------------------------------------------------------------------
 
 def n1_intake(ctx) -> int | None:
-    """Pick the next ready issue. Code sorts; Jev only says whether it is specified enough."""
+    """Pick the next ready issue. Code sorts and code decides whether it is specified enough."""
     for labeled_at, ticket, has_acceptance in ctx.gh.ready_tickets():
         known = ctx.store.ticket(ticket.number)
         if known and known["state"] in ("parked", "needs_spec", "rejected") and labeled_at \
@@ -45,11 +45,8 @@ def n1_intake(ctx) -> int | None:
             reason = "the issue has no acceptance criteria (a '- [ ]' checklist)"
         elif ticket.points > limits.MAX_TICKET_POINTS:
             reason = f"{ticket.points} points is above the {limits.MAX_TICKET_POINTS}-point limit; split it"
-        else:
-            state = {"title": ticket.title, "body": ticket.body[:6000], "acceptance": ticket.acceptance}
-            d = forks.ask(ctx, ticket=ticket.number, node="N1", state=state, forks=[forks.noul_fork("specified", ctx)])
-            if not d["specified"]:
-                reason = "Jev and Opus judged the issue not specified enough to build"
+        decisions.record(ctx, ticket=ticket.number, node="N1", name="specified", decision=reason is None,
+                         source="code", detail=reason or f"{len(ticket.acceptance)} acceptance items, {ticket.points} points")
         if reason:
             ctx.gh.add_label(ticket.number, "needs-spec")
             ctx.store.upsert_ticket(ticket.number, state="needs_spec", result=reason)
@@ -94,13 +91,9 @@ def n2_plan(ctx, n: int, ticket: Ticket):
     if error:
         ctx.store.upsert_ticket(n, data={**ctx.store.ticket(n)["data"], "plan_error": error})
         return "N2", Unplannable(reason=error), "retry"
-    start = None
-    existing = [f for f in plan.files if f not in plan.new_files]
-    if len(existing) >= 2:
-        d = forks.ask(ctx, ticket=n, node="N2",
-                      state={"plan": plan.summary, "first_step": plan.steps[0].description, "files": existing},
-                      forks=[forks.choice_fork("target_file", ctx, existing)])
-        start = d["target_file"]
+    start = (plan.steps[0].files or plan.files)[0]
+    decisions.record(ctx, ticket=n, node="N2", name="start_file", decision=start, source="code",
+                     detail="first file of the plan's first step")
     ctx.store.upsert_ticket(n, node="N3", data={**ctx.store.ticket(n)["data"], "plan": plan.model_dump(),
                                                 "start_file": start, "plan_error": None})
     return "N3", plan, "forward"
@@ -113,12 +106,13 @@ def n3_build(ctx, n: int, ticket: Ticket, plan: Plan, feedback: Any = None):
     if rounds > limits.MAX_BUILD_ROUNDS:
         return ESCALATE, Escalation(node="N3", reason=f"still failing after {limits.MAX_BUILD_ROUNDS} build rounds"), "escalation"
     if feedback is not None:
-        d = forks.ask(ctx, ticket=n, node="N3",
-                      state={"round": rounds, "max_rounds": limits.MAX_BUILD_ROUNDS,
-                             "failure": json.loads(feedback.model_dump_json())},
-                      forks=[forks.noul_fork("retry", ctx)])
-        if not d["retry"]:
-            return ESCALATE, Escalation(node="N3", reason="retry judged pointless for this failure"), "escalation"
+        tail = feedback.log_tail if isinstance(feedback, Failure) else feedback.model_dump_json()
+        data_now = ctx.store.ticket(n)["data"]
+        retry, why = decisions.retry_rule(tail, data_now.get("last_failure"))
+        ctx.store.upsert_ticket(n, data={**data_now, "last_failure": tail})
+        decisions.record(ctx, ticket=n, node="N3", name="retry", decision=retry, source="code", detail=why)
+        if not retry:
+            return ESCALATE, Escalation(node="N3", reason=f"stopped retrying: {why}"), "escalation"
     wt = ctx.ws.ensure(n)
     start = (ctx.store.ticket(n)["data"] or {}).get("start_file")
     fb = ""
@@ -164,25 +158,29 @@ def n4_verify(ctx, n: int, commit: Commit):
 def n5_review(ctx, n: int, ticket: Ticket, verified: Verified):
     rounds = ctx.store.bump(n, "review_rounds")
     diff = ctx.ws.diff_text(n)
+    numbered = "\n".join(f"{i}. {c}" for i, c in enumerate(ticket.acceptance, 1))
     data = opus_mod.call(
         ctx.opus, ctx.store, ticket=n, node="N5", purpose="review",
         prompt=("You are the Critic. Review this diff for correctness, security (tenant isolation, auth, money "
                 "movement), and missing tests. Report only real problems. Severity 'blocking' means it must not ship.\n"
-                f"Acceptance criteria:\n{opus_mod.untrusted(chr(10).join(ticket.acceptance))}\n"
+                "Also give `done`: one boolean per acceptance criterion, in order, true only if the diff implements it "
+                "AND a test in the diff checks it. And give `risk` from 0 to 4: 0 docs/tests only, 1 local change behind "
+                "existing checks, 2 business logic with tests, 3 touches auth, tenancy, money movement or migrations, "
+                "4 could leak another tenant's data or approve a payment wrongly.\n"
+                f"Acceptance criteria:\n{opus_mod.untrusted(numbered)}\n"
                 f"Diff:\n{opus_mod.untrusted(diff, 60000)}"),
-        schema=_schema(Findings), cwd=str(ctx.ws.path(n)), tools=opus_mod.READ_TOOLS,
+        schema=_schema(Review), cwd=str(ctx.ws.path(n)), tools=opus_mod.READ_TOOLS,
     )
-    findings = Findings.model_validate(data)
-    state = {"acceptance": ticket.acceptance, "diff": diff[:20000],
-             "findings": [f.model_dump() for f in findings.findings]}
-    fork_list = [forks.score_fork("risk", ctx)]
-    for i, criterion in enumerate(ticket.acceptance, 1):
-        f = forks.noul_fork(f"done:{i}", ctx)
-        f.question["instructions"] += f"\nCriterion {i}: {criterion}"
-        fork_list.append(f)
-    d = forks.ask(ctx, ticket=n, node="N5", state=state, forks=fork_list)
-    done = {k: bool(v) for k, v in d.items() if k.startswith("done:")}
-    blocking = [f for f in findings.findings if f.severity == "blocking"]
+    review = Review.model_validate(data)
+    if len(review.done) != len(ticket.acceptance):
+        raise ValueError(f"review rated {len(review.done)} criteria, the ticket has {len(ticket.acceptance)}")
+    done = {}
+    for i, ok in enumerate(review.done, 1):
+        done[f"done:{i}"] = decisions.record(ctx, ticket=n, node="N5", name=f"done:{i}", decision=ok, source="opus",
+                                              detail=ticket.acceptance[i - 1])
+    decisions.record(ctx, ticket=n, node="N5", name="risk", decision=review.risk, source="opus",
+                     detail="flagged at G1" if review.risk >= ctx.graph.risk_flag_at else "")
+    blocking = [f for f in review.findings if f.severity == "blocking"]
     for k, ok in done.items():
         if not ok:
             blocking.append(Finding(severity="blocking", file="", message=f"criterion {k.split(':')[1]} is not done: "
@@ -191,13 +189,11 @@ def n5_review(ctx, n: int, ticket: Ticket, verified: Verified):
         return ESCALATE, Escalation(node="N5", reason=f"blocking findings after {rounds} review rounds: "
                                     + "; ".join(f.message for f in blocking[:3])), "escalation"
     if blocking:
-        return "N3", Findings(findings=blocking + [f for f in findings.findings if f.severity != "blocking"]), "back"
-    risk_level = d["risk"]
+        return "N3", Findings(findings=blocking + [f for f in review.findings if f.severity != "blocking"]), "back"
     data_now = ctx.store.ticket(n)["data"]
-    ctx.store.upsert_ticket(n, data={**data_now, "risk": risk_level,
-                                     "should_fix": [f.model_dump() for f in findings.findings]})
-    risk_value = {"low": 0.0, "mid": 2.0, "high": 4.0}.get(risk_level, 2.0)
-    return "N6", Reviewed(sha=verified.sha, risk=risk_value, done=done), "forward"
+    ctx.store.upsert_ticket(n, data={**data_now, "risk": review.risk,
+                                     "should_fix": [f.model_dump() for f in review.findings]})
+    return "N6", Reviewed(sha=verified.sha, risk=float(review.risk), done={k: bool(v) for k, v in done.items()}), "forward"
 
 
 # -- N6 evaluate (code only) -------------------------------------------------------------------
@@ -254,14 +250,14 @@ def n7_ship(ctx, n: int, ticket: Ticket, evaluated: Evaluated):
     t = ctx.store.ticket(n)
     files, lines = ctx.ws.diff_files(n)
     sensitive = check_diff(files, lines).sensitive
-    risk_level = t["data"].get("risk", "mid")
+    risk = int(t["data"].get("risk", 2))
     should_fix = t["data"].get("should_fix", [])
     body = (f"Closes #{n}\n\nBuilt by the DocuPay agent graph.\n\n"
             f"- Build rounds: {t['build_rounds']}, review rounds: {t['review_rounds']}, Opus calls: {t['opus_calls']}, "
-            f"cost: ${t['usd']:.2f}\n- Risk: {risk_level}{' (touches sensitive paths)' if sensitive else ''}\n"
+            f"cost: ${t['usd']:.2f}\n- Risk: {risk}/4{' (touches sensitive paths)' if sensitive else ''}\n"
             f"- Files: {len(files)}, lines: {lines}\n"
             + ("\nNon-blocking review notes:\n" + "\n".join(f"- {f['file']}: {f['message']}" for f in should_fix[:10])
                if should_fix else ""))
     req = ShipRequest(branch=ctx.ws.branch(n), sha=evaluated.sha, title=f"#{n}: {ticket.title}", body=body,
-                      risk={"low": 0.0, "mid": 2.0, "high": 4.0}.get(risk_level, 2.0), sensitive=sensitive)
+                      risk=float(risk), sensitive=sensitive)
     return "G1", req, "gate"

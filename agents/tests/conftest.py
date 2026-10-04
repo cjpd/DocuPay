@@ -7,26 +7,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from dp_agents import graph, questions  # noqa: E402
+from dp_agents import graph  # noqa: E402
 from dp_agents.engine import Ctx  # noqa: E402
-from dp_agents.jev import Answer, FakeJev  # noqa: E402
 from dp_agents.notify import Null  # noqa: E402
 from dp_agents.opus import FakeOpus  # noqa: E402
 from dp_agents.store import Store  # noqa: E402
 from dp_agents.workspace import Workspace  # noqa: E402
-
-
-def yes(p):
-    return Answer("noul", {"yes": p}, p)
-
-
-def pick(label, p, others=("x",)):
-    probs = {label: p, **{o: (1 - p) / len(others) for o in others}}
-    return Answer("choice", probs, label, p)
-
-
-def risk(v):
-    return Answer("score", {str(int(round(v))): 1.0}, v, 1.0)
 
 
 def run(cwd, *cmd):
@@ -67,16 +53,12 @@ class FakeGitHub:
         self.tickets = tickets or []
         self.labels = []
         self.prs = []
-        self.activity = None
 
     def ready_tickets(self):
         return list(self.tickets)
 
     def add_label(self, n, label):
         self.labels.append((n, label))
-
-    def owner_last_activity(self):
-        return self.activity
 
     def open_draft_pr(self, **kw):
         self.prs.append(kw)
@@ -85,10 +67,10 @@ class FakeGitHub:
 
 @pytest.fixture
 def make_ctx(tmp_path, repo):
-    def factory(jev=None, opus=None, gh=None):
+    def factory(opus=None, gh=None):
         return Ctx(
-            store=Store(tmp_path / "state.sqlite3"), jev=jev or FakeJev(), opus=opus or FakeOpus({}),
+            store=Store(tmp_path / "state.sqlite3"), opus=opus or FakeOpus({}),
             gh=gh or FakeGitHub(), ws=Workspace(repo, tmp_path / "work", "main"), notify=Null(),
-            repo=repo, graph=graph.load(), questions=questions.load(),
+            repo=repo, graph=graph.load(),
         )
     return factory

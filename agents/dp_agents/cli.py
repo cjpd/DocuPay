@@ -6,7 +6,6 @@ python -m dp_agents.cli <command>
   dashboard  the live dashboard (127.0.0.1:8765 by default)
   report     print today's report (add --send to post it to Telegram)
   check      the final check; exits 1 unless every answer is clean (the service runs it first)
-  calibrate  score the seed forks with Jev and propose thresholds (opens gate G4, never applies)
 """
 import argparse
 import logging
@@ -34,11 +33,10 @@ def load_env() -> None:
         os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
-def make_ctx(fake: bool = False):
-    from . import graph, questions
+def make_ctx():
+    from . import graph
     from .engine import Ctx
     from .github import GitHub
-    from .jev import FakeJev, get_jev
     from .notify import Null, Telegram
     from .opus import ClaudeCodeOpus
     from .store import Store
@@ -47,18 +45,17 @@ def make_ctx(fake: bool = False):
     store = Store(os.environ.get("DP_AGENTS_DB", ROOT / "data" / "state.sqlite3"))
     tg = Telegram()
     return Ctx(
-        store=store, jev=FakeJev() if fake else get_jev(), opus=ClaudeCodeOpus(), gh=GitHub(),
+        store=store, opus=ClaudeCodeOpus(), gh=GitHub(),
         ws=Workspace(REPO, Path(os.environ.get("DP_AGENTS_WORK", ROOT / "work")), os.environ.get("DP_BASE_BRANCH", "main")),
-        notify=tg if tg.enabled else Null(), repo=REPO, graph=graph.load(), questions=questions.load(),
+        notify=tg if tg.enabled else Null(), repo=REPO, graph=graph.load(),
     )
 
 
 # -- final check --------------------------------------------------------------------------------
 
-def final_check(ctx=None, probe: bool = True) -> tuple[bool, list[str]]:
+def final_check(ctx=None) -> tuple[bool, list[str]]:
     from . import graph as graph_mod
     from . import limits
-    from . import questions as questions_mod
 
     problems, notes = [], []
 
@@ -70,8 +67,8 @@ def final_check(ctx=None, probe: bool = True) -> tuple[bool, list[str]]:
         cells = [c.strip() for c in r.strip("|").split("|")]
         if len(cells) < 5 or not cells[4]:
             problems.append(f"node {cells[0]} has no stop rule")
-    if len(rows) != 9:
-        problems.append(f"graph.md lists {len(rows)} nodes, expected 9")
+    if len(rows) != 8:
+        problems.append(f"graph.md lists {len(rows)} nodes, expected 8")
     for name in ("MAX_PLAN_ATTEMPTS", "MAX_BUILD_ROUNDS", "MAX_REVIEW_ROUNDS", "MAX_OPUS_CALLS_PER_TICKET",
                  "MAX_USD_PER_TICKET", "MAX_USD_PER_DAY", "MAX_MINUTES_PER_TICKET"):
         if not getattr(limits, name, 0) > 0:
@@ -80,40 +77,23 @@ def final_check(ctx=None, probe: bool = True) -> tuple[bool, list[str]]:
     # 2. Is any hard limit owned by a model instead of code?
     try:
         g = graph_mod.parse(text)
-        questions_mod.validate(questions_mod.load())
     except Exception as exc:
-        problems.append(f"graph.md or questions.yaml is invalid: {exc}")
+        problems.append(f"graph.md is invalid: {exc}")
         g = None
     block = graph_mod.gates_block(text)
     for name in dir(limits):
         if name.isupper() and name.lower() in block:
-            problems.append(f"hard limit {name} also appears in graph.md, where N9 could reach it")
-    for protected in ("agents/dp_agents/", "agents/graph.md", "agents/questions.yaml"):
+            problems.append(f"hard limit {name} also appears in graph.md")
+    for protected in ("agents/dp_agents/", "agents/graph.md"):
         if not protected.startswith(limits.FORBIDDEN_PATHS):
             problems.append(f"{protected} is not in limits.FORBIDDEN_PATHS")
-    improve_src = (ROOT / "dp_agents" / "improve.py").read_text()
-    if "GRAPH_MD.write_text" in improve_src.split("def apply_threshold_proposal", 1)[0]:
-        problems.append("improve.py writes graph.md outside the G4-approved path")
-    engine_src = (ROOT / "dp_agents" / "engine.py").read_text()
-    if 'g["gate"] == "G4" and g["status"] == "approved"' not in engine_src:
-        problems.append("threshold changes are not tied to an approved G4 gate")
     if g and set(g.human_gates) != {"G1", "G2", "G3", "G4"}:
         problems.append("graph.md must define human gates G1..G4")
 
-    # 3. Which fork is Jev least sure about?
-    least = None
+    # 3. Which step sends work back most often?
     if ctx is not None:
-        stats = ctx.store.rows(
-            "SELECT substr(fork, 1, instr(fork || ':', ':') - 1) AS f, COUNT(*) AS n, "
-            "AVG(route != 'jev') AS split_rate FROM forks GROUP BY f ORDER BY split_rate DESC")
-        if stats:
-            least = stats[0]
-            notes.append(f"Jev is least sure about '{least['f']}': {least['split_rate']:.0%} of {least['n']} forks split to Opus")
-            if least["split_rate"] > 0.5 and least["n"] >= 10:
-                problems.append(f"Jev splits {least['split_rate']:.0%} of '{least['f']}' forks; tune its question first")
-        else:
-            notes.append("No Jev forks recorded yet: run `calibrate` on the seed set before going unattended")
-            problems.append("Jev has never answered a fork here, so its least-sure fork is unknown")
+        top = ctx.store.one("SELECT src, COUNT(*) AS n FROM events WHERE kind='back' GROUP BY src ORDER BY n DESC LIMIT 1")
+        notes.append(f"most back edges come from {top['src']} ({top['n']})" if top else "no back edges recorded yet")
 
     # 4. What could break this week? (environment and dependencies)
     need = {"GITHUB_TOKEN": "GitHub API", "GITHUB_REPO": "GitHub repo", "GITHUB_OWNER_LOGIN": "owner login",
@@ -121,8 +101,6 @@ def final_check(ctx=None, probe: bool = True) -> tuple[bool, list[str]]:
     for key, what in need.items():
         if not os.environ.get(key):
             problems.append(f"{key} is not set ({what})")
-    if not os.environ.get("TYPESAFE_API_KEY") and os.environ.get("TYPESAFE_KEY_VIA_GATEWAY") != "1":
-        problems.append("TYPESAFE_API_KEY is not set (Jev)")
     if len(os.environ.get("DASHBOARD_TOKEN", "")) < 24:
         problems.append("DASHBOARD_TOKEN must be at least 24 characters")
     if not shutil.which(os.environ.get("CLAUDE_BIN", "claude")):
@@ -130,12 +108,6 @@ def final_check(ctx=None, probe: bool = True) -> tuple[bool, list[str]]:
     for rel in ("backend/.venv/bin/python", "frontend/node_modules"):
         if not (REPO / rel).exists():
             problems.append(f"{rel} is missing: the verify node cannot run the checks")
-    if ctx is not None and probe:
-        res = ctx.jev.ask("ping", {"ok": {"type": "noul", "instructions": "Is this a ping?"}})
-        if res.error:
-            problems.append(f"Jev is unreachable: {res.error}")
-        elif res.latency_ms > limits.JEV_SLOW_MS:
-            notes.append(f"Jev answered in {res.latency_ms:.0f} ms, above the {limits.JEV_SLOW_MS} ms target")
     free = shutil.disk_usage(ROOT).free / 1e9
     if free < 5:
         problems.append(f"only {free:.1f} GB disk free; worktrees and builds need 5 GB")
@@ -145,9 +117,9 @@ def final_check(ctx=None, probe: bool = True) -> tuple[bool, list[str]]:
 def print_check(ok: bool, lines: list[str]) -> None:
     print("FINAL CHECK")
     print("1. Every loop has a stop rule:", "yes" if not any("stop rule" in l for l in lines) else "NO")
-    print("2. No hard limit owned by a model:", "yes" if not any(k in l for l in lines for k in ("hard limit", "G4", "FORBIDDEN")) else "NO")
-    least = next((l for l in lines if "least sure" in l or "least-sure" in l), "unknown")
-    print("3. Least-sure fork:", least.removeprefix("note: "))
+    print("2. No hard limit owned by a model:", "yes" if not any(k in l for l in lines for k in ("hard limit", "G1..G4", "FORBIDDEN")) else "NO")
+    back = next((l for l in lines if "back edges" in l), "unknown")
+    print("3. Step that sends work back most:", back.removeprefix("note: "))
     print("\nWHAT COULD BREAK THIS WEEK?")
     for l in lines:
         print(" -", l)
@@ -188,7 +160,7 @@ def cmd_tick(args):
     from . import engine
 
     logging.basicConfig(level=logging.INFO)
-    engine.tick(make_ctx(fake=args.fake_jev))
+    engine.tick(make_ctx())
 
 
 def cmd_dashboard(args):
@@ -215,15 +187,9 @@ def cmd_check(args):
     except Exception as exc:
         print_check(False, [f"cannot build the graph context: {type(exc).__name__}: {exc}"])
         sys.exit(1)
-    ok, lines = final_check(ctx, probe=not args.no_probe)
+    ok, lines = final_check(ctx)
     print_check(ok, lines)
     sys.exit(0 if ok else 1)
-
-
-def cmd_calibrate(args):
-    from . import calibrate
-
-    calibrate.main(make_ctx(), apply_gate=not args.dry_run)
 
 
 def main(argv=None):
@@ -231,11 +197,10 @@ def main(argv=None):
     p = argparse.ArgumentParser(prog="dp_agents")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("run").set_defaults(fn=cmd_run)
-    t = sub.add_parser("tick"); t.add_argument("--fake-jev", action="store_true"); t.set_defaults(fn=cmd_tick)
+    sub.add_parser("tick").set_defaults(fn=cmd_tick)
     sub.add_parser("dashboard").set_defaults(fn=cmd_dashboard)
     r = sub.add_parser("report"); r.add_argument("--send", action="store_true"); r.set_defaults(fn=cmd_report)
-    c = sub.add_parser("check"); c.add_argument("--no-probe", action="store_true"); c.set_defaults(fn=cmd_check)
-    k = sub.add_parser("calibrate"); k.add_argument("--dry-run", action="store_true"); k.set_defaults(fn=cmd_calibrate)
+    sub.add_parser("check").set_defaults(fn=cmd_check)
     args = p.parse_args(argv)
     args.fn(args)
 

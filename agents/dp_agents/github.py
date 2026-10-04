@@ -83,11 +83,6 @@ class GitHub:
         last = hits[-1]
         return (last.get("actor") or {}).get("login"), _ts(last["created_at"])
 
-    def owner_last_activity(self) -> Optional[float]:
-        events = self._get(f"/repos/{self.repo}/events", per_page=50)
-        mine = [_ts(e["created_at"]) for e in events if (e.get("actor") or {}).get("login") == self.owner_login]
-        return max(mine) if mine else None
-
     def add_label(self, number: int, label: str) -> None:
         self.http.post(f"/repos/{self.repo}/issues/{number}/labels", json={"labels": [label]}).raise_for_status()
 

@@ -11,11 +11,9 @@ CREATE TABLE IF NOT EXISTS events (
   id INTEGER PRIMARY KEY, ts REAL NOT NULL, ticket INTEGER, src TEXT NOT NULL, dst TEXT NOT NULL,
   edge_type TEXT NOT NULL, kind TEXT NOT NULL, payload TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS forks (
-  id INTEGER PRIMARY KEY, ts REAL NOT NULL, ticket INTEGER, node TEXT NOT NULL, fork TEXT NOT NULL,
-  state TEXT NOT NULL, question TEXT, outcomes TEXT NOT NULL, probs TEXT, answer TEXT, route TEXT NOT NULL,
-  jev_call INTEGER, latency_ms REAL, input_tokens INTEGER, output_tokens INTEGER, questions_version INTEGER,
-  label TEXT, labeled_at REAL
+CREATE TABLE IF NOT EXISTS decisions (
+  id INTEGER PRIMARY KEY, ts REAL NOT NULL, ticket INTEGER, node TEXT NOT NULL, name TEXT NOT NULL,
+  decision TEXT NOT NULL, source TEXT NOT NULL, detail TEXT
 );
 CREATE TABLE IF NOT EXISTS opus_calls (
   id INTEGER PRIMARY KEY, ts REAL NOT NULL, ticket INTEGER, node TEXT NOT NULL, purpose TEXT NOT NULL,
@@ -33,12 +31,7 @@ CREATE TABLE IF NOT EXISTS gates (
   payload TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', decided_at REAL, decided_by TEXT
 );
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
-CREATE TABLE IF NOT EXISTS activity (source TEXT PRIMARY KEY, last_at REAL NOT NULL);
-CREATE TABLE IF NOT EXISTS improve_runs (
-  id INTEGER PRIMARY KEY, ts REAL NOT NULL, window_start REAL NOT NULL, status TEXT NOT NULL,
-  score_old REAL, score_new REAL, questions_version INTEGER, note TEXT
-);
-CREATE INDEX IF NOT EXISTS forks_ts ON forks(ts);
+CREATE INDEX IF NOT EXISTS decisions_ts ON decisions(ts);
 CREATE INDEX IF NOT EXISTS events_ts ON events(ts);
 """
 
@@ -74,21 +67,12 @@ class Store:
             (time.time(), ticket, src, dst, edge_type, kind, body),
         ).lastrowid
 
-    # -- forks -------------------------------------------------------------------
-    def fork(self, **f) -> int:
-        cols = ("ts", "ticket", "node", "fork", "state", "question", "outcomes", "probs", "answer", "route",
-                "jev_call", "latency_ms", "input_tokens", "output_tokens", "questions_version")
-        f.setdefault("ts", time.time())
-        for k in ("state", "question", "outcomes", "probs"):
-            if k in f and not isinstance(f[k], str):
-                f[k] = json.dumps(f[k])
+    # -- decisions -----------------------------------------------------------------
+    def decision(self, *, ticket, node, name, decision, source, detail="") -> int:
         return self.exec(
-            f"INSERT INTO forks ({','.join(cols)}) VALUES ({','.join('?' * len(cols))})",
-            tuple(f.get(c) for c in cols),
+            "INSERT INTO decisions (ts, ticket, node, name, decision, source, detail) VALUES (?,?,?,?,?,?,?)",
+            (time.time(), ticket, node, name, json.dumps(decision), source, detail),
         ).lastrowid
-
-    def label_fork(self, fork_id: int, label: str) -> None:
-        self.exec("UPDATE forks SET label=?, labeled_at=? WHERE id=? AND label IS NULL", (label, time.time(), fork_id))
 
     # -- tickets -----------------------------------------------------------------
     def ticket(self, number: int) -> Optional[dict]:
@@ -131,12 +115,7 @@ class Store:
                         ("approved" if approved else "rejected", time.time(), by, gate_id))
         return cur.rowcount == 1
 
-    # -- activity ----------------------------------------------------------------
-    def touch(self, source: str, at: Optional[float] = None) -> None:
-        at = at or time.time()
-        self.exec("INSERT INTO activity (source, last_at) VALUES (?, ?) "
-                  "ON CONFLICT(source) DO UPDATE SET last_at=MAX(last_at, excluded.last_at)", (source, at))
-
+    # -- meta ----------------------------------------------------------------------
     def meta(self, key: str) -> Optional[str]:
         r = self.one("SELECT value FROM meta WHERE key=?", (key,))
         return r["value"] if r else None
@@ -147,6 +126,3 @@ class Store:
         else:
             self.exec("INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
                       (key, value))
-
-    def last_activity(self) -> Optional[float]:
-        return self.one("SELECT MAX(last_at) AS v FROM activity")["v"]

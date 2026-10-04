@@ -3,10 +3,9 @@
 A graph that takes a GitHub issue to a tested, reviewed branch and a draft PR that waits for you.
 
 - **Opus** (Claude Code headless) plans, writes code and reviews diffs.
-- **Jev** (TypeSafe System One) answers every fork with calibrated probabilities, in one call per node.
-- **Code** owns the state, every threshold, every retry limit and every irreversible action.
+- **Code** owns the state, every rule, every retry limit and every irreversible action.
 
-Read [`graph.md`](graph.md) first: nodes, edges, back edges, Jev questions and gates.
+Read [`graph.md`](graph.md) first: nodes, edges, back edges, decisions and gates.
 Hard limits are in [`dp_agents/limits.py`](dp_agents/limits.py). No model can change them.
 
 ## How a ticket moves
@@ -42,7 +41,7 @@ git config user.name "DocuPay agent" && git config user.email "agent@docupay.loc
 ~/.local/bin/uv venv backend/.venv --python 3.11 && ~/.local/bin/uv pip install --python backend/.venv/bin/python -r backend/requirements.txt
 (cd frontend && npm ci)
 ~/.local/bin/uv venv agents/.venv --python 3.11 && ~/.local/bin/uv pip install --python agents/.venv/bin/python -r agents/requirements.txt
-agents/.venv/bin/python -m pytest -q agents/tests    # 48 tests, no network
+agents/.venv/bin/python -m pytest -q agents/tests    # 41 tests, no network
 ```
 
 ### 3. Opus: sign Claude Code in once
@@ -57,7 +56,7 @@ claude          # as dpagent; run /login and finish in the browser, then /exit
 2. Send any message to your new bot.
 3. Get your chat id: `curl -s "https://api.telegram.org/bot<TOKEN>/getUpdates"` and copy `message.chat.id`.
 
-The bot reads only your chat. Commands: `/approve <gate>`, `/reject <gate>`. Any message counts as activity.
+The bot reads only your chat. Commands: `/approve <gate>`, `/reject <gate>`.
 
 ### 5. GitHub token
 
@@ -74,11 +73,10 @@ sudo -u dpagent nano /etc/docupay-agents.env     # fill in the keys; DASHBOARD_T
 
 Keys never go in code, in git, in the chat, or in logs.
 
-### 7. Calibrate, then the final check
+### 7. The final check
 
 ```sh
 cd /srv/docupay && export DP_AGENTS_ENV=/etc/docupay-agents.env PYTHONPATH=agents
-agents/.venv/bin/python -m dp_agents.cli calibrate     # scores DocuPay's own history; proposes thresholds at G4
 agents/.venv/bin/python -m dp_agents.cli check         # must end with CLEAN
 ```
 
@@ -105,18 +103,17 @@ ssh -L 8765:127.0.0.1:8765 dpagent@your-vps
 ```
 
 Or put the VPS on Tailscale and set `DASHBOARD_HOST` to its Tailscale IP. Do not expose the dashboard to the internet.
-An open, visible dashboard tab counts as "active" for the N9 work window.
 
 ## Alerts you get on Telegram
 
 | Event | Message |
 |---|---|
-| Gate G1 or G4 opens | 🚦 with `/approve N` and `/reject N` |
+| Gate G1 opens | 🚦 with `/approve N` and `/reject N` |
 | Ticket parked (stop rule, budget, error) | ⚠️ with the node and the reason |
 | Unclear issue | the reason and the `needs-spec` label |
 | Daemon tick error | ❗ |
 | Service stopped | ⛔ from systemd |
-| Daily report at `REPORT_HOUR` UTC | 📊 loops, forks, hours saved, Opus calls, Jev latency and cost |
+| Daily report at `REPORT_HOUR` UTC | 📊 loops, decisions, hours saved, Opus calls and cost |
 
 ## Commands
 
@@ -126,6 +123,5 @@ python -m dp_agents.cli tick         # one pass
 python -m dp_agents.cli dashboard
 python -m dp_agents.cli report --send
 python -m dp_agents.cli check
-python -m dp_agents.cli calibrate --dry-run
 python agents/scripts/demo.py agents/data/demo.sqlite3    # fills a demo DB with fakes, for the dashboard
 ```

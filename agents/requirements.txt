@@ -1,4 +1,3 @@
-typesafe-sdk[http2]>=0.7.2
 pydantic>=2.7
 fastapi>=0.115
 uvicorn[standard]>=0.30

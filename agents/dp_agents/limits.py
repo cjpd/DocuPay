@@ -1,8 +1,8 @@
 """
 Hard limits. Owned by code only.
 
-Nothing in this file is read from graph.md, questions.yaml, a model answer or the environment,
-so no model (including the N9 improve loop) can loosen it. Change it by hand, in a reviewed commit.
+Nothing in this file is read from graph.md, a model answer or the environment, so no model can
+loosen it. Change it by hand, in a reviewed commit (gate G4).
 """
 
 # Never touched by the agent.
@@ -21,7 +21,7 @@ SENSITIVE_PATHS = (
     ".env",
 )
 # Never allowed, even in a sensitive diff.
-FORBIDDEN_PATHS = ("agents/dp_agents/", "agents/graph.md", "agents/questions.yaml", ".env")
+FORBIDDEN_PATHS = ("agents/dp_agents/", "agents/graph.md", ".env")
 
 MAX_DIFF_LINES = 600
 MAX_TICKET_POINTS = 5
@@ -37,11 +37,14 @@ MAX_USD_PER_TICKET = 5.0
 MAX_USD_PER_DAY = 20.0
 MAX_MINUTES_PER_TICKET = 60
 OPUS_CALL_TIMEOUT_S = 900
-JEV_TIMEOUT_S = 5.0
-JEV_SLOW_MS = 1000             # logged as slow above this
 
-# N9 improve.
-MAX_REPLAY_FORKS = 200         # Jev calls per N9 replay, per version
+# The N3 retry rule: a failure whose output matches one of these is environmental, so another
+# build round cannot fix it. Matched case-insensitively.
+ENVIRONMENT_FAILURES = (
+    "connection refused", "error 111", "could not resolve host", "name or service not known",
+    "permission denied", "returned error: 403", "403 forbidden", "timed out", "no space left on device",
+    "authentication failed", "rate limit",
+)
 
 # The fixed check list for N4 verify (cwd = repo root of the worktree).
 VERIFY_COMMANDS = (

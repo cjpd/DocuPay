@@ -51,6 +51,13 @@ class Findings(BaseModel):
     findings: list[Finding]
 
 
+class Review(BaseModel):
+    """The N5 Critic's answer: findings, plus its own rating of each acceptance item and the risk."""
+    findings: list[Finding]
+    done: list[bool]
+    risk: int = Field(ge=0, le=4)
+
+
 class Verified(BaseModel):
     sha: str
     checks: list[str]
