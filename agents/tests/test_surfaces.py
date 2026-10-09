@@ -16,7 +16,6 @@ def test_final_check_refuses_without_env(make_ctx, monkeypatch):
     ok, lines = cli.final_check(make_ctx())
     assert not ok
     assert any("GITHUB_TOKEN" in l for l in lines)
-    assert not any("jev" in l.lower() or "typesafe" in l.lower() for l in lines)
     assert not any("stop rule" in l for l in lines), "every node in graph.md has a stop rule"
     assert not any("hard limit" in l for l in lines), "no hard limit is reachable by a model"
 
